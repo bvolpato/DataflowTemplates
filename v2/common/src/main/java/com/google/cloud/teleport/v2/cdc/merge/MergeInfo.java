@@ -20,9 +20,12 @@ import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryOptions;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
+import com.google.cloud.bigquery.Schema;
 import com.google.cloud.bigquery.Table;
+import com.google.cloud.bigquery.TableDefinition;
 import com.google.cloud.bigquery.TableId;
 import com.google.cloud.teleport.v2.utils.BigQueryTableCache;
+import com.google.common.annotations.VisibleForTesting;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -144,6 +147,15 @@ public abstract class MergeInfo implements Serializable {
     }
   }
 
+  @VisibleForTesting
+  static void setTableCache(BigQueryTableCache newTableCache) {
+    tableCache = newTableCache;
+  }
+  @VisibleForTesting
+  static void resetTableCache() {
+    tableCache = null;
+  }
+
   private List<String> getColumns() {
     if (getCustomColumns().isEmpty()) {
       return getMergeFields(getReplicaTable());
@@ -152,10 +164,21 @@ public abstract class MergeInfo implements Serializable {
     return getCustomColumns();
   }
 
-  private List<String> getMergeFields(TableId tableId) {
+  @VisibleForTesting
+  List<String> getMergeFields(TableId tableId) {
     List<String> mergeFields = new ArrayList<String>();
     Table table = getTableCache().get(tableId);
-    FieldList tableFields = table.getDefinition().getSchema().getFields();
+    if (table == null) {
+      throw new IllegalArgumentException(
+          "Could not get the table '" + getTableReference(tableId) + "' from BigQuery.");
+    }
+    if (table.getDefinition() == null || table.getDefinition().getSchema() == null) {
+      throw new IllegalArgumentException(
+          "Could not get the schema for BigQuery table '" + getTableReference(tableId) + "'.");
+    }
+    TableDefinition tableDefinition = table.getDefinition();
+    Schema tableSchema = tableDefinition.getSchema();
+    FieldList tableFields = tableSchema.getFields();
 
     for (Field field : tableFields) {
       mergeFields.add(field.getName());
