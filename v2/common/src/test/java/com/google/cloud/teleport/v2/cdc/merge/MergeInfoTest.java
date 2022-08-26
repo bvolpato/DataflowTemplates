@@ -167,7 +167,7 @@ public final class MergeInfoTest {
   }
 
   @Test
-  public void getMergeFields_tableNotFound() {
+  public void getMergeFields_tableSchemaNotFound() {
     MergeInfo mergeInfo = buildSampleMergeInfo();
 
     when(bigQuery.getTable(eq(mergeInfo.getStagingTable()))).thenReturn(table);

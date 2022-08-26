@@ -20,9 +20,7 @@ import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryOptions;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
-import com.google.cloud.bigquery.Schema;
 import com.google.cloud.bigquery.Table;
-import com.google.cloud.bigquery.TableDefinition;
 import com.google.cloud.bigquery.TableId;
 import com.google.cloud.teleport.v2.utils.BigQueryTableCache;
 import com.google.common.annotations.VisibleForTesting;
@@ -151,6 +149,7 @@ public abstract class MergeInfo implements Serializable {
   static void setTableCache(BigQueryTableCache newTableCache) {
     tableCache = newTableCache;
   }
+
   @VisibleForTesting
   static void resetTableCache() {
     tableCache = null;
@@ -176,9 +175,8 @@ public abstract class MergeInfo implements Serializable {
       throw new IllegalArgumentException(
           "Could not get the schema for BigQuery table '" + getTableReference(tableId) + "'.");
     }
-    TableDefinition tableDefinition = table.getDefinition();
-    Schema tableSchema = tableDefinition.getSchema();
-    FieldList tableFields = tableSchema.getFields();
+
+    FieldList tableFields = table.getDefinition().getSchema().getFields();
 
     for (Field field : tableFields) {
       mergeFields.add(field.getName());
