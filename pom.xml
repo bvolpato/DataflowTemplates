@@ -61,6 +61,7 @@
     <!-- TODO: check if this could be declared on a Beam BOM instead of here -->
     <bigtable-beam-import.version>1.15.0</bigtable-beam-import.version>
     <protobuf.version>3.11.1</protobuf.version>
+    <nashorn.version>15.4</nashorn.version>
     <json.version>20200518</json.version>
     <junit.jupiter.version>5.5.2</junit.jupiter.version>
     <re2j.version>1.4</re2j.version>
@@ -232,6 +233,13 @@
       <groupId>com.google.http-client</groupId>
       <artifactId>google-http-client-apache-v2</artifactId>
       <version>${apache-http-client-v2}</version>
+    </dependency>
+
+    <!-- UDFs -->
+    <dependency>
+      <groupId>org.openjdk.nashorn</groupId>
+      <artifactId>nashorn-core</artifactId>
+      <version>${nashorn.version}</version>
     </dependency>
 
     <!-- Test -->
