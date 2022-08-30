@@ -37,6 +37,7 @@
         <jib.maven.version>2.6.0</jib.maven.version>
         <junit.version>4.13</junit.version>
         <junit-dep.version>4.10</junit-dep.version>
+        <testcontainers.version>1.16.3</testcontainers.version>
         <opensensus.version>0.31.0</opensensus.version>
         <surefire.version>2.21.0</surefire.version>
         <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
@@ -55,6 +56,7 @@
         <json.version>20200518</json.version>
         <excluded.spanner.tests>com.google.cloud.teleport.v2.spanner.IntegrationTest</excluded.spanner.tests>
         <spotless-maven-plugin.version>2.12.1</spotless-maven-plugin.version>
+        <google-truth.version>1.0.1</google-truth.version>
     </properties>
 
     <dependencyManagement>
@@ -143,6 +145,12 @@
         </dependency>
 
         <!-- Test -->
+        <dependency>
+            <groupId>com.google.truth</groupId>
+            <artifactId>truth</artifactId>
+            <version>${google-truth.version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest</artifactId>

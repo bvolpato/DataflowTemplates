@@ -39,7 +39,7 @@
     </properties>
 
     <dependencies>
-        <!-- Exluding com.google.protobuf transitive dependencies to avoid version conflicts -->
+        <!-- Excluding com.google.protobuf transitive dependencies to avoid version conflicts -->
         <dependency>
             <groupId>org.apache.avro</groupId>
             <artifactId>avro</artifactId>

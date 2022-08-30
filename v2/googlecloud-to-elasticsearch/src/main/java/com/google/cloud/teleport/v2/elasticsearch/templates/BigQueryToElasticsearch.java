@@ -52,7 +52,7 @@ public class BigQueryToElasticsearch {
    * @param options The execution parameters to the pipeline.
    * @return The result of the pipeline execution.
    */
-  private static PipelineResult run(BigQueryToElasticsearchOptions options) {
+  protected static PipelineResult run(BigQueryToElasticsearchOptions options) {
 
     // Create the pipeline.
     Pipeline pipeline = Pipeline.create(options);
