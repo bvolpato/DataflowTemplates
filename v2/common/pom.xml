@@ -39,7 +39,12 @@
     </properties>
 
     <dependencies>
-        <!-- Exluding com.google.protobuf transitive dependencies to avoid version conflicts -->
+        <!-- Used to convert messages to JSON format -->
+        <dependency>
+            <groupId>org.apache.beam</groupId>
+            <artifactId>beam-sdks-java-extensions-json-jackson</artifactId>
+        </dependency>
+        <!-- Excluding com.google.protobuf transitive dependencies to avoid version conflicts -->
         <dependency>
             <groupId>org.apache.avro</groupId>
             <artifactId>avro</artifactId>

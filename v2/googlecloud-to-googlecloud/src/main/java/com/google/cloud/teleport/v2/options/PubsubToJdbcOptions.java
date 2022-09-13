@@ -22,7 +22,10 @@ import org.apache.beam.sdk.options.Validation;
  * The {@link PubsubToJdbcOptions} interface provides the custom execution options passed by the
  * executor at the command-line.
  */
-public interface PubsubToJdbcOptions extends CommonTemplateOptions {
+public interface PubsubToJdbcOptions
+    extends CommonTemplateOptions,
+        PubsubOptions.PubsubWriteDeadletterTopicOptions,
+        GcsOptions.GcsWriteDeadletterTopicOptions {
 
   @Description(
       "The Cloud Pub/Sub subscription to read from. "
@@ -74,15 +77,6 @@ public interface PubsubToJdbcOptions extends CommonTemplateOptions {
   String getStatement();
 
   void setStatement(String statement);
-
-  @Description(
-      "The Cloud Pub/Sub topic to publish deadletter records to. "
-          + "The name should be in the format of "
-          + "projects/<project-id>/topics/<topic-name>.")
-  @Validation.Required
-  String getOutputDeadletterTopic();
-
-  void setOutputDeadletterTopic(String deadletterTopic);
 
   @Description(
       "KMS Encryption Key. The key should be in the format"

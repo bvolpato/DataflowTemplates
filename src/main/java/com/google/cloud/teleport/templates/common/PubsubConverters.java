@@ -15,6 +15,7 @@
  */
 package com.google.cloud.teleport.templates.common;
 
+import org.apache.beam.sdk.options.Default;
 import org.apache.beam.sdk.options.Description;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.Validation;
@@ -52,6 +53,14 @@ public class PubsubConverters {
 
   /** Options for using Pub/Sub as a deadletter sink. */
   public interface PubsubWriteDeadletterTopicOptions extends PipelineOptions {
+
+    @Description(
+        "Parameter which specifies if deadletter should be written to Pub/Sub. Default: true.")
+    @Default.Boolean(true)
+    ValueProvider<Boolean> getEnablePubsubDeadletter();
+
+    void setEnablePubsubDeadletter(ValueProvider<Boolean> enablePubsubDeadletter);
+
     @Description(
         "The Cloud Pub/Sub topic to publish deadletter records to. "
             + "The name should be in the format of "

@@ -30,6 +30,7 @@ import org.apache.beam.sdk.coders.CoderException;
 import org.apache.beam.sdk.coders.KvCoder;
 import org.apache.beam.sdk.coders.MapCoder;
 import org.apache.beam.sdk.coders.StringUtf8Coder;
+import org.apache.beam.sdk.extensions.jackson.AsJsons;
 import org.apache.beam.sdk.io.TextIO;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.CreateDisposition;
@@ -587,7 +588,7 @@ public class ErrorConverters {
    * A {@link DoFn} to convert {@link FailsafeElement} wrapped errors into a Pub/Sub message that
    * can be published to a Pub/Sub deadletter topic.
    */
-  protected static class FailedStringToPubsubMessageFn
+  public static class FailedStringToPubsubMessageFn
       extends DoFn<FailsafeElement<String, String>, PubsubMessage> {
 
     protected static final String ERROR_MESSAGE = "errorMessage";
@@ -652,6 +653,36 @@ public class ErrorConverters {
       public abstract Builder setErrorRecordsTopic(String errorRecordsTopic);
 
       public abstract WriteStringMessageErrorsToPubSub build();
+    }
+  }
+
+  /**
+   * A {@link PTransform} to write {@link FailsafeElement} wrapped errors to a GCS deadletter sink.
+   */
+  @AutoValue
+  public abstract static class WriteStringMessageErrorsToGcs
+      extends PTransform<PCollection<FailsafeElement<String, String>>, PDone> {
+
+    public static Builder newBuilder() {
+      return new AutoValue_ErrorConverters_WriteStringMessageErrorsToGcs.Builder();
+    }
+
+    public abstract String errorRecordsDirectory();
+
+    @Override
+    public PDone expand(PCollection<FailsafeElement<String, String>> failedRecords) {
+      return failedRecords
+          .apply("FailedRecordToPubSubMessage", ParDo.of(new FailedStringToPubsubMessageFn()))
+          .apply("AsJsonMessages", AsJsons.of(PubsubMessage.class))
+          .apply("WriteFailedRecordsToGcs", TextIO.write().to(errorRecordsDirectory()));
+    }
+
+    /** Builder for {@link WriteStringMessageErrorsToGcs}. */
+    @AutoValue.Builder
+    public abstract static class Builder {
+      public abstract Builder setErrorRecordsDirectory(String errorRecordsDirectory);
+
+      public abstract WriteStringMessageErrorsToGcs build();
     }
   }
 }

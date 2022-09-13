@@ -21,12 +21,14 @@ import com.google.cloud.teleport.splunk.SplunkEventCoder;
 import com.google.cloud.teleport.splunk.SplunkIO;
 import com.google.cloud.teleport.splunk.SplunkWriteError;
 import com.google.cloud.teleport.templates.common.ErrorConverters;
+import com.google.cloud.teleport.templates.common.GcsConverters.GcsWriteDeadletterTopicOptions;
 import com.google.cloud.teleport.templates.common.JavascriptTextTransformer.FailsafeJavascriptUdf;
 import com.google.cloud.teleport.templates.common.JavascriptTextTransformer.JavascriptTextTransformerOptions;
 import com.google.cloud.teleport.templates.common.PubsubConverters.PubsubReadSubscriptionOptions;
 import com.google.cloud.teleport.templates.common.PubsubConverters.PubsubWriteDeadletterTopicOptions;
 import com.google.cloud.teleport.templates.common.SplunkConverters;
 import com.google.cloud.teleport.templates.common.SplunkConverters.SplunkOptions;
+import com.google.cloud.teleport.templates.common.ValueProviderBooleanFilter;
 import com.google.cloud.teleport.util.TokenNestedValueProvider;
 import com.google.cloud.teleport.values.FailsafeElement;
 import com.google.common.annotations.VisibleForTesting;
@@ -286,17 +288,34 @@ public class PubSubToSplunk {
                 }));
 
     // 6) Collect errors from UDF transform (#4), SplunkEvent transform (#5)
-    //     and writing to Splunk HEC (#6) and stream into a Pub/Sub deadletter topic.
-    PCollectionList.of(
-            ImmutableList.of(
-                convertToEventTuple.get(SPLUNK_EVENT_DEADLETTER_OUT),
-                wrappedSplunkWriteErrors,
-                transformedOutput.get(UDF_DEADLETTER_OUT)))
-        .apply("FlattenErrors", Flatten.pCollections())
+    //     and writing to Splunk HEC (#6) and flatten into a single PCollection
+    PCollection<FailsafeElement<String, String>> flattenErrors =
+        PCollectionList.of(
+                ImmutableList.of(
+                    convertToEventTuple.get(SPLUNK_EVENT_DEADLETTER_OUT),
+                    wrappedSplunkWriteErrors,
+                    transformedOutput.get(UDF_DEADLETTER_OUT)))
+            .apply("FlattenErrors", Flatten.pCollections());
+
+    // 7.1) Stream errors a Pub/Sub deadletter topic, if enabled.
+    flattenErrors
         .apply(
-            "WriteFailedRecords",
+            "PubsubDeadletterGate",
+            new ValueProviderBooleanFilter<>(options.getEnablePubsubDeadletter()))
+        .apply(
+            "PubsubWriteFailedRecords",
             ErrorConverters.WriteStringMessageErrorsToPubSub.newBuilder()
                 .setErrorRecordsTopic(options.getOutputDeadletterTopic())
+                .build());
+
+    // 7.2) Stream errors a GCS deadletter directory, if enabled.
+    flattenErrors
+        .apply(
+            "GcsDeadletterGate", new ValueProviderBooleanFilter<>(options.getEnableGcsDeadletter()))
+        .apply(
+            "GcsWriteFailedRecords",
+            ErrorConverters.WriteStringMessageErrorsToGcs.newBuilder()
+                .setErrorRecordsDirectory(options.getGcsDeadletterDirectory())
                 .build());
 
     return pipeline.run();
@@ -310,6 +329,7 @@ public class PubSubToSplunk {
       extends SplunkOptions,
           PubsubReadSubscriptionOptions,
           PubsubWriteDeadletterTopicOptions,
+          GcsWriteDeadletterTopicOptions,
           JavascriptTextTransformerOptions {}
 
   /**

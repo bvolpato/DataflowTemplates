@@ -84,7 +84,7 @@ public class DatastoreConverters {
     void setDatastoreReadProjectId(ValueProvider<String> datastoreReadProjectId);
 
     /** @deprecated Please use getFirestoreReadNamespace() instead. */
-    @Description("Namespace of requested Entties. Set as \"\" for default namespace")
+    @Description("Namespace of requested Entities. Set as \"\" for default namespace")
     @Hidden
     @Deprecated
     ValueProvider<String> getDatastoreReadNamespace();
@@ -92,7 +92,7 @@ public class DatastoreConverters {
     /** @deprecated Please use setFirestoreReadNamespace(value) instead. */
     @Hidden
     @Deprecated
-    void setDatastoreReadNamespace(ValueProvider<String> datstoreReadNamespace);
+    void setDatastoreReadNamespace(ValueProvider<String> datastoreReadNamespace);
 
     @Description("GQL Query which specifies what entities to grab")
     ValueProvider<String> getFirestoreReadGqlQuery();
@@ -104,7 +104,7 @@ public class DatastoreConverters {
 
     void setFirestoreReadProjectId(ValueProvider<String> firestoreReadProjectId);
 
-    @Description("Namespace of requested Entties. Set as \"\" for default namespace")
+    @Description("Namespace of requested Entities. Set as \"\" for default namespace")
     ValueProvider<String> getFirestoreReadNamespace();
 
     void setFirestoreReadNamespace(ValueProvider<String> firestoreReadNamespace);
@@ -121,7 +121,7 @@ public class DatastoreConverters {
     /** @deprecated Please use setFirestoreWriteProjectId(value) instead. */
     @Hidden
     @Deprecated
-    void setDatastoreWriteProjectId(ValueProvider<String> datstoreWriteProjectId);
+    void setDatastoreWriteProjectId(ValueProvider<String> datastoreWriteProjectId);
 
     /** @deprecated Please use getFirestoreWriteEntityKind() instead. */
     @Description("Kind of the Datastore entity")
@@ -639,7 +639,7 @@ public class DatastoreConverters {
   public static class EntityJsonPrinter {
 
     // A cached jsonPrinter
-    private JsonFormat.Printer jsonPrinter;
+    private final JsonFormat.Printer jsonPrinter;
 
     public EntityJsonPrinter() {
       TypeRegistry typeRegistry = TypeRegistry.newBuilder().add(Entity.getDescriptor()).build();

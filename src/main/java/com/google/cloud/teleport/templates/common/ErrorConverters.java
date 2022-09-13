@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
+import org.apache.beam.sdk.extensions.jackson.AsJsons;
 import org.apache.beam.sdk.io.TextIO;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.CreateDisposition;
@@ -394,6 +395,36 @@ public class ErrorConverters {
       ERROR_MESSAGES_COUNTER.inc();
 
       context.output(pubsubMessage);
+    }
+  }
+
+  /**
+   * A {@link PTransform} to write {@link FailsafeElement} wrapped errors to a GCS deadletter sink.
+   */
+  @AutoValue
+  public abstract static class WriteStringMessageErrorsToGcs
+      extends PTransform<PCollection<FailsafeElement<String, String>>, PDone> {
+
+    public static Builder newBuilder() {
+      return new AutoValue_ErrorConverters_WriteStringMessageErrorsToGcs.Builder();
+    }
+
+    public abstract ValueProvider<String> errorRecordsDirectory();
+
+    @Override
+    public PDone expand(PCollection<FailsafeElement<String, String>> failedRecords) {
+      return failedRecords
+          .apply("FailedRecordToPubSubMessage", ParDo.of(new FailedStringToPubsubMessageFn()))
+          .apply("AsJsonMessages", AsJsons.of(PubsubMessage.class))
+          .apply("WriteFailedRecordsToGcs", TextIO.write().to(errorRecordsDirectory()));
+    }
+
+    /** Builder for {@link WriteStringMessageErrorsToGcs}. */
+    @AutoValue.Builder
+    public abstract static class Builder {
+      public abstract Builder setErrorRecordsDirectory(ValueProvider<String> errorRecordsDirectory);
+
+      public abstract WriteStringMessageErrorsToGcs build();
     }
   }
 }

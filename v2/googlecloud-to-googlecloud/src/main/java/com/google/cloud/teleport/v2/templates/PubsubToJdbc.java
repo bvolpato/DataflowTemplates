@@ -15,6 +15,8 @@
  */
 package com.google.cloud.teleport.v2.templates;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.cloud.teleport.v2.coders.FailsafeElementCoder;
 import com.google.cloud.teleport.v2.io.DynamicJdbcIO;
 import com.google.cloud.teleport.v2.options.PubsubToJdbcOptions;
@@ -116,11 +118,29 @@ public class PubsubToJdbc {
                         new MapJsonStringToQuery(getKeyOrder(options.getStatement()))))
             .setCoder(FAILSAFE_ELEMENT_CODER);
 
-    errors.apply(
-        "WriteFailedRecords",
-        ErrorConverters.WriteStringMessageErrorsToPubSub.newBuilder()
-            .setErrorRecordsTopic(options.getOutputDeadletterTopic())
-            .build());
+    // 7.1) Stream errors a Pub/Sub deadletter topic, if enabled.
+    if (options.getEnablePubsubDeadletter()) {
+      checkArgument(
+          options.getOutputDeadletterTopic().isPresent(), "outputDeadletterTopic not present");
+
+      errors.apply(
+          "PubsubWriteFailedRecords",
+          ErrorConverters.WriteStringMessageErrorsToPubSub.newBuilder()
+              .setErrorRecordsTopic(options.getOutputDeadletterTopic().get())
+              .build());
+    }
+
+    // 7.2) Stream errors a GCS deadletter directory, if enabled.
+    if (options.getEnableGcsDeadletter()) {
+      checkArgument(
+          options.getGcsDeadletterDirectory().isPresent(), "gcsDeadletterDirectory not present");
+
+      errors.apply(
+          "GcsWriteFailedRecords",
+          ErrorConverters.WriteStringMessageErrorsToGcs.newBuilder()
+              .setErrorRecordsDirectory(options.getGcsDeadletterDirectory().get())
+              .build());
+    }
 
     return pipeline.run();
   }
