@@ -44,6 +44,7 @@ import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.TypeDescriptor;
 import org.apache.beam.sdk.values.TypeDescriptors;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -171,7 +172,11 @@ public class BigQueryMerger extends PTransform<PCollection<MergeInfo>, PCollecti
     @Setup
     public void setUp() {
       if (bigQueryClient == null) {
-        bigQueryClient = BigQueryOptions.getDefaultInstance().getService();
+        BigQueryOptions.Builder optionsBuilder = BigQueryOptions.newBuilder();
+        if (StringUtils.isNotEmpty(mergeConfiguration.projectId())) {
+          optionsBuilder = optionsBuilder.setProjectId(mergeConfiguration.projectId());
+        }
+        bigQueryClient = optionsBuilder.build().getService();
       }
     }
 

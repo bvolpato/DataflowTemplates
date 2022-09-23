@@ -428,6 +428,7 @@ public class DataStreamToBigQuery {
               "BigQuery Merge/Merge into Replica Tables",
               BigQueryMerger.of(
                   MergeConfiguration.bigQueryConfiguration()
+                      .withProjectId(bigqueryProjectId)
                       .withMergeWindowDuration(
                           Duration.standardMinutes(options.getMergeFrequencyMinutes()))));
     }

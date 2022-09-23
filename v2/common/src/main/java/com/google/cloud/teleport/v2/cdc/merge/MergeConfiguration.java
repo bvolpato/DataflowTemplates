@@ -57,6 +57,8 @@ public abstract class MergeConfiguration implements Serializable {
   // BigQuery-specific properties
   public static final String BIGQUERY_QUOTE_CHARACTER = "`";
 
+  public abstract String projectId();
+
   public abstract String quoteCharacter();
 
   public abstract Boolean supportPartitionedTables();
@@ -71,6 +73,10 @@ public abstract class MergeConfiguration implements Serializable {
 
   public static MergeConfiguration bigQueryConfiguration() {
     return MergeConfiguration.builder().setQuoteCharacter(BIGQUERY_QUOTE_CHARACTER).build();
+  }
+
+  public MergeConfiguration withProjectId(String projectId) {
+    return this.toBuilder().setProjectId(projectId).build();
   }
 
   public MergeConfiguration withPartitionRetention(int partitionRetention) {
@@ -99,6 +105,8 @@ public abstract class MergeConfiguration implements Serializable {
 
   @AutoValue.Builder
   abstract static class Builder {
+    abstract Builder setProjectId(String projectId);
+
     abstract Builder setQuoteCharacter(String quote);
 
     abstract Builder setSupportPartitionedTables(Boolean supportPartitionedTables);
