@@ -35,6 +35,7 @@ import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO;
 import org.apache.beam.sdk.io.jdbc.JdbcIO;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.values.PCollection;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,24 +122,27 @@ public class PubsubToJdbc {
     // 7.1) Stream errors a Pub/Sub deadletter topic, if enabled.
     if (options.getEnablePubsubDeadletter()) {
       checkArgument(
-          options.getOutputDeadletterTopic().isPresent(), "outputDeadletterTopic not present");
+          StringUtils.isNotEmpty(options.getOutputDeadletterTopic()),
+          "outputDeadletterTopic must not be empty");
 
       errors.apply(
           "PubsubWriteFailedRecords",
           ErrorConverters.WriteStringMessageErrorsToPubSub.newBuilder()
-              .setErrorRecordsTopic(options.getOutputDeadletterTopic().get())
+              .setErrorRecordsTopic(options.getOutputDeadletterTopic())
               .build());
     }
 
     // 7.2) Stream errors a GCS deadletter directory, if enabled.
     if (options.getEnableGcsDeadletter()) {
       checkArgument(
-          options.getGcsDeadletterDirectory().isPresent(), "gcsDeadletterDirectory not present");
+          StringUtils.isNotEmpty(options.getGcsDeadletterDirectory()),
+          "gcsDeadletterDirectory must not be empty");
 
       errors.apply(
           "GcsWriteFailedRecords",
           ErrorConverters.WriteStringMessageErrorsToGcs.newBuilder()
-              .setErrorRecordsDirectory(options.getGcsDeadletterDirectory().get())
+              .setErrorRecordsDirectory(options.getGcsDeadletterDirectory())
+              .setErrorWindowDuration(options.getGcsDeadletterWindowDuration())
               .build());
     }
 

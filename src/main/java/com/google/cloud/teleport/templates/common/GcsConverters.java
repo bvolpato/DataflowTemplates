@@ -20,7 +20,7 @@ import org.apache.beam.sdk.options.Description;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.ValueProvider;
 
-/** Options for Teleport PubsubIO. */
+/** Options for Gcs utilities. */
 public class GcsConverters {
 
   /** Options for using GCS as a deadletter sink. */
@@ -35,10 +35,28 @@ public class GcsConverters {
 
     @Description(
         "The output location to write to deadletter records. For example, "
-            + "gs://mybucket/somefolder/.Must be specified when Cloud Storage deadletter is enabled.")
+            + "gs://mybucket/somefolder/. Must be specified when Cloud Storage deadletter is enabled.")
     @Default.String("")
     ValueProvider<String> getGcsDeadletterDirectory();
 
     void setGcsDeadletterDirectory(ValueProvider<String> gcsDeadletterDirectory);
+
+    @Description(
+        "Parameter which specifies if deadletter writes to Cloud Storage must be notified through"
+            + " a Cloud Pub/Sub topic. Default: false.")
+    @Default.Boolean(false)
+    ValueProvider<Boolean> getGcsDeadletterPubsubNotification();
+
+    void setGcsDeadletterPubsubNotification(ValueProvider<Boolean> gcsDeadletterPubsubNotification);
+
+    @Description(
+        "The Cloud Pub/Sub topic to write deadletter notification messages. "
+            + "The name should be in the format of projects/<project-id>/topics/<topic-name>. "
+            + "Must be specified when Deadletter Pub/Sub Notification is enabled.")
+    @Default.String("")
+    ValueProvider<String> getGcsDeadletterPubsubTopic();
+
+    void setGcsDeadletterPubsubTopic(ValueProvider<String> gcsDeadletterPubsubTopic);
+
   }
 }

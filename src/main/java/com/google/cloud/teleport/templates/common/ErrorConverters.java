@@ -25,6 +25,7 @@ import com.google.api.services.bigquery.model.TableRow;
 import com.google.auto.value.AutoValue;
 import com.google.cloud.teleport.values.FailsafeElement;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -34,6 +35,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import org.apache.beam.sdk.extensions.jackson.AsJsons;
 import org.apache.beam.sdk.io.TextIO;
+import org.apache.beam.sdk.io.WriteFilesResult;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.CreateDisposition;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.WriteDisposition;
@@ -46,13 +48,18 @@ import org.apache.beam.sdk.options.Description;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.ValueProvider;
 import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.beam.sdk.transforms.MapElements;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.windowing.FixedWindows;
+import org.apache.beam.sdk.transforms.windowing.Window;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PCollectionTuple;
 import org.apache.beam.sdk.values.PDone;
 import org.apache.beam.sdk.values.TupleTag;
+import org.apache.beam.sdk.values.TypeDescriptor;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -411,18 +418,46 @@ public class ErrorConverters {
 
     public abstract ValueProvider<String> errorRecordsDirectory();
 
+    public abstract ValueProvider<Boolean> errorPubsubNotification();
+
+    public abstract ValueProvider<String> errorPubsubTopic();
+
     @Override
     public PDone expand(PCollection<FailsafeElement<String, String>> failedRecords) {
-      return failedRecords
-          .apply("FailedRecordToPubSubMessage", ParDo.of(new FailedStringToPubsubMessageFn()))
-          .apply("AsJsonMessages", AsJsons.of(PubsubMessage.class))
-          .apply("WriteFailedRecordsToGcs", TextIO.write().to(errorRecordsDirectory()));
+      WriteFilesResult<Void> writeFilesResult =
+          failedRecords
+              .apply("FailedRecordToPubSubMessage", ParDo.of(new FailedStringToPubsubMessageFn()))
+              .apply("AsJsonMessages", AsJsons.of(PubsubMessage.class))
+              .apply("ApplyWindow", Window.into(FixedWindows.of(Duration.standardMinutes(1))))
+              .apply(
+                  "WriteFailedRecordsToGcs",
+                  TextIO.<String>writeCustomType()
+                      .withWindowedWrites()
+                      .to(errorRecordsDirectory()));
+
+      return writeFilesResult
+          .getPerDestinationOutputFilenames()
+          .apply(
+              "ErrorNotifyPubsubGate", new ValueProviderBooleanFilter<>(errorPubsubNotification()))
+          .apply(
+              "ErrorToMessage",
+              MapElements.into(TypeDescriptor.of(PubsubMessage.class))
+                  .via(
+                      kv ->
+                          new PubsubMessage(
+                              kv.getValue().getBytes(StandardCharsets.UTF_8), ImmutableMap.of())))
+          .apply("ErrorWriteToPubsub", PubsubIO.writeMessages().to(errorPubsubTopic()));
     }
 
     /** Builder for {@link WriteStringMessageErrorsToGcs}. */
     @AutoValue.Builder
     public abstract static class Builder {
       public abstract Builder setErrorRecordsDirectory(ValueProvider<String> errorRecordsDirectory);
+
+      public abstract Builder setErrorPubsubNotification(
+          ValueProvider<Boolean> errorPubsubNotification);
+
+      public abstract Builder setErrorPubsubTopic(ValueProvider<String> errorPubsubTopic);
 
       public abstract WriteStringMessageErrorsToGcs build();
     }

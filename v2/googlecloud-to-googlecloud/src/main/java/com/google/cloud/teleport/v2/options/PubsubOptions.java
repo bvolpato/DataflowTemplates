@@ -37,7 +37,8 @@ public class PubsubOptions {
         "The Cloud Pub/Sub topic to publish deadletter records to. "
             + "The name should be in the format of "
             + "projects/<project-id>/topics/<topic-name>.")
-    Optional<String> getOutputDeadletterTopic();
+    @Default.String("")
+    String getOutputDeadletterTopic();
 
     void setOutputDeadletterTopic(String deadletterTopic);
   }

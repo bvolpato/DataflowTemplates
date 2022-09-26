@@ -19,6 +19,7 @@ import static org.apache.beam.vendor.guava.v26_0_jre.com.google.common.base.Prec
 
 import com.google.api.services.bigquery.model.TableRow;
 import com.google.auto.value.AutoValue;
+import com.google.cloud.teleport.v2.utils.DurationUtils;
 import com.google.cloud.teleport.v2.values.FailsafeElement;
 import com.google.common.collect.ImmutableMap;
 import java.nio.charset.StandardCharsets;
@@ -32,6 +33,7 @@ import org.apache.beam.sdk.coders.MapCoder;
 import org.apache.beam.sdk.coders.StringUtf8Coder;
 import org.apache.beam.sdk.extensions.jackson.AsJsons;
 import org.apache.beam.sdk.io.TextIO;
+import org.apache.beam.sdk.io.WriteFilesResult;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.CreateDisposition;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.WriteDisposition;
@@ -667,20 +669,56 @@ public class ErrorConverters {
       return new AutoValue_ErrorConverters_WriteStringMessageErrorsToGcs.Builder();
     }
 
+    public abstract String errorWindowDuration();
+
     public abstract String errorRecordsDirectory();
+
+    public abstract Boolean errorPubsubNotification();
+
+    public abstract String errorPubsubTopic();
 
     @Override
     public PDone expand(PCollection<FailsafeElement<String, String>> failedRecords) {
-      return failedRecords
-          .apply("FailedRecordToPubSubMessage", ParDo.of(new FailedStringToPubsubMessageFn()))
-          .apply("AsJsonMessages", AsJsons.of(PubsubMessage.class))
-          .apply("WriteFailedRecordsToGcs", TextIO.write().to(errorRecordsDirectory()));
+      PCollection<String> failedStrings =
+          failedRecords
+              .apply("FailedRecordToPubSubMessage", ParDo.of(new FailedStringToPubsubMessageFn()))
+              .apply("AsJsonMessages", AsJsons.of(PubsubMessage.class))
+              .apply(
+                  "ApplyWindow",
+                  Window.into(FixedWindows.of(DurationUtils.parseDuration(errorWindowDuration()))));
+
+      if (errorPubsubNotification()) {
+        WriteFilesResult<Void> writeFilesResult =
+            failedStrings.apply(
+                "WriteFailedRecordsToGcsNotify",
+                TextIO.<String>writeCustomType().withWindowedWrites().to(errorRecordsDirectory()));
+        return writeFilesResult
+            .getPerDestinationOutputFilenames()
+            .apply(
+                "ErrorToMessage",
+                MapElements.into(TypeDescriptor.of(PubsubMessage.class))
+                    .via(
+                        kv ->
+                            new PubsubMessage(
+                                kv.getValue().getBytes(StandardCharsets.UTF_8), ImmutableMap.of())))
+            .apply("ErrorWriteToPubsub", PubsubIO.writeMessages().to(errorPubsubTopic()));
+      } else {
+        return failedStrings.apply(
+            "WriteFailedRecordsToGcs",
+            TextIO.write().withWindowedWrites().to(errorRecordsDirectory()));
+      }
     }
 
     /** Builder for {@link WriteStringMessageErrorsToGcs}. */
     @AutoValue.Builder
     public abstract static class Builder {
       public abstract Builder setErrorRecordsDirectory(String errorRecordsDirectory);
+
+      public abstract Builder setErrorPubsubNotification(Boolean errorPubsubNotification);
+
+      public abstract Builder setErrorPubsubTopic(String errorPubsubTopic);
+
+      public abstract Builder setErrorWindowDuration(String errorWindowDuration);
 
       public abstract WriteStringMessageErrorsToGcs build();
     }

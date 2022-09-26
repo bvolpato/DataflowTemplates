@@ -316,6 +316,8 @@ public class PubSubToSplunk {
             "GcsWriteFailedRecords",
             ErrorConverters.WriteStringMessageErrorsToGcs.newBuilder()
                 .setErrorRecordsDirectory(options.getGcsDeadletterDirectory())
+                .setErrorPubsubNotification(options.getGcsDeadletterPubsubNotification())
+                .setErrorPubsubTopic(options.getGcsDeadletterPubsubTopic())
                 .build());
 
     return pipeline.run();
