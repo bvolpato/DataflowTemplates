@@ -25,12 +25,14 @@
   <name>Google Cloud Dataflow Templates</name>
   <packaging>pom</packaging>
   <description>
-    Unifies all the template libraries under one POM for easier automation and to allow
+    Unifies all the template libraries under one POM for easier automation and
+    to allow
     for more reusable and modular dependencies.
   </description>
 
   <properties>
     <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
+    <spotless-maven-plugin.version>2.12.1</spotless-maven-plugin.version>
   </properties>
 
   <build>
@@ -48,11 +50,56 @@
             </execution>
           </executions>
         </plugin>
+
+        <!-- Have spotless here to allow spotless:apply over the entire project -->
+        <plugin>
+          <groupId>com.diffplug.spotless</groupId>
+          <artifactId>spotless-maven-plugin</artifactId>
+          <version>${spotless-maven-plugin.version}</version>
+          <configuration>
+            <formats>
+              <!-- Avoid trailing whitespace and require ending newline. -->
+              <format>
+                <includes>
+                  <include>*.md</include>
+                  <include>.gitignore</include>
+                </includes>
+                <trimTrailingWhitespace/>
+                <endWithNewline/>
+              </format>
+            </formats>
+            <java>
+              <!-- Exclude Beam code from formatting/license headers -->
+              <excludes>
+                <exclude>src/main/java/org/apache/beam/**</exclude>
+                <exclude>src/test/java/org/apache/beam/**</exclude>
+              </excludes>
+              <toggleOffOn/>
+              <googleJavaFormat>
+                <version>1.8</version>
+                <style>GOOGLE</style>
+              </googleJavaFormat>
+              <licenseHeader>
+                <file>JAVA_LICENSE_HEADER</file>
+              </licenseHeader>
+            </java>
+          </configuration>
+          <!-- Bind to verify. -->
+          <executions>
+            <execution>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
 
   <modules>
+    <module>metadata</module>
+    <module>plugins</module>
     <module>.</module>
     <module>it</module>
     <module>v2</module>

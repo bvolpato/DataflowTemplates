@@ -174,7 +174,7 @@ public final class DataflowOperator {
 
     public static Builder builder() {
       return new AutoValue_DataflowOperator_Config.Builder()
-          .setCheckAfter(Duration.ofSeconds(30))
+          .setCheckAfter(Duration.ofSeconds(15))
           .setTimeoutAfter(Duration.ofMinutes(15));
     }
 

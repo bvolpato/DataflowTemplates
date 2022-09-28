@@ -18,6 +18,7 @@ package com.google.cloud.teleport.v2.transforms;
 import static org.apache.beam.vendor.guava.v26_0_jre.com.google.common.base.Preconditions.checkArgument;
 
 import com.google.auto.value.AutoValue;
+import com.google.cloud.teleport.metadata.TemplateParameter;
 import com.google.cloud.teleport.v2.values.FailsafeElement;
 import com.google.common.base.Strings;
 import com.google.common.io.CharStreams;
@@ -73,7 +74,14 @@ public abstract class PythonTextTransformer implements Serializable {
 
   /** Necessary CLI options for running UDF function. */
   public interface PythonTextTransformerOptions extends PipelineOptions {
-    @Description("Gcs path to python udf source")
+
+    @TemplateParameter.GcsReadFile(
+        order = 1,
+        optional = true,
+        description = "Gcs path to python UDF source",
+        helpText =
+            "The Cloud Storage path pattern for the Python code containing your user-defined functions.",
+        example = "gs://your-bucket/your-transforms/*.py")
     String getPythonTextTransformGcsPath();
 
     void setPythonTextTransformGcsPath(String pythonTextTransformGcsPath);
@@ -83,7 +91,13 @@ public abstract class PythonTextTransformer implements Serializable {
 
     void setPythonRuntimeVersion(String pythonRuntimeVersion);
 
-    @Description("UDF Python Function Name")
+    @TemplateParameter.Text(
+        order = 2,
+        optional = true,
+        description = "UDF Python Function Name",
+        helpText =
+            "The name of the function to call from your JavaScript file. Use only letters, digits, and underscores.",
+        example = "transform_udf1")
     String getPythonTextTransformFunctionName();
 
     void setPythonTextTransformFunctionName(String pythonTextTransformFunctionName);

@@ -95,7 +95,7 @@
 
   <dependencyManagement>
     <dependencies>
-    <dependency>
+      <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-api</artifactId>
             <version>${grpc.version}</version>
@@ -130,6 +130,13 @@
   </dependencyManagement>
 
   <dependencies>
+    <!-- Templates Annotations -->
+    <dependency>
+      <groupId>com.google.cloud.teleport.metadata</groupId>
+      <artifactId>metadata</artifactId>
+      <version>${metadata.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>

@@ -16,6 +16,10 @@
 package com.google.cloud.dataflow.cdc.applier;
 
 import com.google.cloud.dataflow.cdc.applier.CdcPCollectionsFetchers.CdcPCollectionFetcher;
+import com.google.cloud.dataflow.cdc.applier.CdcToBigQueryChangeApplierPipeline.CdcApplierOptions;
+import com.google.cloud.teleport.metadata.Template;
+import com.google.cloud.teleport.metadata.TemplateCategory;
+import com.google.cloud.teleport.metadata.TemplateParameter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,6 +55,14 @@ import org.slf4j.LoggerFactory;
  * changelog from the external database, formats the data into Beam {@link Row} format, updates Data
  * Catalog with schema information for each table, and pushes the change data to PubSub.
  */
+@Template(
+    name = "Cdc_To_BigQuery_Template",
+    category = TemplateCategory.STREAMING,
+    displayName = "Synchronizing CDC data to BigQuery",
+    description = "A pipeline to synchronize a Change Data Capture streams to BigQuery.",
+    optionsClass = CdcApplierOptions.class,
+    flexContainerName = "cdc-agg",
+    contactInformation = "https://cloud.google.com/support")
 public class CdcToBigQueryChangeApplierPipeline {
 
   public static final Integer SECONDS_PER_DAY = 24 * 60 * 60;
@@ -73,29 +85,48 @@ public class CdcToBigQueryChangeApplierPipeline {
 
     void setInputTopics(String topic);
 
-    @Description("Comma-separated list of PubSub subscriptions where CDC data is available.")
+    @TemplateParameter.Text(
+        order = 1,
+        regexes = {"[^/]+"},
+        description = "Input subscriptions to the template",
+        helpText = "Comma-separated list of Pub/Sub subscriptions where CDC data is available.")
     String getInputSubscriptions();
 
     void setInputSubscriptions(String subscriptions);
 
-    @Description("The BigQuery dataset where Staging / Change Log tables are to be kept.")
+    @TemplateParameter.Text(
+        order = 2,
+        regexes = {".+"},
+        description = "Output BigQuery dataset for Changelog tables",
+        helpText = "Name of the BigQuery dataset where Staging / Change Log tables are to be kept.")
     String getChangeLogDataset();
 
     void setChangeLogDataset(String dataset);
 
-    @Description("The BigQuery dataset where the Replica tables are to be kept.")
+    @TemplateParameter.Text(
+        order = 3,
+        regexes = {".+"},
+        description = "Output BigQuery dataset for replica tables",
+        helpText = "Name of the BigQuery dataset where the Replica tables are to be kept.")
     String getReplicaDataset();
 
     void setReplicaDataset(String dataset);
 
-    @Description("How often the pipeline will issue updates to the BigQuery replica table.")
+    @TemplateParameter.Integer(
+        order = 4,
+        optional = true,
+        description = "Frequency to issue updates to BigQuery tables (seconds).",
+        helpText = "How often the pipeline will issue updates to the BigQuery replica table.")
     Integer getUpdateFrequencySecs();
 
     void setUpdateFrequencySecs(Integer frequency);
 
-    @Description(
-        "Whether change updates should come from a single PubSub topic. If this option "
-            + "is set to true, then a single input subscription or topic will be expected.")
+    @TemplateParameter.Boolean(
+        order = 5,
+        optional = true,
+        description = "Whether to use a single topic for all MySQL table changes.",
+        helpText =
+            "Set this to true if you have configured your Debezium connector to publish all table updates to a single topic")
     @Default.Boolean(false)
     Boolean getUseSingleTopic();
 

@@ -92,6 +92,7 @@
     <spotless-maven-plugin.version>2.12.1</spotless-maven-plugin.version>
     <cloud-libraries-bom.version>24.4.0</cloud-libraries-bom.version>
     <jacoco.version>0.8.8</jacoco.version>
+    <metadata.version>1.0-SNAPSHOT</metadata.version>
   </properties>
 
   <dependencyManagement>
@@ -120,6 +121,13 @@
   </dependencyManagement>
 
   <dependencies>
+    <!-- Templates Annotations -->
+    <dependency>
+      <groupId>com.google.cloud.teleport.metadata</groupId>
+      <artifactId>metadata</artifactId>
+      <version>${metadata.version}</version>
+    </dependency>
+
     <!-- Beam -->
     <dependency>
       <groupId>org.apache.beam</groupId>
@@ -667,7 +675,8 @@
                 <ignoredUsedUndeclaredDependency>
                   org.apache.beam:beam-vendor-grpc-1_36_0
                 </ignoredUsedUndeclaredDependency>
-                <ignoredUsedUndeclaredDependency>io.grpc:grpc-api</ignoredUsedUndeclaredDependency>
+                <ignoredUsedUndeclaredDependency>io.grpc:grpc-api
+                </ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>
                   org.apache.derby:derbytools
                 </ignoredUsedUndeclaredDependency>
@@ -907,7 +916,9 @@
               <goal>schema</goal>
             </goals>
             <configuration>
-              <sourceDirectory>${project.basedir}/src/main/resources/schema/avro</sourceDirectory>
+              <sourceDirectory>
+                ${project.basedir}/src/main/resources/schema/avro
+              </sourceDirectory>
             </configuration>
           </execution>
         </executions>
@@ -1037,16 +1048,104 @@
     <profile>
       <id>missing-artifact-repos</id>
       <activation>
-          <activeByDefault>true</activeByDefault>
+        <activeByDefault>true</activeByDefault>
       </activation>
       <repositories>
-          <repository>
-              <!-- Required for io.confluent:kafka-avro-serializer artifact -->
-              <id>confluent</id>
-              <url>https://packages.confluent.io/maven/</url>
-          </repository>
+        <repository>
+          <!-- Required for io.confluent:kafka-avro-serializer artifact -->
+          <id>confluent</id>
+          <url>https://packages.confluent.io/maven/</url>
+        </repository>
       </repositories>
-        </profile>
+    </profile>
+    <profile>
+      <id>templatesValidate</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.google.cloud.teleport.plugin</groupId>
+            <artifactId>templates-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>compile</phase>
+                <goals>
+                  <goal>validate</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>templatesSpec</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.google.cloud.teleport.plugin</groupId>
+            <artifactId>templates-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>spec</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>templatesStage</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.google.cloud.teleport.plugin</groupId>
+            <artifactId>templates-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>stage</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>templatesRun</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.google.cloud.teleport.plugin</groupId>
+            <artifactId>templates-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 
 </project>

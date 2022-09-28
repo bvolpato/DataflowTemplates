@@ -47,6 +47,7 @@
         <maven-jar-plugin.version>3.0.2</maven-jar-plugin.version>
         <maven-shade-plugin.version>3.0.0</maven-shade-plugin.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
+        <metadata.version>1.0-SNAPSHOT</metadata.version>
         <mockito-core.version>3.0.0</mockito-core.version>
         <os-maven-plugin.version>1.5.0.Final</os-maven-plugin.version>
         <re2j.version>1.5</re2j.version>
@@ -97,6 +98,12 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- Templates Annotations -->
+        <dependency>
+            <groupId>com.google.cloud.teleport.metadata</groupId>
+            <artifactId>metadata</artifactId>
+            <version>${metadata.version}</version>
+        </dependency>
         <!-- Beam -->
         <dependency>
             <groupId>org.apache.beam</groupId>
@@ -179,7 +186,6 @@
             <version>1.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
-
 
         <!-- Misc -->
         <dependency>
@@ -432,43 +438,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>bundle-and-repackage</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <shadeTestJar>true</shadeTestJar>
-                            <artifactSet>
-                                <includes>
-                                    <include>*:*</include>
-                                </includes>
-                            </artifactSet>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                            </transformers>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-
-            <plugin>
                 <!-- Set up Javadoc configuration for javadoc run via in the Maven
                      build. Teleport only uses the plugin to create the individual javadoc
                      attached artifacts used for IDEs. The combined javadoc for the
@@ -658,6 +627,56 @@
     </build>
 
     <profiles>
+
+        <profile>
+            <id>shade</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>bundle-and-repackage</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <shadeTestJar>true</shadeTestJar>
+                                    <artifactSet>
+                                        <includes>
+                                            <include>*:*</include>
+                                        </includes>
+                                    </artifactSet>
+                                    <filters>
+                                        <filter>
+                                            <artifact>*:*</artifact>
+                                            <excludes>
+                                                <exclude>META-INF/*.SF</exclude>
+                                                <exclude>META-INF/*.DSA</exclude>
+                                                <exclude>META-INF/*.RSA</exclude>
+                                            </excludes>
+                                        </filter>
+                                    </filters>
+                                    <transformers>
+                                        <transformer
+                                            implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                    </transformers>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <activation>
+                <property>
+                    <name>skipShade</name>
+                    <value>!true</value>
+                </property>
+            </activation>
+        </profile>
+
         <!-- The following snapshot profile allows us to test teleport with
              unreleased apache sw. E.g. to test with a snapshot version of beam we
              could do
@@ -685,33 +704,123 @@
                 </repository>
             </repositories>
         </profile>
+        <profile>
+            <id>templatesValidate</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.google.cloud.teleport.plugin</groupId>
+                        <artifactId>templates-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>validate</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>templatesSpec</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.google.cloud.teleport.plugin</groupId>
+                        <artifactId>templates-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>spec</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>templatesStage</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.google.cloud.teleport.plugin</groupId>
+                        <artifactId>templates-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>stage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>templatesRun</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.google.cloud.teleport.plugin</groupId>
+                        <artifactId>templates-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <modules>
         <module>bigquery-to-bigtable</module>
         <module>bigquery-to-parquet</module>
-        <module>common</module>
         <module>cdc-parent</module>
+        <module>common</module>
         <module>datastream-to-bigquery</module>
+        <module>datastream-to-mongodb</module>
+        <module>datastream-to-postgres</module>
         <module>datastream-to-spanner</module>
         <module>datastream-to-sql</module>
         <module>elasticsearch-common</module>
         <module>file-format-conversion</module>
-        <module>googlecloud-to-neo4j</module>
         <module>googlecloud-to-elasticsearch</module>
-        <module>googlecloud-to-mongodb</module>
         <module>googlecloud-to-googlecloud</module>
+        <module>googlecloud-to-mongodb</module>
+        <module>googlecloud-to-neo4j</module>
         <module>googlecloud-to-splunk</module>
+        <module>kafka-common</module>
         <module>kafka-to-bigquery</module>
         <module>kafka-to-gcs</module>
-        <module>mongodb-to-googlecloud</module>
+        <module>kafka-to-pubsub</module>
         <module>kudu-to-bigquery</module>
+        <module>mongodb-to-googlecloud</module>
         <module>pubsub-binary-to-bigquery</module>
         <module>pubsub-cdc-to-bigquery</module>
         <module>pubsub-to-mongodb</module>
         <module>streaming-data-generator</module>
-        <module>kafka-to-pubsub</module>
-        <module>kafka-common</module>
     </modules>
 
 </project>
