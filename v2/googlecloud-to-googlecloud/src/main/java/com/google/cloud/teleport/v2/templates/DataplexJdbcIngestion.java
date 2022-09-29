@@ -264,7 +264,7 @@ public class DataplexJdbcIngestion {
                 .withDataSourceConfiguration(dataSourceConfig)
                 .withQuery(options.getQuery())
                 .withCoder(TableRowJsonCoder.of())
-                .withRowMapper(JdbcConverters.getResultSetToTableRow()))
+                .withRowMapper(JdbcConverters.getResultSetToTableRow(false)))
         .apply(
             "Write to BigQuery",
             BigQueryIO.writeTableRows()
