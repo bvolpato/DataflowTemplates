@@ -110,7 +110,7 @@ public class JdbcConverters {
     protected String getColumnRef(ResultSetMetaData metaData, int index) throws SQLException {
       if (useColumnAlias != null && useColumnAlias) {
         String columnLabel = metaData.getColumnLabel(index);
-        if (columnLabel != null && columnLabel.isEmpty()) {
+        if (columnLabel != null && !columnLabel.isEmpty()) {
           return columnLabel;
         }
       }
