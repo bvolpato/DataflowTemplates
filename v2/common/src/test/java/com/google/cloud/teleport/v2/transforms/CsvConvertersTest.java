@@ -140,6 +140,46 @@ public class CsvConvertersTest {
     pipeline.run();
   }
 
+  /** Tests {@link CsvConverters.ReadCsv} reads a Csv with no headers correctly. */
+  @Test
+  public void testReadNoHeadersCsvLargeNumFilesFlag() {
+
+    CsvConverters.CsvPipelineOptions options =
+        PipelineOptionsFactory.create().as(CsvConverters.CsvPipelineOptions.class);
+
+    options.setContainsHeaders(false);
+    options.setLargeNumFiles(true);
+    options.setDelimiter(",");
+    options.setCsvFormat("Default");
+    options.setInputFileSpec(NO_HEADER_CSV_FILE_PATH);
+
+    // Build pipeline with no headers.
+    PCollectionTuple readCsvOut =
+        pipeline.apply(
+            "TestReadCsvNoHeadersLargeNumFiles",
+            CsvConverters.ReadCsv.newBuilder()
+                .setCsvFormat(options.getCsvFormat())
+                .setDelimiter(options.getDelimiter())
+                .setHasHeaders(options.getContainsHeaders())
+                .setInputFileSpec(options.getInputFileSpec())
+                .setLargeNumFiles(options.getLargeNumFiles())
+                .setHeaderTag(CSV_HEADERS)
+                .setLineTag(CSV_LINES)
+                .setFileEncoding(options.getCsvFileEncoding())
+                .build());
+
+    PAssert.that(readCsvOut.get(CSV_LINES))
+        .satisfies(
+            collection -> {
+              String result = collection.iterator().next();
+              assertThat(result, is(equalTo(RECORD_STRING)));
+              return null;
+            });
+
+    //  Execute pipeline
+    pipeline.run();
+  }
+
   /** Tests {@link CsvConverters.ReadCsv} reads a Csv with headers correctly. */
   @Test
   public void testReadWithHeadersCsv() {

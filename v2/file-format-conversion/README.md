@@ -70,6 +70,7 @@ The pipeline requires the following parameters:
 * inputFileSpec: GCS bucket to read input file from (e.g. gs://mybucket/path/file)
 * outputBucket: GCS bucket to write output file(s) to (e.g. gs://mybucket/path/). Must end with a slash.
 * containsHeaders: Set to true if Csv file contains headers.
+* largeNumFiles: Set to true if number of Csv files is in the tens of thousands. Default: false
 * schema: Path to [Avro schema](https://avro.apache.org/docs/1.8.1/spec.html#schemas) (e.g. gs://mybucket/path/).
   NOTE: The order of fields in the Avro schema must match the order of the columns exactly in the Csv file.
 

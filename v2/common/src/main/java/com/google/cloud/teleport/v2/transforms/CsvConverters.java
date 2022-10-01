@@ -468,7 +468,7 @@ public class CsvConverters {
   public abstract static class ReadCsv extends PTransform<PBegin, PCollectionTuple> {
 
     public static Builder newBuilder() {
-      return new AutoValue_CsvConverters_ReadCsv.Builder();
+      return new AutoValue_CsvConverters_ReadCsv.Builder().setLargeNumFiles(false);
     }
 
     public abstract String csvFormat();
@@ -477,6 +477,8 @@ public class CsvConverters {
     public abstract String delimiter();
 
     public abstract Boolean hasHeaders();
+
+    public abstract Boolean largeNumFiles();
 
     public abstract String inputFileSpec();
 
@@ -499,10 +501,14 @@ public class CsvConverters {
                         new GetCsvHeadersFn(
                             headerTag(), lineTag(), csvFormat(), delimiter(), fileEncoding()))
                     .withOutputTags(headerTag(), TupleTagList.of(lineTag())));
-      }
+      } else {
+        TextIO.Read reader = TextIO.read().from(inputFileSpec());
+        if (largeNumFiles()) {
+          reader = reader.withHintMatchesManyFiles();
+        }
 
-      return PCollectionTuple.of(
-          lineTag(), input.apply("ReadCsvWithoutHeaders", TextIO.read().from(inputFileSpec())));
+        return PCollectionTuple.of(lineTag(), input.apply("ReadCsvWithoutHeaders", reader));
+      }
     }
 
     /** Builder for {@link ReadCsv}. */
@@ -514,6 +520,8 @@ public class CsvConverters {
       public abstract Builder setDelimiter(@Nullable String delimiter);
 
       public abstract Builder setHasHeaders(Boolean hasHeaders);
+
+      public abstract Builder setLargeNumFiles(Boolean largeNumFiles);
 
       public abstract Builder setInputFileSpec(String inputFileSpec);
 
