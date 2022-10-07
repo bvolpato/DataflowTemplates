@@ -24,16 +24,16 @@ import com.google.auto.value.AutoValue;
 import com.google.cloud.teleport.util.GCSUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;
 import com.google.common.net.InternetDomainName;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
+import java.io.Serializable;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,7 +61,8 @@ import org.slf4j.LoggerFactory;
 @AutoValue
 public abstract class SplunkEventWriter extends DoFn<KV<Integer, SplunkEvent>, SplunkWriteError> {
 
-  private static final Integer DEFAULT_BATCH_COUNT = 1;
+  private static final Integer DEFAULT_BATCH_COUNT = 10;
+  private static final Integer DEFAULT_MAX_CONNECTIONS = 10;
   private static final Boolean DEFAULT_DISABLE_CERTIFICATE_VALIDATION = false;
   private static final Boolean DEFAULT_ENABLE_BATCH_LOGS = true;
   private static final Boolean DEFAULT_ENABLE_GZIP_HTTP_COMPRESSION = true;
@@ -90,6 +91,20 @@ public abstract class SplunkEventWriter extends DoFn<KV<Integer, SplunkEvent>, S
   private static final String TIME_ID_NAME = "expiry";
   private static final Pattern URL_PATTERN = Pattern.compile("^http(s?)://([^:]+)(:[0-9]+)?$");
 
+  /**
+   * Create a cache of Publishers so connections/ports can be reused across DoFns. The reason why we
+   * want to reuse such connections is to reduce the number of outgoing ports being leased (e.g.,
+   * Cloud NAT).
+   */
+  private static final LoadingCache<WriterCacheKey, HttpEventPublisher> PUBLISHER_CACHE =
+      CacheBuilder.newBuilder().build(new HttpEventPublisherLoader());
+
+  /**
+   * A hard limit on the maximum number of connections per CPU. This limit prevent jobs from
+   * reaching a bottleneck before they are able to scale, for jobs with a high parallelism.
+   */
+  private static final Integer MAX_CONNECTIONS_PER_CPU = 128;
+
   @VisibleForTesting
   protected static final String INVALID_URL_FORMAT_MESSAGE =
       "Invalid url format. Url format should match PROTOCOL://HOST[:PORT], where PORT is optional. "
@@ -102,12 +117,14 @@ public abstract class SplunkEventWriter extends DoFn<KV<Integer, SplunkEvent>, S
   private final StateSpec<ValueState<Long>> count = StateSpecs.value();
 
   @TimerId(TIME_ID_NAME)
-  private final TimerSpec expirySpec = TimerSpecs.timer(TimeDomain.EVENT_TIME);
+  private final TimerSpec expirySpec = TimerSpecs.timer(TimeDomain.PROCESSING_TIME);
 
-  private Integer batchCount;
-  private Boolean disableValidation;
-  private Boolean enableBatchLogs;
-  private Boolean enableGzipHttpCompression;
+  private Integer batchCount = DEFAULT_BATCH_COUNT;
+  private Integer maxConnections = DEFAULT_MAX_CONNECTIONS;
+  private Boolean disableValidation = DEFAULT_DISABLE_CERTIFICATE_VALIDATION;
+  private Boolean enableBatchLogs = DEFAULT_ENABLE_BATCH_LOGS;
+  private Boolean enableGzipHttpCompression = DEFAULT_ENABLE_GZIP_HTTP_COMPRESSION;
+
   private HttpEventPublisher publisher;
 
   private static final Gson GSON =
@@ -138,6 +155,9 @@ public abstract class SplunkEventWriter extends DoFn<KV<Integer, SplunkEvent>, S
   @Nullable
   abstract ValueProvider<Integer> inputBatchCount();
 
+  @Nullable
+  abstract ValueProvider<Integer> maxConnections();
+
   @Setup
   public void setup() {
 
@@ -145,70 +165,40 @@ public abstract class SplunkEventWriter extends DoFn<KV<Integer, SplunkEvent>, S
     checkArgument(isValidUrlFormat(url().get()), INVALID_URL_FORMAT_MESSAGE);
     checkArgument(token().isAccessible(), "Access token is required for writing events.");
 
-    // Either user supplied or default batchCount.
-    if (batchCount == null) {
-
-      if (inputBatchCount() != null) {
-        batchCount = inputBatchCount().get();
-      }
-
-      batchCount = MoreObjects.firstNonNull(batchCount, DEFAULT_BATCH_COUNT);
-      LOG.info("Batch count set to: {}", batchCount);
+    // Use the supplied options if they are given
+    if (inputBatchCount() != null && inputBatchCount().get() != null) {
+      batchCount = inputBatchCount().get();
+    }
+    if (maxConnections() != null && maxConnections().get() != null) {
+      maxConnections = maxConnections().get();
     }
 
-    if (enableBatchLogs == null) {
+    // hard limit the amount of parallelism to MAX_CONNECTIONS_PER_CPU * vCPUs.
+    maxConnections =
+        Integer.min(
+            maxConnections, Runtime.getRuntime().availableProcessors() * MAX_CONNECTIONS_PER_CPU);
 
-      if (enableBatchLogs() != null) {
-        enableBatchLogs = enableBatchLogs().get();
-      }
-
-      enableBatchLogs = MoreObjects.firstNonNull(enableBatchLogs, DEFAULT_ENABLE_BATCH_LOGS);
-      LOG.info("Enable Batch logs set to: {}", enableBatchLogs);
+    if (enableBatchLogs() != null && enableBatchLogs().get() != null) {
+      enableBatchLogs = enableBatchLogs().get();
     }
-
-    if (enableGzipHttpCompression == null) {
-
-      if (enableGzipHttpCompression() != null) {
-        enableGzipHttpCompression = enableGzipHttpCompression().get();
-      }
-
-      enableGzipHttpCompression =
-          MoreObjects.firstNonNull(enableGzipHttpCompression, DEFAULT_ENABLE_GZIP_HTTP_COMPRESSION);
-      LOG.info("Enable gzip http compression set to: {}", enableGzipHttpCompression);
+    if (enableGzipHttpCompression() != null && enableGzipHttpCompression().get() != null) {
+      enableGzipHttpCompression = enableGzipHttpCompression().get();
     }
-
-    // Either user supplied or default disableValidation.
-    if (disableValidation == null) {
-
-      if (disableCertificateValidation() != null) {
-        disableValidation = disableCertificateValidation().get();
-      }
-
-      disableValidation =
-          MoreObjects.firstNonNull(disableValidation, DEFAULT_DISABLE_CERTIFICATE_VALIDATION);
-      LOG.info("Disable certificate validation set to: {}", disableValidation);
+    if (disableCertificateValidation() != null && disableCertificateValidation().get() != null) {
+      disableValidation = disableCertificateValidation().get();
     }
 
     try {
-      HttpEventPublisher.Builder builder =
-          HttpEventPublisher.newBuilder()
-              .withUrl(url().get())
-              .withToken(token().get())
-              .withDisableCertificateValidation(disableValidation)
-              .withEnableGzipHttpCompression(enableGzipHttpCompression);
+      LOG.info(
+          "Setting up SplunkEventWriter instance. Batch count: {}, Maximum connections: {}, Enable batch logs: {}, Enable gzip HTTP compression: {}, Disable certificate validation: {}",
+          batchCount,
+          maxConnections,
+          enableBatchLogs,
+          enableGzipHttpCompression,
+          disableValidation);
 
-      if (rootCaCertificatePath() != null && rootCaCertificatePath().get() != null) {
-        builder.withRootCaCertificate(GCSUtils.getGcsFileAsBytes(rootCaCertificatePath().get()));
-      }
-
-      publisher = builder.build();
-      LOG.info("Successfully created HttpEventPublisher");
-
-    } catch (CertificateException
-        | NoSuchAlgorithmException
-        | KeyStoreException
-        | KeyManagementException
-        | IOException e) {
+      this.publisher = PUBLISHER_CACHE.get(buildWriterCacheKey());
+    } catch (Exception e) {
       LOG.error("Error creating HttpEventPublisher: {}", e.getMessage());
       throw new RuntimeException(e);
     }
@@ -351,7 +341,7 @@ public abstract class SplunkEventWriter extends DoFn<KV<Integer, SplunkEvent>, S
         // the exception fall through, so this isn't considered a major issue.
         try {
           if (response != null) {
-            response.disconnect();
+            response.ignore();
           }
         } catch (IOException e) {
           LOG.warn(
@@ -462,6 +452,8 @@ public abstract class SplunkEventWriter extends DoFn<KV<Integer, SplunkEvent>, S
 
     abstract Builder setInputBatchCount(ValueProvider<Integer> inputBatchCount);
 
+    abstract Builder setMaxConnections(ValueProvider<Integer> maxConnections);
+
     abstract SplunkEventWriter autoBuild();
 
     /**
@@ -523,6 +515,16 @@ public abstract class SplunkEventWriter extends DoFn<KV<Integer, SplunkEvent>, S
     }
 
     /**
+     * Method to set the maxConnections.
+     *
+     * @param maxConnections for batching post requests.
+     * @return {@link Builder}
+     */
+    public Builder withMaxConnections(ValueProvider<Integer> maxConnections) {
+      return setMaxConnections(maxConnections);
+    }
+
+    /**
      * Method to disable certificate validation.
      *
      * @param disableCertificateValidation for disabling certificate validation.
@@ -569,6 +571,88 @@ public abstract class SplunkEventWriter extends DoFn<KV<Integer, SplunkEvent>, S
       checkNotNull(token(), "token needs to be provided.");
 
       return autoBuild();
+    }
+  }
+
+  /** Build the {@link WriterCacheKey} for the current writer. */
+  private WriterCacheKey buildWriterCacheKey() {
+    WriterCacheKey.Builder writerCacheKey =
+        WriterCacheKey.builder()
+            .url(url().get())
+            .token(token().get())
+            .disableCertificateValidation(disableValidation)
+            .enableGzipHttpCompression(enableGzipHttpCompression)
+            .maxConnections(maxConnections);
+
+    if (rootCaCertificatePath() != null && rootCaCertificatePath().get() != null) {
+      writerCacheKey = writerCacheKey.rootCaCertificatePath(rootCaCertificatePath().get());
+    }
+
+    return writerCacheKey.build();
+  }
+
+  /** Cache loader that builds a {@link HttpEventPublisher} on demand. */
+  static class HttpEventPublisherLoader extends CacheLoader<WriterCacheKey, HttpEventPublisher> {
+
+    @Override
+    public HttpEventPublisher load(WriterCacheKey publisherKey) throws Exception {
+      HttpEventPublisher.Builder builder =
+          HttpEventPublisher.newBuilder()
+              .withUrl(publisherKey.url())
+              .withToken(publisherKey.token())
+              .withDisableCertificateValidation(publisherKey.disableCertificateValidation())
+              .withEnableGzipHttpCompression(publisherKey.enableGzipHttpCompression())
+              .withMaxConnections(publisherKey.maxConnections());
+
+      if (publisherKey.rootCaCertificatePath() != null
+          && !publisherKey.rootCaCertificatePath().isEmpty()) {
+        builder.withRootCaCertificate(
+            GCSUtils.getGcsFileAsBytes(publisherKey.rootCaCertificatePath()));
+      }
+
+      return builder.build();
+    }
+  }
+
+  /**
+   * Class containing all the attributes that are used to create an {@link HttpEventPublisher},
+   * which should be used as a cache key to reuse publishers.
+   */
+  @AutoValue
+  abstract static class WriterCacheKey implements Serializable {
+
+    abstract String url();
+
+    abstract String token();
+
+    abstract Integer maxConnections();
+
+    abstract Boolean disableCertificateValidation();
+
+    abstract Boolean enableGzipHttpCompression();
+
+    @Nullable
+    abstract String rootCaCertificatePath();
+
+    static Builder builder() {
+      return new AutoValue_SplunkEventWriter_WriterCacheKey.Builder();
+    }
+
+    @AutoValue.Builder
+    public abstract static class Builder {
+      public abstract Builder url(String url);
+
+      public abstract Builder token(String token);
+
+      public abstract Builder maxConnections(Integer maxConnections);
+
+      public abstract Builder disableCertificateValidation(Boolean disableCertificateValidation);
+
+      public abstract Builder enableGzipHttpCompression(Boolean enableGzipHttpCompression);
+
+      public abstract Builder rootCaCertificatePath(String rootCaCertificatePath);
+
+      public abstract WriterCacheKey build();
     }
   }
 }

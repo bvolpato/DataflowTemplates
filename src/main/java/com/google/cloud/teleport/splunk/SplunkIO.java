@@ -96,7 +96,8 @@ public class SplunkIO {
               .withToken((token()))
               .withRootCaCertificatePath(rootCaCertificatePath())
               .withEnableBatchLogs(enableBatchLogs())
-              .withEnableGzipHttpCompression(enableGzipHttpCompression());
+              .withEnableGzipHttpCompression(enableGzipHttpCompression())
+              .withMaxConnections(parallelism());
 
       SplunkEventWriter writer = builder.build();
       LOG.info("SplunkEventWriter configured");

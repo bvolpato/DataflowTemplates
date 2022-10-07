@@ -46,6 +46,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -60,6 +61,7 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +75,11 @@ public abstract class HttpEventPublisher {
 
   private static final Logger LOG = LoggerFactory.getLogger(HttpEventPublisher.class);
 
-  private static final int DEFAULT_MAX_CONNECTIONS = 1;
+  /** Default number of connections to use. */
+  private static final int DEFAULT_MAX_CONNECTIONS = 10;
+
+  /** How long connections should be kept, even if idle. */
+  private static final int CONNECTION_TIME_TO_LIVE = 60;
 
   private static final boolean DEFAULT_DISABLE_CERTIFICATE_VALIDATION = false;
 
@@ -93,7 +99,7 @@ public abstract class HttpEventPublisher {
   private static final String HTTPS_PROTOCOL_PREFIX = "https";
 
   public static Builder newBuilder() {
-    return new AutoValue_HttpEventPublisher.Builder();
+    return new AutoValue_HttpEventPublisher.Builder().setMaxConnections(DEFAULT_MAX_CONNECTIONS);
   }
 
   abstract ApacheHttpTransport transport();
@@ -109,6 +115,8 @@ public abstract class HttpEventPublisher {
 
   @Nullable
   abstract Integer maxElapsedMillis();
+
+  abstract Integer maxConnections();
 
   abstract Boolean disableCertificateValidation();
 
@@ -239,6 +247,10 @@ public abstract class HttpEventPublisher {
 
     abstract Integer maxElapsedMillis();
 
+    abstract Builder setMaxConnections(Integer maxConnections);
+
+    abstract Integer maxConnections();
+
     abstract HttpEventPublisher autoBuild();
 
     /**
@@ -315,6 +327,17 @@ public abstract class HttpEventPublisher {
     }
 
     /**
+     * Method to max connections for the underlying {@link ApacheHttpTransport}.
+     *
+     * @param maxConnections the maximum number of connections to be used for a single publisher.
+     * @return {@link Builder}
+     */
+    public Builder withMaxConnections(Integer maxConnections) {
+      checkNotNull(maxConnections, "withMaxConnections(maxConnections) called with null input.");
+      return setMaxConnections(maxConnections);
+    }
+
+    /**
      * Validates and builds a {@link HttpEventPublisher} object.
      *
      * @return {@link HttpEventPublisher}
@@ -339,8 +362,7 @@ public abstract class HttpEventPublisher {
       }
 
       CloseableHttpClient httpClient =
-          getHttpClient(
-              DEFAULT_MAX_CONNECTIONS, disableCertificateValidation(), rootCaCertificate());
+          getHttpClient(maxConnections(), disableCertificateValidation(), rootCaCertificate());
 
       setTransport(new ApacheHttpTransport(httpClient));
       setRequestFactory(transport().createRequestFactory());
@@ -403,7 +425,12 @@ public abstract class HttpEventPublisher {
         builder.setSSLSocketFactory(connectionSocketFactory);
       }
 
+      PoolingHttpClientConnectionManager connectionManager =
+          new PoolingHttpClientConnectionManager(CONNECTION_TIME_TO_LIVE, TimeUnit.SECONDS);
+      builder.setConnectionManager(connectionManager);
       builder.setMaxConnTotal(maxConnections);
+      builder.setMaxConnPerRoute(maxConnections);
+      builder.evictIdleConnections(CONNECTION_TIME_TO_LIVE, TimeUnit.SECONDS);
       builder.setDefaultRequestConfig(
           RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build());
 
