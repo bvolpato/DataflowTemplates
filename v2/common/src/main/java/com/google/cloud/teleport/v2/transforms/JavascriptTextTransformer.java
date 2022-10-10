@@ -25,6 +25,7 @@ import java.io.UncheckedIOException;
 import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -81,6 +82,11 @@ public abstract class JavascriptTextTransformer {
    */
   @AutoValue
   public abstract static class JavascriptRuntime {
+
+    /** JavaScript Engines to look for in the classpath. */
+    private static final List<String> JAVASCRIPT_ENGINE_NAMES =
+        Arrays.asList("Nashorn", "JavaScript");
+
     @Nullable
     public abstract String fileSystemPath();
 
@@ -135,23 +141,39 @@ public abstract class JavascriptTextTransformer {
      */
     @Nullable
     private static Invocable newInvocable(Collection<String> scripts) throws ScriptException {
-      ScriptEngineManager manager = new ScriptEngineManager();
-      ScriptEngine engine = manager.getEngineByName("JavaScript");
-
-      if (engine == null) {
-        List<String> availableEngines = new ArrayList<>();
-        for (ScriptEngineFactory factory : manager.getEngineFactories()) {
-          availableEngines.add(factory.getEngineName() + " " + factory.getEngineVersion());
-        }
-        throw new RuntimeException(
-            String.format("JavaScript engine not available. Found engines: %s.", availableEngines));
-      }
-
+      ScriptEngine engine = getJavaScriptEngine();
       for (String script : scripts) {
         engine.eval(script);
       }
-
       return (Invocable) engine;
+    }
+
+    private static ScriptEngine getJavaScriptEngine() {
+      ScriptEngineManager manager = new ScriptEngineManager();
+      for (String engineName : JAVASCRIPT_ENGINE_NAMES) {
+        ScriptEngine engine = manager.getEngineByName(engineName);
+        if (engine != null) {
+          return engine;
+        }
+      }
+
+      ScriptEngine engine = manager.getEngineByExtension("js");
+      if (engine != null) {
+        return engine;
+      }
+
+      List<String> availableEngines = new ArrayList<>();
+      for (ScriptEngineFactory factory : manager.getEngineFactories()) {
+        availableEngines.add(
+            factory.getEngineName()
+                + " ("
+                + factory.getEngineVersion()
+                + ") - "
+                + factory.getNames());
+      }
+
+      throw new RuntimeException(
+          String.format("JavaScript engine not available. Found engines: %s.", availableEngines));
     }
 
     /**
@@ -164,16 +186,14 @@ public abstract class JavascriptTextTransformer {
     public String invoke(String data) throws ScriptException, IOException, NoSuchMethodException {
       Invocable invocable = getInvocable();
       if (invocable == null) {
-        throw new RuntimeException("No udf was loaded");
+        throw new RuntimeException("No UDF was loaded");
       }
 
-      Object result = getInvocable().invokeFunction(functionName(), data);
+      Object result = invocable.invokeFunction(functionName(), data);
       if (result == null || ScriptObjectMirror.isUndefined(result)) {
         return null;
-
       } else if (result instanceof String) {
         return (String) result;
-
       } else {
         String className = result.getClass().getName();
         throw new RuntimeException(
