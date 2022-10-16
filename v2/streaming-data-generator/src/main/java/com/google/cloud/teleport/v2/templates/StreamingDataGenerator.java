@@ -261,6 +261,7 @@ public class StreamingDataGenerator {
 
     @TemplateParameter.Text(
         order = 13,
+        optional = true,
         description = "Output filename prefix of the files to write",
         helpText = "The prefix to place on each windowed file.",
         example = "output-")

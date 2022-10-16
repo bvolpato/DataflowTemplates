@@ -57,7 +57,7 @@ public abstract class TemplateTestBase {
   private static final Map<String, String> stagedTemplates = new HashMap<>();
 
   @Before
-  public void setUp() throws IOException {
+  public void setUpBase() throws IOException {
     TemplateIntegrationTest annotation = getClass().getAnnotation(TemplateIntegrationTest.class);
     if (annotation == null) {
       LOG.warn(
@@ -149,7 +149,7 @@ public abstract class TemplateTestBase {
   }
 
   @After
-  public void tearDown() {}
+  public void tearDownBase() {}
 
   public static Credentials buildCredentialsFromEnv() throws IOException {
 
