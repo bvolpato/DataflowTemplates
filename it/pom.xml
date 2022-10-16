@@ -31,7 +31,6 @@
     <guava.version>31.0.1-jre</guava.version>
     <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
     <maven-compiler-plugin.version>3.6.2</maven-compiler-plugin.version>
-    <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
     <mockito.version>3.7.7</mockito.version>
     <mockito-inline.version>4.5.1</mockito-inline.version>
     <puppycrawl.version>8.7</puppycrawl.version>
