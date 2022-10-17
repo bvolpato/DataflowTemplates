@@ -15,7 +15,6 @@
  */
 package com.google.cloud.teleport.templates;
 
-import com.google.cloud.teleport.templates.TextToPubsub.Options;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
 import org.apache.beam.sdk.io.TextIO;
