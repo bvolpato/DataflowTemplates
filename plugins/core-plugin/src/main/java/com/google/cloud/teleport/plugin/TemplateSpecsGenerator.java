@@ -61,7 +61,7 @@ public class TemplateSpecsGenerator {
       TemplateDefinitions definition, ImageSpec imageSpec, File targetDirectory) {
 
     Template templateAnnotation = definition.getTemplateAnnotation();
-    String templateDash = getTemplateNameDash(templateAnnotation);
+    String templateDash = getTemplateNameDash(templateAnnotation.name());
 
     if (!targetDirectory.exists()) {
       targetDirectory.mkdirs();
@@ -85,7 +85,7 @@ public class TemplateSpecsGenerator {
       TemplateDefinitions definition, ImageSpecMetadata imageSpecMetadata, File targetDirectory) {
 
     Template templateAnnotation = definition.getTemplateAnnotation();
-    String templateDash = getTemplateNameDash(templateAnnotation);
+    String templateDash = getTemplateNameDash(templateAnnotation.name());
 
     if (!targetDirectory.exists()) {
       targetDirectory.mkdirs();
@@ -112,7 +112,7 @@ public class TemplateSpecsGenerator {
   public File saveCommandSpec(TemplateDefinitions definition, File targetDirectory) {
 
     Template templateAnnotation = definition.getTemplateAnnotation();
-    String templateDash = getTemplateNameDash(templateAnnotation);
+    String templateDash = getTemplateNameDash(templateAnnotation.name());
 
     if (!targetDirectory.exists()) {
       targetDirectory.mkdirs();
@@ -150,7 +150,7 @@ public class TemplateSpecsGenerator {
     return file;
   }
 
-  public String getTemplateNameDash(Template templateAnnotation) {
-    return templateAnnotation.name().replace(' ', '-').replace('_', '-').toLowerCase();
+  public String getTemplateNameDash(String templateName) {
+    return templateName.replace(' ', '-').replace('_', '-').toLowerCase();
   }
 }

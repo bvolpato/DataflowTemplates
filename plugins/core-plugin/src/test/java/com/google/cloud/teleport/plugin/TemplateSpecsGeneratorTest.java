@@ -15,38 +15,77 @@
  */
 package com.google.cloud.teleport.plugin;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.teleport.metadata.Template;
 import com.google.cloud.teleport.plugin.model.ImageSpec;
+import com.google.cloud.teleport.plugin.model.ImageSpecMetadata;
 import com.google.cloud.teleport.plugin.model.TemplateDefinitions;
 import com.google.cloud.teleport.plugin.sample.AtoBOk;
 import com.google.common.io.Files;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import org.apache.beam.vendor.grpc.v1p43p2.com.google.gson.Gson;
+import org.apache.beam.vendor.grpc.v1p43p2.com.google.gson.GsonBuilder;
 import org.junit.Test;
 
 public class TemplateSpecsGeneratorTest {
 
-  TemplateDefinitions definitions =
+  private static final Gson GSON = new GsonBuilder().create();
+
+  private final TemplateDefinitions definitions =
       new TemplateDefinitions(AtoBOk.class, AtoBOk.class.getAnnotation(Template.class));
-  ImageSpec imageSpec = definitions.buildSpecModel(false);
-  TemplateSpecsGenerator generator = new TemplateSpecsGenerator();
+  private final ImageSpec imageSpec = definitions.buildSpecModel(false);
+  private final File outputFolder = Files.createTempDir().getAbsoluteFile();
+  private final TemplateSpecsGenerator generator = new TemplateSpecsGenerator();
 
   @Test
-  public void saveImageSpec() {
-    File outputFolder = Files.createTempDir().getAbsoluteFile();
+  public void saveImageSpec() throws IOException {
     File saveImageSpec = generator.saveImageSpec(definitions, imageSpec, outputFolder);
     assertNotNull(saveImageSpec);
     assertTrue(saveImageSpec.exists());
+
+    try (FileInputStream fis = new FileInputStream(saveImageSpec)) {
+      ImageSpec read =
+          GSON.fromJson(new String(fis.readAllBytes(), StandardCharsets.UTF_8), ImageSpec.class);
+      assertEquals(imageSpec.getMetadata().getName(), read.getMetadata().getName());
+    }
   }
 
   @Test
-  public void saveMetadata() {}
+  public void saveMetadata() throws IOException {
+    ImageSpecMetadata metadata = imageSpec.getMetadata();
+    File saveMetadata = generator.saveMetadata(definitions, metadata, outputFolder);
+    assertNotNull(saveMetadata);
+    assertTrue(saveMetadata.exists());
+
+    try (FileInputStream fis = new FileInputStream(saveMetadata)) {
+      ImageSpecMetadata read =
+          GSON.fromJson(
+              new String(fis.readAllBytes(), StandardCharsets.UTF_8), ImageSpecMetadata.class);
+      assertEquals(metadata.getName(), read.getName());
+    }
+  }
 
   @Test
-  public void saveCommandSpec() {}
+  public void saveCommandSpec() throws IOException {
+    File spec = generator.saveCommandSpec(definitions, outputFolder);
+    assertNotNull(spec);
+    assertTrue(spec.exists());
+
+    try (FileInputStream fis = new FileInputStream(spec)) {
+      String specString = new String(fis.readAllBytes(), StandardCharsets.UTF_8);
+      assertTrue(specString.contains(definitions.getTemplateClass().getName()));
+    }
+  }
 
   @Test
-  public void getTemplateNameDash() {}
+  public void getTemplateNameDash() {
+    assertEquals("cloud-pubsub-to-text", generator.getTemplateNameDash("Cloud PubSub to Text"));
+    assertEquals("cloud-pubsub-to-text", generator.getTemplateNameDash("Cloud_PubSub_to_Text"));
+  }
 }
