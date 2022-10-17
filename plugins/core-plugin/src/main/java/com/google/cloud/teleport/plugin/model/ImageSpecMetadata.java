@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /** Image Spec Metadata, which needs to be generated to expose UI parameters. */
 public class ImageSpecMetadata {
@@ -67,5 +68,9 @@ public class ImageSpecMetadata {
 
   public void setRuntimeParameters(Map<String, String> runtimeParameters) {
     this.runtimeParameters = runtimeParameters;
+  }
+
+  public Optional<ImageSpecParameter> getParameter(String name) {
+    return parameters.stream().filter(parameter -> parameter.getName().equals(name)).findFirst();
   }
 }

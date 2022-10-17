@@ -55,6 +55,7 @@ public class TemplateDefinitions {
         TemplateParameter.KmsEncryptionKey.class,
         TemplateParameter.Long.class,
         TemplateParameter.Password.class,
+        TemplateParameter.ProjectId.class,
         TemplateParameter.PubsubSubscription.class,
         TemplateParameter.PubsubTopic.class,
         TemplateParameter.Text.class
