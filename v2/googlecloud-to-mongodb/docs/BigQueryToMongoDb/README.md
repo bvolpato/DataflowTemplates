@@ -46,7 +46,7 @@ export INPUT_TABLE_SPEC=<input table spec>
 
 * Build and push image to Google Container Repository
 ```sh
-mvn clean package -Dimage=${TARGET_GCR_IMAGE} \
+mvn clean install -Dimage=${TARGET_GCR_IMAGE} \
                   -Dbase-container-image=${BASE_CONTAINER_IMAGE} \
                   -Dbase-container-image.version=${BASE_CONTAINER_IMAGE_VERSION} \
                   -Dapp-root=${APP_ROOT} \

@@ -40,7 +40,7 @@ export IMAGE_SPEC_GCSPATH="$BUCKET/images/$COMMAND_MODULE-image-spec.json"
 **Build and push image to Google Container Repository from the DataflowTemplates directory.**
 
 ```sh
-mvn clean package -f unified-templates.xml \
+mvn clean install -f unified-templates.xml \
     -Dimage="$TARGET_GCR_IMAGE" \
     -Dbase-container-image="$BASE_CONTAINER_IMAGE" \
     -Dbase-container-image.version="$BASE_CONTAINER_IMAGE_VERSION" \

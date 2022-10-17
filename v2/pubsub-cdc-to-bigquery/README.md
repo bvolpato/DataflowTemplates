@@ -40,7 +40,7 @@ gcloud config set project ${PROJECT}
 * Build and push image to Google Container Repository
 
 ```sh
-mvn clean package \
+mvn clean install \
 -Dimage=${TARGET_GCR_IMAGE} \
 -Dbase-container-image=${BASE_CONTAINER_IMAGE} \
 -Dbase-container-image.version=${BASE_CONTAINER_IMAGE_VERSION} \

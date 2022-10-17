@@ -576,7 +576,7 @@ export BASE_CONTAINER_IMAGE_VERSION=latest
 export APP_ROOT="/template/$MODULE_NAME"
 export COMMAND_SPEC="$APP_ROOT/resources/$MODULE_NAME-command-spec.json"
 
-mvn clean package -f unified-templates.xml -pl "v2/$MODULE_NAME" -am \
+mvn clean install -f unified-templates.xml -pl "v2/$MODULE_NAME" -am \
   -Dimage="$TARGET_GCR_IMAGE" \
   -Dbase-container-image="$BASE_CONTAINER_IMAGE" \
   -Dbase-container-image.version="$BASE_CONTAINER_IMAGE_VERSION" \

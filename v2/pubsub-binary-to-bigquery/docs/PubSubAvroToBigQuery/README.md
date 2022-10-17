@@ -64,7 +64,7 @@ export COMMAND_SPEC=${APP_ROOT}/resources/pubsub-avro-to-bigquery-command-spec.j
 __Build and push image to Google Container Repository__
 
 ```sh
-mvn clean package -Dimage=${TARGET_GCR_IMAGE} \
+mvn clean install -Dimage=${TARGET_GCR_IMAGE} \
                   -Dbase-container-image=${BASE_CONTAINER_IMAGE} \
                   -Dbase-container-image.version=${BASE_CONTAINER_IMAGE_VERSION} \
                   -Dapp-root=${APP_ROOT} \

@@ -133,7 +133,7 @@ gcloud config set project ${PROJECT}
 * Execute the following command from the directory containing the root pom.xml:
 
 ```sh
-mvn -DskipTests=true clean package \
+mvn -DskipTests=true clean install \
     -f unified-templates.xml \
     -pl v2/${TEMPLATE_POM_MODULE} \
     -am \
