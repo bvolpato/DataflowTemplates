@@ -65,9 +65,8 @@ public final class AvroToBigtable {
 
   /** Options for the import pipeline. */
   public interface Options extends PipelineOptions {
-    @TemplateParameter.Text(
+    @TemplateParameter.ProjectId(
         order = 1,
-        regexes = {"^([a-z0-9\\.]+:)?[a-z0-9][a-z0-9-]{5,29}$"},
         description = "Project ID",
         helpText =
             "The ID of the Google Cloud project of the Cloud Bigtable instance that you want to write data to")
@@ -95,7 +94,7 @@ public final class AvroToBigtable {
         order = 4,
         regexes = {"[_a-zA-Z0-9][-_.a-zA-Z0-9]*"},
         description = "Table ID",
-        helpText = "The ID of the Cloud Bigtable table to import")
+        helpText = "The ID of the Cloud Bigtable table to write")
     ValueProvider<String> getBigtableTableId();
 
     @SuppressWarnings("unused")

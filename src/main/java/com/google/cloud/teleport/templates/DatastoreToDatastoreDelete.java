@@ -38,7 +38,13 @@ import org.apache.beam.sdk.options.ValueProvider;
     description =
         "A pipeline which reads in Entities (via a GQL query) from Datastore, optionally passes in the JSON encoded Entities to a JavaScript UDF, and then deletes all matching Entities in the selected target project.",
     optionsClass = DatastoreToDatastoreDeleteOptions.class,
-    skipOptions = {"firestoreReadGqlQuery", "firestoreReadProjectId", "firestoreReadNamespace"},
+    skipOptions = {
+      "firestoreReadGqlQuery",
+      "firestoreReadProjectId",
+      "firestoreReadNamespace",
+      "firestoreDeleteProjectId",
+      "firestoreHintNumWorkers"
+    },
     contactInformation = "https://cloud.google.com/support")
 @Template(
     name = "Firestore_to_Firestore_Delete",
@@ -47,7 +53,13 @@ import org.apache.beam.sdk.options.ValueProvider;
     description =
         "A pipeline which reads in Entities (via a GQL query) from Firestore, optionally passes in the JSON encoded Entities to a JavaScript UDF, and then deletes all matching Entities in the selected target project.",
     optionsClass = DatastoreToDatastoreDeleteOptions.class,
-    skipOptions = {"datastoreReadGqlQuery", "datastoreReadProjectId", "datastoreReadNamespace"},
+    skipOptions = {
+      "datastoreReadGqlQuery",
+      "datastoreReadProjectId",
+      "datastoreReadNamespace",
+      "datastoreDeleteProjectId",
+      "datastoreHintNumWorkers"
+    },
     contactInformation = "https://cloud.google.com/support")
 public class DatastoreToDatastoreDelete {
 

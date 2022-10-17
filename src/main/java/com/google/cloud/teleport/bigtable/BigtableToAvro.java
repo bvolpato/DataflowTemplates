@@ -60,12 +60,11 @@ public class BigtableToAvro {
 
   /** Options for the export pipeline. */
   public interface Options extends PipelineOptions {
-    @TemplateParameter.Text(
+    @TemplateParameter.ProjectId(
         order = 1,
-        regexes = {"[a-z0-9\\-\\.\\:]+"},
         description = "Project ID",
         helpText =
-            "The ID of the Google Cloud project of the Cloud Bigtable instance that you want to write data to")
+            "The ID of the Google Cloud project of the Cloud Bigtable instance that you want to read data from")
     ValueProvider<String> getBigtableProjectId();
 
     @SuppressWarnings("unused")
@@ -85,7 +84,7 @@ public class BigtableToAvro {
         order = 3,
         regexes = {"[_a-zA-Z0-9][-_.a-zA-Z0-9]*"},
         description = "Table ID",
-        helpText = "The ID of the Cloud Bigtable table to import")
+        helpText = "The ID of the Cloud Bigtable table to read")
     ValueProvider<String> getBigtableTableId();
 
     @SuppressWarnings("unused")

@@ -238,7 +238,7 @@ public class BigQueryConverters {
         order = 3,
         optional = true,
         regexes = {"^.+$"},
-        description = "JDBC source SQL query.",
+        description = "Input SQL query.",
         helpText = "Query to be executed on the source to extract the data.",
         example = "select * from sampledb.sample_table")
     String getQuery();
@@ -249,8 +249,7 @@ public class BigQueryConverters {
         order = 4,
         optional = true,
         description = "Set to true to use legacy SQL",
-        helpText =
-            "Set to true to use legacy SQL (only applicable if supplying query). Default: false")
+        helpText = "Set to true to use legacy SQL (only applicable if supplying query).")
     @Default.Boolean(false)
     Boolean getUseLegacySql();
 

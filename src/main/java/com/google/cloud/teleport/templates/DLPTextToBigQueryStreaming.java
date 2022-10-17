@@ -353,9 +353,8 @@ public class DLPTextToBigQueryStreaming {
 
     void setDatasetName(ValueProvider<String> value);
 
-    @TemplateParameter.Text(
+    @TemplateParameter.ProjectId(
         order = 6,
-        regexes = {"^([a-z0-9\\.]+:)?[a-z0-9][a-z0-9-]{5,29}$"},
         description = "Cloud DLP project ID",
         helpText =
             "Cloud DLP project ID to be used for data masking/tokenization. Ex. your-dlp-project")

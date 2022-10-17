@@ -193,7 +193,7 @@ public class CsvConverters {
         optional = true,
         description = "Input CSV files contain a header record.",
         helpText =
-            "Input CSV files contain a header record (true/false). Default: false. Only required if reading csv files.")
+            "Input CSV files contain a header record (true/false). Only required if reading CSV files.")
     @Default.Boolean(false)
     Boolean getContainsHeaders();
 
@@ -214,7 +214,8 @@ public class CsvConverters {
         optional = true,
         description = "Column delimiter of the data files.",
         helpText =
-            "The column delimiter of the input text files. Default: use delimiter provided in csvFormat")
+            "The column delimiter of the input text files. Default: use delimiter provided in csvFormat",
+        example = ",")
     @Default.InstanceFactory(DelimiterFactory.class)
     String getDelimiter();
 
@@ -246,7 +247,7 @@ public class CsvConverters {
         order = 7,
         optional = true,
         description = "Set to true if number of files is in the tens of thousands",
-        helpText = "Set to true if number of files is in the tens of thousands. Default: false")
+        helpText = "Set to true if number of files is in the tens of thousands.")
     @Default.Boolean(false)
     Boolean getLargeNumFiles();
 
@@ -258,8 +259,8 @@ public class CsvConverters {
         regexes = {"^(US-ASCII|ISO-8859-1|UTF-8|UTF-16)$"},
         description = "CSV file encoding",
         helpText =
-            "CSV file character encoding format. Default: UTF-8. Allowed Values are US-ASCII"
-                + ",ISO-8859-1,UTF-8,UTF-16")
+            "CSV file character encoding format. Allowed Values are US-ASCII"
+                + ", ISO-8859-1, UTF-8, UTF-16")
     @Default.String("UTF-8")
     String getCsvFileEncoding();
 

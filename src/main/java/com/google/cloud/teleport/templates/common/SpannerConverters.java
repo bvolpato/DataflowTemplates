@@ -85,9 +85,8 @@ public class SpannerConverters {
     @SuppressWarnings("unused")
     void setSpannerTable(ValueProvider<String> table);
 
-    @TemplateParameter.Text(
+    @TemplateParameter.ProjectId(
         order = 2,
-        regexes = {"^([a-z0-9\\.]+:)?[a-z0-9][a-z0-9-]{5,29}$"},
         description = "Read data from Cloud Spanner Project Id",
         helpText =
             "The Google Cloud Project Id of the Cloud Spanner database that you want to read data from")

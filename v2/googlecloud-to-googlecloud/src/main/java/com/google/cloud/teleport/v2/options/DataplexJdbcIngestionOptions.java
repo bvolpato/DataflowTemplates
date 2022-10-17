@@ -163,8 +163,7 @@ public interface DataplexJdbcIngestionOptions
       enumOptions = {"DAILY", "HOURLY", "MONTHLY"},
       optional = true,
       description = "The partition scheme when writing the file.",
-      helpText =
-          "The partition scheme when writing the file. Format: DAILY or MONTHLY or HOURLY. Default: DAILY.")
+      helpText = "The partition scheme when writing the file. Format: DAILY or MONTHLY or HOURLY.")
   @Default.Enum("DAILY")
   PartitioningSchema getPartitioningScheme();
 
@@ -186,7 +185,7 @@ public interface DataplexJdbcIngestionOptions
       optional = true,
       description = "BigQuery write disposition type",
       helpText =
-          "Strategy to employ if the target file/table exists. If the table exists - should it overwrite/append or fail the load. Format: WRITE_APPEND or WRITE_TRUNCATE or WRITE_EMPTY. Default: WRITE_APPEND. Only supported for writing to BigQuery.")
+          "Strategy to employ if the target file/table exists. If the table exists - should it overwrite/append or fail the load. Format: WRITE_APPEND or WRITE_TRUNCATE or WRITE_EMPTY. Only supported for writing to BigQuery.")
   @Default.Enum("WRITE_EMPTY")
   WriteDispositionOptions getWriteDisposition();
 
@@ -197,7 +196,7 @@ public interface DataplexJdbcIngestionOptions
       enumOptions = {"AVRO", "PARQUET"},
       optional = true,
       description = "Output file format in Cloud Storage.",
-      helpText = "Output file format in Cloud Storage. Format: PARQUET or AVRO. Default: PARQUET.")
+      helpText = "Output file format in Cloud Storage. Format: PARQUET or AVRO.")
   @Default.Enum("PARQUET")
   FileFormatOptions getFileFormat();
 

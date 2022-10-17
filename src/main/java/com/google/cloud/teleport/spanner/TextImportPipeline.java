@@ -144,7 +144,8 @@ public class TextImportPipeline {
         order = 5,
         optional = true,
         description = "Column delimiter of the data files",
-        helpText = "The column delimiter of the input text files. Defaults to ','")
+        helpText = "The column delimiter of the input text files. Defaults to ','",
+        example = ",")
     @Default.Character(',')
     ValueProvider<Character> getColumnDelimiter();
 
@@ -227,11 +228,10 @@ public class TextImportPipeline {
 
     void setWaitUntilFinish(boolean value);
 
-    @TemplateParameter.Text(
+    @TemplateParameter.ProjectId(
         order = 13,
         optional = true,
-        regexes = {"[a-z][a-z0-9\\-]*[a-z0-9]"},
-        description = "Cloud Spanner project id",
+        description = "Cloud Spanner Project Id",
         helpText = "The project id of the Cloud Spanner instance.")
     ValueProvider<String> getSpannerProjectId();
 

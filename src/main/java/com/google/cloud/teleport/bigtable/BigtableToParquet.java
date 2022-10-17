@@ -62,9 +62,8 @@ public class BigtableToParquet {
   /** Options for the export pipeline. */
   public interface Options extends PipelineOptions {
 
-    @TemplateParameter.Text(
+    @TemplateParameter.ProjectId(
         order = 1,
-        regexes = {"[a-z0-9\\-\\.\\:]+"},
         description = "Project ID",
         helpText =
             "The ID of the Google Cloud project of the Cloud Bigtable instance that you want to read data from")

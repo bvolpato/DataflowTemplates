@@ -18,6 +18,7 @@ package com.google.cloud.teleport.templates;
 import com.google.cloud.bigtable.beam.sequencefiles.ImportJob;
 import com.google.cloud.teleport.metadata.Template;
 import com.google.cloud.teleport.metadata.TemplateCategory;
+import com.google.cloud.teleport.metadata.TemplateCreationParameter;
 import com.google.cloud.teleport.metadata.TemplateParameter;
 import com.google.cloud.teleport.templates.ImportJobPlaceholder.ImportJobPlaceholderOptions;
 import org.apache.beam.sdk.options.Default;
@@ -40,9 +41,8 @@ public class ImportJobPlaceholder {
   /** Options class for the ImportJob pipeline. */
   protected interface ImportJobPlaceholderOptions {
 
-    @TemplateParameter.Text(
+    @TemplateParameter.ProjectId(
         order = 1,
-        regexes = {"^([a-z0-9\\.]+:)?[a-z0-9][a-z0-9-]{5,29}$"},
         description = "Project ID",
         helpText =
             "The ID of the Google Cloud project of the Cloud Bigtable instance that you want to write data to. Defaults to --project.")
@@ -82,6 +82,7 @@ public class ImportJobPlaceholder {
     @Integer(0)
     ValueProvider<java.lang.Integer> getMutationThrottleLatencyMs();
 
+    @TemplateCreationParameter(name = "wait", value = "false")
     @Description("Wait for pipeline to finish.")
     @Default.Boolean(false)
     boolean getWait();

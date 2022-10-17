@@ -35,7 +35,7 @@ public interface KafkaToGCSOptions
 
   @TemplateParameter.Text(
       order = 1,
-      optional = true,
+      optional = false,
       regexes = {"[,:a-zA-Z0-9._-]+"},
       description = "Kafka Bootstrap Server list",
       helpText = "Kafka Bootstrap Server list, separated by commas.",

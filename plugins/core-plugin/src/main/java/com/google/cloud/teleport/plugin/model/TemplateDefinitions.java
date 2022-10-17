@@ -16,16 +16,19 @@
 package com.google.cloud.teleport.plugin.model;
 
 import com.google.cloud.teleport.metadata.Template;
+import com.google.cloud.teleport.metadata.TemplateCreationParameter;
 import com.google.cloud.teleport.metadata.TemplateParameter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.beam.repackaged.core.org.apache.commons.lang3.StringUtils;
+import org.apache.beam.sdk.options.Default;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,6 +138,8 @@ public class TemplateDefinitions {
 
     classOrder.putIfAbsent(optionsClass, order++);
 
+    Set<String> parameterNames = new HashSet<>();
+
     Method[] methods = optionsClass.getMethods();
     for (Method method : methods) {
       method.setAccessible(true);
@@ -143,6 +148,13 @@ public class TemplateDefinitions {
 
       Annotation parameterAnnotation = getParameterAnnotation(method);
       if (parameterAnnotation == null) {
+
+        TemplateCreationParameter creationParameter =
+            method.getAnnotation(TemplateCreationParameter.class);
+        if (creationParameter != null) {
+          metadata.getRuntimeParameters().put(creationParameter.name(), creationParameter.value());
+          continue;
+        }
 
         // Ignore non-annotated params in this criteria
         if (method.getName().startsWith("set")
@@ -179,6 +191,16 @@ public class TemplateDefinitions {
           StringUtils.uncapitalize(method.getDefiningMethod().getName().replaceFirst("^get", "")));
       parameter.processParamType(parameterAnnotation);
 
+      Object defaultValue = getDefault(method.getDefiningMethod());
+      String helpText = parameter.getHelpText();
+      if (defaultValue != null && !helpText.toLowerCase().contains("default")) {
+        if (!helpText.endsWith(".")) {
+          helpText += ".";
+        }
+        helpText += " Defaults to: " + defaultValue;
+        parameter.setHelpText(helpText);
+      }
+
       if (!method.getDefiningMethod().getName().equalsIgnoreCase("get" + parameter.getName())) {
         LOG.warn(
             "Name for the method and annotation do not match! {} vs {}",
@@ -190,12 +212,54 @@ public class TemplateDefinitions {
         continue;
       }
 
-      metadata.getParameters().add(parameter);
+      if (parameterNames.add(parameter.getName())) {
+        metadata.getParameters().add(parameter);
+      } else {
+        LOG.warn(
+            "Parameter {} was already added for the Template {}, skipping repetition.",
+            templateAnnotation.name());
+      }
     }
 
     imageSpec.setMetadata(metadata);
 
     return imageSpec;
+  }
+
+  private Object getDefault(Method definingMethod) {
+
+    if (definingMethod.getAnnotation(Default.String.class) != null) {
+      return definingMethod.getAnnotation(Default.String.class).value();
+    }
+    if (definingMethod.getAnnotation(Default.Boolean.class) != null) {
+      return definingMethod.getAnnotation(Default.Boolean.class).value();
+    }
+    if (definingMethod.getAnnotation(Default.Character.class) != null) {
+      return definingMethod.getAnnotation(Default.Character.class).value();
+    }
+    if (definingMethod.getAnnotation(Default.Byte.class) != null) {
+      return definingMethod.getAnnotation(Default.Byte.class).value();
+    }
+    if (definingMethod.getAnnotation(Default.Short.class) != null) {
+      return definingMethod.getAnnotation(Default.Short.class).value();
+    }
+    if (definingMethod.getAnnotation(Default.Integer.class) != null) {
+      return definingMethod.getAnnotation(Default.Integer.class).value();
+    }
+    if (definingMethod.getAnnotation(Default.Long.class) != null) {
+      return definingMethod.getAnnotation(Default.Long.class).value();
+    }
+    if (definingMethod.getAnnotation(Default.Float.class) != null) {
+      return definingMethod.getAnnotation(Default.Float.class).value();
+    }
+    if (definingMethod.getAnnotation(Default.Double.class) != null) {
+      return definingMethod.getAnnotation(Default.Double.class).value();
+    }
+    if (definingMethod.getAnnotation(Default.Enum.class) != null) {
+      return definingMethod.getAnnotation(Default.Enum.class).value();
+    }
+
+    return null;
   }
 
   public Annotation getParameterAnnotation(Method method) {
@@ -205,14 +269,6 @@ public class TemplateDefinitions {
         return method.getAnnotation(annotation);
       }
     }
-    // Annotation[] annotations = method.getAnnotations();
-    //
-    // for (Annotation annotation : annotations) {
-    //   if (annotation.annotationType().getName().contains("TemplateParameter")
-    //       || annotation.getClass().getName().contains("TemplateParameter")) {
-    //     return annotation;
-    //   }
-    // }
 
     return null;
   }

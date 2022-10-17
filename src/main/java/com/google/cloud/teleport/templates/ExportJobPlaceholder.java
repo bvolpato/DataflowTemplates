@@ -18,6 +18,7 @@ package com.google.cloud.teleport.templates;
 import com.google.cloud.bigtable.beam.sequencefiles.ExportJob;
 import com.google.cloud.teleport.metadata.Template;
 import com.google.cloud.teleport.metadata.TemplateCategory;
+import com.google.cloud.teleport.metadata.TemplateCreationParameter;
 import com.google.cloud.teleport.metadata.TemplateParameter;
 import com.google.cloud.teleport.templates.ExportJobPlaceholder.ExportJobPlaceholderOptions;
 import org.apache.beam.sdk.options.Default;
@@ -40,9 +41,8 @@ public class ExportJobPlaceholder {
   /** Options class for the ExportJob pipeline. */
   protected interface ExportJobPlaceholderOptions {
 
-    @TemplateParameter.Text(
+    @TemplateParameter.ProjectId(
         order = 1,
-        regexes = {"^([a-z0-9\\.]+:)?[a-z0-9][a-z0-9-]{5,29}$"},
         description = "Project ID",
         helpText =
             "The ID of the Google Cloud project of the Cloud Bigtable instance that you want to read data from. Defaults to job project.")
@@ -101,6 +101,7 @@ public class ExportJobPlaceholder {
     @Default.String("part")
     ValueProvider<String> getFilenamePrefix();
 
+    @TemplateCreationParameter(name = "wait", value = "false")
     @Description("Wait for pipeline to finish.")
     @Default.Boolean(false)
     boolean getWait();

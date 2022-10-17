@@ -33,7 +33,7 @@ public interface SpannerChangeStreamsToGcsOptions
         WriteDataChangeRecordsToGcsAvro.WriteToGcsAvroOptions,
         WriteDataChangeRecordsToGcsText.WriteToGcsTextOptions {
 
-  @TemplateParameter.Text(
+  @TemplateParameter.ProjectId(
       order = 1,
       optional = true,
       description = "Spanner Project ID",
@@ -172,7 +172,7 @@ public interface SpannerChangeStreamsToGcsOptions
       optional = true,
       description = "Priority for Spanner RPC invocations",
       helpText =
-          "The request priority for Cloud Spanner calls. The value must be one of: [HIGH,MEDIUM,LOW]. Default: HIGH.")
+          "The request priority for Cloud Spanner calls. The value must be one of: [HIGH,MEDIUM,LOW].")
   @Default.Enum("HIGH")
   RpcPriority getRpcPriority();
 

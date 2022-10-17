@@ -218,7 +218,7 @@ public interface ElasticsearchWriteOptions extends PipelineOptions {
       optional = true,
       description = "Use partial updates",
       helpText =
-          "Whether to use partial updates (update rather than create or index, allowing partial docs) with Elasticsearch requests. Default: false.")
+          "Whether to use partial updates (update rather than create or index, allowing partial docs) with Elasticsearch requests.")
   @Default.Boolean(false)
   Boolean getUsePartialUpdate();
 

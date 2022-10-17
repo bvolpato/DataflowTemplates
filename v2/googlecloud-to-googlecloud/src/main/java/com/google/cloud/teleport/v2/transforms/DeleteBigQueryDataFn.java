@@ -169,7 +169,7 @@ public class DeleteBigQueryDataFn extends DoFn<KV<BigQueryTable, BigQueryTablePa
         optional = true,
         description = "Delete source data from BigQuery.",
         helpText =
-            "Whether to delete source data from BigQuery after a successful export. Format: true or false. Default: false.")
+            "Whether to delete source data from BigQuery after a successful export. Format: true or false.")
     @Default.Boolean(false)
     @Required
     Boolean getDeleteSourceData();

@@ -202,10 +202,10 @@ public class DataStreamToBigQuery {
 
     void setFileReadConcurrency(Integer value);
 
-    @TemplateParameter.Text(
+    @TemplateParameter.ProjectId(
         order = 6,
         optional = true,
-        description = "Project name for BigQuery datasets.",
+        description = "Project Id for BigQuery datasets.",
         helpText =
             "Project for BigQuery datasets to output data into. The default for this parameter "
                 + "is the project where the Dataflow pipeline is running.")
@@ -300,7 +300,7 @@ public class DataStreamToBigQuery {
         order = 14,
         optional = true,
         description = "The number of minutes between DLQ Retries.",
-        helpText = "The number of minutes between DLQ Retries. Default: 10")
+        helpText = "The number of minutes between DLQ Retries.")
     @Default.Integer(10)
     Integer getDlqRetryMinutes();
 

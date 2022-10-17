@@ -83,7 +83,7 @@ public class ParquetConverters {
         order = 5,
         optional = true,
         description = "Output file prefix.",
-        helpText = "The prefix of the files to write to. Default: output")
+        helpText = "The prefix of the files to write to.")
     @Default.String("output")
     String getOutputFilePrefix();
 

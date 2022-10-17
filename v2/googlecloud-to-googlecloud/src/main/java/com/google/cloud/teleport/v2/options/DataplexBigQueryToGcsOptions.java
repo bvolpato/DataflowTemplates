@@ -90,7 +90,7 @@ public interface DataplexBigQueryToGcsOptions
 
   @Description(
       "The maximum number of parallel requests that will be sent to BigQuery when loading"
-          + " table/partition metadata. Default: 5.")
+          + " table/partition metadata.")
   @Default.Integer(5)
   @Required
   Integer getMaxParallelBigQueryMetadataRequests();
@@ -102,7 +102,7 @@ public interface DataplexBigQueryToGcsOptions
       enumOptions = {"AVRO", "PARQUET"},
       optional = true,
       description = "Output file format in Cloud Storage.",
-      helpText = "Output file format in Cloud Storage. Format: PARQUET or AVRO. Default: PARQUET.")
+      helpText = "Output file format in Cloud Storage. Format: PARQUET or AVRO.")
   @Default.Enum("PARQUET")
   @Required
   FileFormatOptions getFileFormat();
@@ -115,7 +115,7 @@ public interface DataplexBigQueryToGcsOptions
       optional = true,
       description = "Output file compression in Cloud Storage.",
       helpText =
-          "Output file compression. Format: UNCOMPRESSED, SNAPPY, GZIP, or BZIP2. Default: SNAPPY. BZIP2 not supported for PARQUET files.")
+          "Output file compression. Format: UNCOMPRESSED, SNAPPY, GZIP, or BZIP2. BZIP2 not supported for PARQUET files.")
   @Default.Enum("SNAPPY")
   DataplexCompression getFileCompression();
 
@@ -137,7 +137,7 @@ public interface DataplexBigQueryToGcsOptions
       optional = true,
       description = "Action that occurs if a destination file already exists.",
       helpText =
-          "Specifies the action that occurs if a destination file already exists. Format: OVERWRITE, FAIL, SKIP. Default: SKIP. If SKIP, only files that don't exist in the destination directory will be processed. If FAIL and at least one file already exists, no data will be processed and an error will be produced.")
+          "Specifies the action that occurs if a destination file already exists. Format: OVERWRITE, FAIL, SKIP. If SKIP, only files that don't exist in the destination directory will be processed. If FAIL and at least one file already exists, no data will be processed and an error will be produced.")
   @Default.Enum("SKIP")
   WriteDispositionOptions getWriteDisposition();
 

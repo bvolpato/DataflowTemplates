@@ -72,6 +72,29 @@ public final class TemplateParameter {
     String example() default "";
   }
 
+  /** Template Parameter containing a project ID. */
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.FIELD, ElementType.METHOD})
+  public @interface ProjectId {
+    /** Order of appearance. */
+    int order() default 999;
+
+    /** Name of the parameter. */
+    String name() default "";
+
+    /** If parameter is optional. */
+    boolean optional() default false;
+
+    /** Description of the parameter. */
+    String description();
+
+    /** Help text of the parameter. */
+    String helpText();
+
+    /** Example of the parameter. */
+    String example() default "";
+  }
+
   /** Template Parameter containing enum options. */
   @Retention(RetentionPolicy.RUNTIME)
   @Target({ElementType.FIELD, ElementType.METHOD})

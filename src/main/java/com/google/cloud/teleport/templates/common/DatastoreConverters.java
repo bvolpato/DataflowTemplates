@@ -77,9 +77,8 @@ public class DatastoreConverters {
     void setDatastoreReadGqlQuery(ValueProvider<String> datastoreReadGqlQuery);
 
     /** @deprecated Please use getFirestoreReadProjectId() instead. */
-    @TemplateParameter.Text(
+    @TemplateParameter.ProjectId(
         order = 2,
-        regexes = {"^([a-z0-9\\.]+:)?[a-z0-9][a-z0-9-]{5,29}$"},
         description = "Project ID",
         helpText = "The Google Cloud project ID of the Datastore instance to read from")
     @Hidden
@@ -116,9 +115,8 @@ public class DatastoreConverters {
 
     void setFirestoreReadGqlQuery(ValueProvider<String> firestoreReadGqlQuery);
 
-    @TemplateParameter.Text(
+    @TemplateParameter.ProjectId(
         order = 5,
-        regexes = {"^([a-z0-9\\.]+:)?[a-z0-9][a-z0-9-]{5,29}$"},
         description = "Project ID",
         helpText = "The Google Cloud project ID of the Firestore instance to read from")
     ValueProvider<String> getFirestoreReadProjectId();
@@ -140,9 +138,8 @@ public class DatastoreConverters {
   /** Options for writing Datastore Entities. */
   public interface DatastoreWriteOptions extends PipelineOptions {
     /** @deprecated Please use getFirestoreWriteProjectId() instead. */
-    @TemplateParameter.Text(
+    @TemplateParameter.ProjectId(
         order = 1,
-        regexes = {"^([a-z0-9\\.]+:)?[a-z0-9][a-z0-9-]{5,29}$"},
         description = "Project ID",
         helpText = "The Google Cloud project ID of where to write Datastore entities")
     @Hidden
@@ -192,7 +189,7 @@ public class DatastoreConverters {
         regexes = {"^[1-9]+[0-9]*$"},
         description = "Expected number of workers",
         helpText =
-            "Hint for the expected number of workers in the Datastore ramp-up throttling step. Default: 500.")
+            "Hint for the expected number of workers in the Datastore ramp-up throttling step.")
     @Default.Integer(500)
     @Hidden
     @Deprecated
@@ -203,9 +200,8 @@ public class DatastoreConverters {
     @Deprecated
     void setDatastoreHintNumWorkers(ValueProvider<Integer> value);
 
-    @TemplateParameter.Text(
+    @TemplateParameter.ProjectId(
         order = 5,
-        regexes = {"^([a-z0-9\\.]+:)?[a-z0-9][a-z0-9-]{5,29}$"},
         description = "Project ID",
         helpText = "The Google Cloud project ID of where to write Firestore entities")
     ValueProvider<String> getFirestoreWriteProjectId();
@@ -231,13 +227,13 @@ public class DatastoreConverters {
 
     void setFirestoreWriteNamespace(ValueProvider<String> value);
 
-    @TemplateParameter.Text(
+    @TemplateParameter.Integer(
         order = 8,
         optional = true,
-        regexes = {"^[1-9]+[0-9]*$"},
         description = "Expected number of workers",
         helpText =
             "Hint for the expected number of workers in the Firestore ramp-up throttling step. Default: 500.")
+    @Default.Integer(500)
     ValueProvider<Integer> getFirestoreHintNumWorkers();
 
     void setFirestoreHintNumWorkers(ValueProvider<Integer> value);
@@ -246,9 +242,8 @@ public class DatastoreConverters {
   /** Options for deleting Datastore Entities. */
   public interface DatastoreDeleteOptions extends PipelineOptions {
     /** @deprecated Please use getFirestoreDeleteProjectId() instead. */
-    @TemplateParameter.Text(
+    @TemplateParameter.ProjectId(
         order = 1,
-        regexes = {"^([a-z0-9\\.]+:)?[a-z0-9][a-z0-9-]{5,29}$"},
         description =
             "Delete all matching entities from the GQL Query present in this Datastore Project Id of",
         helpText = "Google Cloud Project Id of where to delete the datastore entities")
@@ -268,7 +263,7 @@ public class DatastoreConverters {
         regexes = {"^[1-9][0-9]*$"},
         description = "Expected number of workers",
         helpText =
-            "Hint for the expected number of workers in the Datastore ramp-up throttling step. Default: 500.")
+            "Hint for the expected number of workers in the Datastore ramp-up throttling step.")
     @Default.Integer(500)
     @Hidden
     @Deprecated
@@ -279,9 +274,8 @@ public class DatastoreConverters {
     @Deprecated
     void setDatastoreHintNumWorkers(ValueProvider<Integer> value);
 
-    @TemplateParameter.Text(
+    @TemplateParameter.ProjectId(
         order = 3,
-        regexes = {"^([a-z0-9\\.]+:)?[a-z0-9][a-z0-9-]{5,29}$"},
         description =
             "Delete all matching entities from the GQL Query present in this Firestore Project Id of",
         helpText = "Google Cloud Project Id of where to delete the firestore entities")
@@ -289,13 +283,12 @@ public class DatastoreConverters {
 
     void setFirestoreDeleteProjectId(ValueProvider<String> firestoreDeleteProjectId);
 
-    @TemplateParameter.Text(
+    @TemplateParameter.Integer(
         order = 4,
         optional = true,
-        regexes = {"^[1-9][0-9]*$"},
         description = "Expected number of workers",
         helpText =
-            "Hint for the expected number of workers in the Firestore ramp-up throttling step. Default: 500.")
+            "Hint for the expected number of workers in the Firestore ramp-up throttling step.")
     @Default.Integer(500)
     ValueProvider<Integer> getFirestoreHintNumWorkers();
 

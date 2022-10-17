@@ -111,9 +111,8 @@ final class CassandraToBigtable {
     @SuppressWarnings("unused")
     void setCassandraTable(ValueProvider<String> cassandraTable);
 
-    @TemplateParameter.Text(
+    @TemplateParameter.ProjectId(
         order = 5,
-        regexes = {"^([a-z0-9\\.]+:)?[a-z0-9][a-z0-9-]{5,29}$"},
         description = "Bigtable Project ID",
         helpText = "The Project ID where the target Bigtable Instance is running.")
     ValueProvider<String> getBigtableProjectId();

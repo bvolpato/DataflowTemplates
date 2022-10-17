@@ -192,6 +192,19 @@ public class ImageSpecParameter {
         this.setOptional(passwordParam.optional());
         this.setParamType(ImageSpecParameterType.TEXT);
         break;
+      case "ProjectId":
+        TemplateParameter.ProjectId projectIdParam =
+            (TemplateParameter.ProjectId) parameterAnnotation;
+        if (!projectIdParam.name().isEmpty()) {
+          this.setName(projectIdParam.name());
+        }
+        processDescriptions(
+            projectIdParam.description(), projectIdParam.helpText(), projectIdParam.example());
+        this.setOptional(projectIdParam.optional());
+        // More specific? {"^([a-z0-9\\.]+:)?[a-z0-9][a-z0-9-]{5,29}$"}
+        this.setRegexes(List.of("[a-z0-9\\-\\.\\:]+"));
+        this.setParamType(ImageSpecParameterType.TEXT);
+        break;
       case "Boolean":
         TemplateParameter.Boolean booleanParam = (TemplateParameter.Boolean) parameterAnnotation;
         if (!booleanParam.name().isEmpty()) {
@@ -288,6 +301,8 @@ public class ImageSpecParameter {
         this.setParamType(ImageSpecParameterType.TEXT);
         this.setRegexes(List.of("^[1-9][0-9]*[s|m|h]$"));
         break;
+      default:
+        throw new IllegalArgumentException("Invalid type " + parameterAnnotation);
     }
   }
 

@@ -203,7 +203,7 @@ public class BigQueryToParquet {
 
     void setTableRef(String tableRef);
 
-    @TemplateParameter.GcsWriteFolder(
+    @TemplateParameter.GcsWriteFile(
         order = 2,
         description = "Output Cloud Storage file(s)",
         helpText = "Path and filename prefix for writing output files.",

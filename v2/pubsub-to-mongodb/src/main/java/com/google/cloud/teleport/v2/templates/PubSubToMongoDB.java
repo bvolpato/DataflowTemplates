@@ -200,7 +200,7 @@ public class PubSubToMongoDB {
         order = 6,
         optional = true,
         description = "Batch Size",
-        helpText = "Batch Size used for batch insertion of documents into MongoDB. Default: 1000")
+        helpText = "Batch Size used for batch insertion of documents into MongoDB.")
     @Default.Long(1000)
     Long getBatchSize();
 
@@ -231,7 +231,7 @@ public class PubSubToMongoDB {
         order = 9,
         optional = true,
         description = "SSL Enabled",
-        helpText = "Indicates whether connection to MongoDB is ssl enabled. Default: true")
+        helpText = "Indicates whether connection to MongoDB is ssl enabled.")
     @Default.Boolean(true)
     Boolean getSslEnabled();
 
@@ -241,7 +241,7 @@ public class PubSubToMongoDB {
         order = 10,
         optional = true,
         description = "Ignore SSL Certificate",
-        helpText = "Indicates whether SSL certificate should be ignored. Default: true")
+        helpText = "Indicates whether SSL certificate should be ignored.")
     @Default.Boolean(true)
     Boolean getIgnoreSSLCertificate();
 
@@ -251,7 +251,7 @@ public class PubSubToMongoDB {
         order = 11,
         optional = true,
         description = "withOrdered",
-        helpText = "Enables ordered bulk insertions into MongoDB. Default: true")
+        helpText = "Enables ordered bulk insertions into MongoDB.")
     @Default.Boolean(true)
     Boolean getWithOrdered();
 
@@ -261,8 +261,7 @@ public class PubSubToMongoDB {
         order = 12,
         optional = true,
         description = "withSSLInvalidHostNameAllowed",
-        helpText =
-            "Indicates whether invalid host name is allowed for ssl connection. Default: true")
+        helpText = "Indicates whether invalid host name is allowed for ssl connection.")
     @Default.Boolean(true)
     Boolean getWithSSLInvalidHostNameAllowed();
 

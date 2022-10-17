@@ -28,7 +28,7 @@ import org.apache.beam.sdk.options.Validation;
  */
 public interface SpannerChangeStreamsToBigQueryOptions extends DataflowPipelineOptions {
 
-  @TemplateParameter.Text(
+  @TemplateParameter.ProjectId(
       order = 1,
       optional = true,
       description = "Spanner Project ID",
@@ -105,7 +105,7 @@ public interface SpannerChangeStreamsToBigQueryOptions extends DataflowPipelineO
       optional = true,
       description = "Priority for Spanner RPC invocations",
       helpText =
-          "The request priority for Cloud Spanner calls. The value must be one of: [HIGH,MEDIUM,LOW]. Default: HIGH.")
+          "The request priority for Cloud Spanner calls. The value must be one of: [HIGH,MEDIUM,LOW].")
   @Default.Enum("HIGH")
   RpcPriority getRpcPriority();
 
@@ -156,7 +156,7 @@ public interface SpannerChangeStreamsToBigQueryOptions extends DataflowPipelineO
 
   void setBigQueryDataset(String value);
 
-  @TemplateParameter.Text(
+  @TemplateParameter.ProjectId(
       order = 13,
       optional = true,
       description = "BigQuery project ID",

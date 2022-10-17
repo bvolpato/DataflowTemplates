@@ -130,11 +130,10 @@ public class ImportPipeline {
     @Default.Boolean(true)
     boolean getWaitUntilFinish();
 
-    @TemplateParameter.Text(
+    @TemplateParameter.ProjectId(
         order = 9,
         optional = true,
-        regexes = {"[a-z][a-z0-9\\-]*[a-z0-9]"},
-        description = "Cloud Spanner project id",
+        description = "Cloud Spanner Project Id",
         helpText = "The project id of the Cloud Spanner instance.")
     ValueProvider<String> getSpannerProjectId();
 

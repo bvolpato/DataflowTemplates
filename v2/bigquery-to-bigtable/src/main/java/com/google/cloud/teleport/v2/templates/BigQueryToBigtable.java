@@ -66,9 +66,8 @@ public class BigQueryToBigtable {
 
     void setReadIdColumn(String value);
 
-    @TemplateParameter.Text(
+    @TemplateParameter.ProjectId(
         order = 3,
-        regexes = {"^([a-z0-9\\.]+:)?[a-z0-9][a-z0-9-]{5,29}$"},
         description = "Project ID",
         helpText =
             "The ID of the Google Cloud project of the Cloud Bigtable instance that you want to write data to")
@@ -101,7 +100,7 @@ public class BigQueryToBigtable {
         order = 6,
         regexes = {"[_a-zA-Z0-9][-_.a-zA-Z0-9]*"},
         description = "Table ID",
-        helpText = "The ID of the Cloud Bigtable table to import")
+        helpText = "The ID of the Cloud Bigtable table to write")
     @Required
     String getBigtableWriteTableId();
 

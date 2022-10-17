@@ -122,11 +122,10 @@ public class ExportPipeline {
 
     void setSnapshotTime(ValueProvider<String> value);
 
-    @TemplateParameter.Text(
+    @TemplateParameter.ProjectId(
         order = 8,
         optional = true,
-        regexes = {"[a-z][a-z0-9\\-]*[a-z0-9]"},
-        description = "Cloud Spanner project id",
+        description = "Cloud Spanner Project Id",
         helpText = "The project id of the Cloud Spanner instance.")
     ValueProvider<String> getSpannerProjectId();
 

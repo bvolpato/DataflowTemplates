@@ -16,7 +16,9 @@
 package com.google.cloud.teleport.plugin.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /** Image Spec Metadata, which needs to be generated to expose UI parameters. */
 public class ImageSpecMetadata {
@@ -25,6 +27,7 @@ public class ImageSpecMetadata {
   private String description;
   private String mainClass;
   private List<ImageSpecParameter> parameters = new ArrayList<>();
+  private Map<String, String> runtimeParameters = new HashMap<>();
 
   public String getDescription() {
     return description;
@@ -56,5 +59,13 @@ public class ImageSpecMetadata {
 
   public void setParameters(List<ImageSpecParameter> parameters) {
     this.parameters = parameters;
+  }
+
+  public Map<String, String> getRuntimeParameters() {
+    return runtimeParameters;
+  }
+
+  public void setRuntimeParameters(Map<String, String> runtimeParameters) {
+    this.runtimeParameters = runtimeParameters;
   }
 }

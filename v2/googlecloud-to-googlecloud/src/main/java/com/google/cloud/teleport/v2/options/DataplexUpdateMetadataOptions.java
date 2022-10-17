@@ -28,7 +28,7 @@ public interface DataplexUpdateMetadataOptions extends PipelineOptions {
       optional = true,
       description = "Update Dataplex metadata.",
       helpText =
-          "Whether to update Dataplex metadata for the newly created entities. Default: false. Only supported for Cloud Storage destination. If enabled, the pipeline will automatically copy the schema from source to the destination Dataplex entities, and the automated Dataplex Discovery won't run for them. Use this flag in cases where you have managed schema at the source.")
+          "Whether to update Dataplex metadata for the newly created entities. Only supported for Cloud Storage destination. If enabled, the pipeline will automatically copy the schema from source to the destination Dataplex entities, and the automated Dataplex Discovery won't run for them. Use this flag in cases where you have managed schema at the source.")
   @Default.Boolean(false)
   @Required
   Boolean getUpdateDataplexMetadata();

@@ -157,7 +157,7 @@ public class DataStreamToSpanner {
 
     void setDatabaseId(String value);
 
-    @TemplateParameter.Text(
+    @TemplateParameter.ProjectId(
         order = 6,
         optional = true,
         description = "Cloud Spanner Project Id.",

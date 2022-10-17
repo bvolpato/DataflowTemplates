@@ -162,7 +162,7 @@ public class StreamingDataGenerator {
         optional = true,
         description = "Maximum number of output Messages",
         helpText =
-            "Indicates maximum number of output messages to be generated. Default: 0 indicating Unlimited")
+            "Indicates maximum number of output messages to be generated. 0 means unlimited.")
     @Default.Long(0L)
     Long getMessagesLimit();
 
@@ -217,7 +217,7 @@ public class StreamingDataGenerator {
         optional = true,
         description = "Write Disposition to use for BigQuery",
         helpText =
-            "BigQuery WriteDisposition. For example, WRITE_APPEND, WRITE_EMPTY or WRITE_TRUNCATE. Default: WRITE_APPEND")
+            "BigQuery WriteDisposition. For example, WRITE_APPEND, WRITE_EMPTY or WRITE_TRUNCATE.")
     @Default.String("WRITE_APPEND")
     String getWriteDisposition();
 
