@@ -47,8 +47,7 @@
     <dependency>
       <groupId>com.google.cloud.dataflow.cdc</groupId>
       <artifactId>cdc-common</artifactId>
-      <version>0.1</version>
-      <scope>compile</scope>
+      <version>${pom.version}</version>
     </dependency>
     <dependency>
       <groupId>com.google.cloud</groupId>

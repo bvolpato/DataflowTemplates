@@ -25,7 +25,8 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>classic-templates</artifactId>
+  <artifactId>google-cloud-teleport-java</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
   <name>Google Cloud Teleport Classic</name>
   <description>
     Cloud Teleport Classic is a collection of Apache Beam pipelines for common tasks, like data movement
@@ -37,14 +38,12 @@
     <apache-http-client-v2>1.40.1</apache-http-client-v2>
     <autovalue.service.version>1.0-rc6</autovalue.service.version>
     <avro.version>1.8.2</avro.version>
-    <checkstyle.version>8.7</checkstyle.version>
     <beam.version>2.41.0</beam.version>
     <extra.enforcer.rules.version>1.3</extra.enforcer.rules.version>
     <hamcrest.version>2.1</hamcrest.version>
     <java.version>11</java.version>
     <junit.version>4.13</junit.version>
     <surefire.version>2.21.0</surefire.version>
-    <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
     <maven-compiler-plugin.version>3.6.2</maven-compiler-plugin.version>
     <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
     <maven-enforcer-plugin.version>3.0.0-M1</maven-enforcer-plugin.version>
@@ -87,7 +86,6 @@
     <cassandra.driver.version>3.6.0</cassandra.driver.version>
     <kms.version>1.40.0</kms.version>
     <proto-kms.version>0.87.0</proto-kms.version>
-    <spotless-maven-plugin.version>2.12.1</spotless-maven-plugin.version>
     <cloud-libraries-bom.version>24.4.0</cloud-libraries-bom.version>
     <jacoco.version>0.8.8</jacoco.version>
   </properties>
@@ -763,43 +761,6 @@
         <artifactId>maven-shade-plugin</artifactId>
         <version>${maven-shade-plugin.version}</version>
       </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${maven-checkstyle-plugin.version}</version>
-        <dependencies>
-          <dependency>
-            <groupId>com.puppycrawl.tools</groupId>
-            <artifactId>checkstyle</artifactId>
-            <version>${checkstyle.version}</version>
-          </dependency>
-        </dependencies>
-        <configuration>
-          <configLocation>src/main/resources/checkstyle/checkstyle.xml</configLocation>
-          <suppressionsLocation>${project.basedir}/src/main/resources/checkstyle/suppressions.xml</suppressionsLocation>
-          <consoleOutput>true</consoleOutput>
-          <failOnViolation>true</failOnViolation>
-          <includeResources>false</includeResources>
-          <includeTestSourceDirectory>true</includeTestSourceDirectory>
-        </configuration>
-        <executions>
-          <!--
-            Execute checkstyle after compilation but before tests.
-
-            This ensures that any parsing or type checking errors are from
-            javac, so they look as expected. Beyond that, we want to
-            fail as early as possible.
-          -->
-          <execution>
-            <phase>test-compile</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
@@ -907,51 +868,6 @@
             <configuration>
               <sourceDirectory>src/main/resources/schema/avro</sourceDirectory>
             </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- Keep this equivalent with v2/pom.xml. Unfortunately, we need to duplicate the
-      plugin until we can fix errors introduced by adding v2 as a child module of the root
-      teleport module. -->
-      <plugin>
-        <groupId>com.diffplug.spotless</groupId>
-        <artifactId>spotless-maven-plugin</artifactId>
-        <version>${spotless-maven-plugin.version}</version>
-        <configuration>
-          <formats>
-            <!-- Avoid trailing whitespace and require ending newline. -->
-            <format>
-              <includes>
-                <include>*.md</include>
-                <include>.gitignore</include>
-              </includes>
-              <trimTrailingWhitespace/>
-              <endWithNewline/>
-            </format>
-          </formats>
-          <java>
-            <!-- Exclude Beam code from formatting/license headers -->
-            <excludes>
-              <exclude>src/main/java/org/apache/beam/**</exclude>
-              <exclude>src/test/java/org/apache/beam/**</exclude>
-            </excludes>
-            <toggleOffOn />
-            <googleJavaFormat>
-              <version>1.8</version>
-              <style>GOOGLE</style>
-            </googleJavaFormat>
-            <licenseHeader>
-              <file>JAVA_LICENSE_HEADER</file>
-            </licenseHeader>
-          </java>
-        </configuration>
-        <!-- Bind to verify. -->
-        <executions>
-          <execution>
-            <goals>
-              <goal>check</goal>
-            </goals>
           </execution>
         </executions>
       </plugin>

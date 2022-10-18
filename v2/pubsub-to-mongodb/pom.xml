@@ -34,10 +34,6 @@
         Stream data from Google PubSub to a hosted MongoDB Database
     </description>
 
-    <properties>
-        <checkstyle.version>8.7</checkstyle.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.apache.beam</groupId>
