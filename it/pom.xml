@@ -42,7 +42,6 @@
     <slf4j.version>1.7.25</slf4j.version>
     <surefire.version>2.21.0</surefire.version>
     <truth.version>1.0.1</truth.version>
-    <metadata.version>1.0-SNAPSHOT</metadata.version>
   </properties>
 
   <dependencyManagement>

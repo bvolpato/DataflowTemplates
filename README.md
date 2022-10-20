@@ -277,7 +277,7 @@ example, use the following commands:
 Validate in all modules:
 
 ```shell
-mvn compile -PtemplatesValidate 
+mvn compile -PtemplatesValidate
 ```
 
 Validate in a specific module (for example, `v2/googlecloud-to-googlecloud)`:
