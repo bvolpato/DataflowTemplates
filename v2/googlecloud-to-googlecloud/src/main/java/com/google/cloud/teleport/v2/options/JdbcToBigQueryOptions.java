@@ -146,8 +146,12 @@ public interface JdbcToBigQueryOptions extends CommonTemplateOptions, BigQueryOp
 
   void setUseColumnAlias(Boolean useColumnAlias);
 
-  @Description(
-      "If enabled (set to true) the pipeline will truncate/load data into BigQuery, else by default, it will Append.")
+  @TemplateParameter.Boolean(
+      order = 12,
+      optional = true,
+      description = "Whether to truncate data before writing",
+      helpText =
+          "If enabled (set to true) the pipeline will truncate before loading data into BigQuery. Defaults to false, which is used to only append data.")
   @Default.Boolean(false)
   Boolean getIsTruncate();
 
