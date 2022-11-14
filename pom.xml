@@ -26,8 +26,7 @@
   <packaging>pom</packaging>
   <description>
     Unifies all the template libraries under one POM for easier automation and
-    to allow
-    for more reusable and modular dependencies.
+    to allow for more reusable and modular dependencies.
   </description>
 
   <properties>
@@ -35,6 +34,7 @@
     <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
     <spotless-maven-plugin.version>2.12.1</spotless-maven-plugin.version>
     <checkstyle.version>8.7</checkstyle.version>
+    <metadata.version>1.0-SNAPSHOT</metadata.version>
   </properties>
 
   <build>
@@ -150,6 +150,7 @@
 
 
   <modules>
+    <module>metadata</module>
     <module>it</module>
     <module>v1</module>
     <module>v2</module>
