@@ -194,7 +194,8 @@ public final class DefaultBigQueryResourceManager implements BigQueryResourceMan
                 .setExpirationTime(expirationTime)
                 .build();
         bigQuery.create(tableInfo);
-        LOG.info("Successfully created table {}.{}", dataset.getDatasetId().getDataset(), tableName);
+        LOG.info(
+            "Successfully created table {}.{}", dataset.getDatasetId().getDataset(), tableName);
 
         return tableId;
       } else {
@@ -204,7 +205,6 @@ public final class DefaultBigQueryResourceManager implements BigQueryResourceMan
     } catch (Exception e) {
       throw new BigQueryResourceManagerException("Failed to create table.", e);
     }
-
   }
 
   @Override
