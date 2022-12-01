@@ -812,7 +812,7 @@
           <!-- Exclude Cloud Spanner integration tests that require a GCP project to run.
           They can be run run manually using
           'mvn -Dexcluded.spanner.tests="" -Dtest=<testname> test' -->
-          <excludedGroups>${excluded.spanner.tests},com.google.cloud.teleport.metadata.TemplateIntegrationTest</excludedGroups>
+          <excludedGroups>com.google.cloud.teleport.metadata.TemplateIntegrationTest,${excluded.spanner.tests}</excludedGroups>
         </configuration>
       </plugin>
 

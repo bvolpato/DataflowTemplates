@@ -515,7 +515,7 @@
                   <!-- TODO(zhoufek): Try to find an alternative way to avoid writing
                    sensitive info to disk.-->
                   <disableXmlReport>true</disableXmlReport>
-                  <excludedGroups>${excluded.spanner.tests},com.google.cloud.teleport.metadata.TemplateIntegrationTest</excludedGroups>
+                  <excludedGroups>com.google.cloud.teleport.metadata.TemplateIntegrationTest,${excluded.spanner.tests}</excludedGroups>
                 </configuration>
             </plugin>
         </plugins>
