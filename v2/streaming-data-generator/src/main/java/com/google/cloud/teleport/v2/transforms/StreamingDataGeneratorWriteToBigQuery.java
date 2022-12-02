@@ -70,7 +70,7 @@ public abstract class StreamingDataGeneratorWriteToBigQuery
   public PDone expand(PCollection<byte[]> fakeMessages) {
     WriteResult writeResults =
         fakeMessages.apply(
-            "Write Json messsages",
+            "Write Json messages",
             BigQueryIO.<byte[]>write()
                 .to(getPipelineOptions().getOutputTableSpec())
                 .withMethod(Method.STREAMING_INSERTS)
@@ -88,8 +88,7 @@ public abstract class StreamingDataGeneratorWriteToBigQuery
                             TableRowJsonCoder.of()
                                 .decode(new ByteArrayInputStream(message), Coder.Context.OUTER);
                       } catch (IOException e) {
-                        throw new RuntimeException(
-                            "Failed converting to TableRow with an error:" + e.getMessage());
+                        throw new RuntimeException("Failed converting to TableRow", e);
                       }
                       return row;
                     }));
