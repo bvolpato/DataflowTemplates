@@ -16,23 +16,28 @@
 package com.google.cloud.teleport.v2.templates;
 
 import static com.google.cloud.teleport.it.dataflow.DataflowUtils.createJobName;
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatRecords;
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.cloud.bigquery.Field;
+import com.google.cloud.bigquery.Schema;
+import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.cloud.teleport.it.TemplateTestBase;
 import com.google.cloud.teleport.it.artifacts.Artifact;
+import com.google.cloud.teleport.it.bigquery.BigQueryResourceManager;
+import com.google.cloud.teleport.it.bigquery.DefaultBigQueryResourceManager;
 import com.google.cloud.teleport.it.dataflow.DataflowOperator;
 import com.google.cloud.teleport.it.dataflow.DataflowOperator.Result;
-import com.google.cloud.teleport.it.dataflow.DataflowTemplateClient;
 import com.google.cloud.teleport.it.dataflow.DataflowTemplateClient.JobInfo;
 import com.google.cloud.teleport.it.dataflow.DataflowTemplateClient.JobState;
 import com.google.cloud.teleport.it.dataflow.DataflowTemplateClient.LaunchConfig;
-import com.google.cloud.teleport.it.dataflow.FlexTemplateClient;
 import com.google.cloud.teleport.metadata.TemplateIntegrationTest;
 import com.google.cloud.teleport.v2.templates.StreamingDataGenerator.SinkType;
 import com.google.common.io.Resources;
 import com.google.re2j.Pattern;
 import java.io.IOException;
 import java.util.List;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -50,6 +55,7 @@ public final class StreamingDataGeneratorIT extends TemplateTestBase {
 
   private static final String NUM_SHARDS_KEY = "numShards";
   private static final String OUTPUT_DIRECTORY_KEY = "outputDirectory";
+  private static final String OUTPUT_TABLE_SPEC = "outputTableSpec";
   private static final String QPS_KEY = "qps";
   private static final String SCHEMA_LOCATION_KEY = "schemaLocation";
   private static final String SINK_TYPE_KEY = "sinkType";
@@ -58,9 +64,21 @@ public final class StreamingDataGeneratorIT extends TemplateTestBase {
   private static final String DEFAULT_QPS = "15";
   private static final String DEFAULT_WINDOW_DURATION = "60s";
 
+  private BigQueryResourceManager bigQueryClient;
+
   @Before
   public void setUp() throws IOException {
     artifactClient.uploadArtifact(SCHEMA_FILE, LOCAL_SCHEMA_PATH);
+
+    bigQueryClient =
+        DefaultBigQueryResourceManager.builder(testName.getMethodName(), PROJECT)
+            .setCredentials(credentials)
+            .build();
+  }
+
+  @After
+  public void tearDown() {
+    bigQueryClient.cleanupAll();
   }
 
   @Test
@@ -69,26 +87,22 @@ public final class StreamingDataGeneratorIT extends TemplateTestBase {
     String name = testName.getMethodName();
     String jobName = createJobName(name);
 
-    LaunchConfig options =
-        LaunchConfig.builder(jobName, specPath)
-            // TODO(zhoufek): See if it is possible to use the properties interface and generate
-            // the map from the set values.
-            .addParameter(SCHEMA_LOCATION_KEY, getGcsPath(SCHEMA_FILE))
-            .addParameter(QPS_KEY, DEFAULT_QPS)
-            .addParameter(SINK_TYPE_KEY, SinkType.GCS.name())
-            .addParameter(WINDOW_DURATION_KEY, DEFAULT_WINDOW_DURATION)
-            .addParameter(OUTPUT_DIRECTORY_KEY, getGcsPath(name))
-            .addParameter(NUM_SHARDS_KEY, "1")
-            .build();
-    DataflowTemplateClient dataflow =
-        FlexTemplateClient.builder().setCredentials(credentials).build();
-
     // Act
-    JobInfo info = dataflow.launchTemplate(PROJECT, REGION, options);
+    JobInfo info =
+        launchTemplate(
+            LaunchConfig.builder(jobName, specPath)
+                // TODO(zhoufek): See if it is possible to use the properties interface and generate
+                // the map from the set values.
+                .addParameter(SCHEMA_LOCATION_KEY, getGcsPath(SCHEMA_FILE))
+                .addParameter(QPS_KEY, DEFAULT_QPS)
+                .addParameter(SINK_TYPE_KEY, SinkType.GCS.name())
+                .addParameter(WINDOW_DURATION_KEY, DEFAULT_WINDOW_DURATION)
+                .addParameter(OUTPUT_DIRECTORY_KEY, getGcsPath(name))
+                .addParameter(NUM_SHARDS_KEY, "1"));
     assertThat(info.state()).isIn(JobState.ACTIVE_STATES);
 
     Result result =
-        new DataflowOperator(dataflow)
+        new DataflowOperator(getDataflowClient())
             .waitForConditionAndFinish(
                 createConfig(info),
                 () -> {
@@ -99,5 +113,51 @@ public final class StreamingDataGeneratorIT extends TemplateTestBase {
 
     // Assert
     assertThat(result).isEqualTo(Result.CONDITION_MET);
+  }
+
+  @Test
+  public void testFakeMessagesToBigQuery() throws IOException {
+    // Arrange
+    String name = testName.getMethodName();
+    String jobName = createJobName(name);
+
+    String bqTable = testName.getMethodName();
+    List<Field> bqSchemaFields =
+        List.of(
+            Field.of("eventId", StandardSQLTypeName.STRING),
+            Field.of("eventTime", StandardSQLTypeName.STRING),
+            Field.of("ipv4", StandardSQLTypeName.STRING),
+            Field.of("ipv6", StandardSQLTypeName.STRING),
+            Field.of("country", StandardSQLTypeName.STRING),
+            Field.of("username", StandardSQLTypeName.STRING),
+            Field.of("quest", StandardSQLTypeName.STRING),
+            Field.of("score", StandardSQLTypeName.INT64),
+            Field.of("completed", StandardSQLTypeName.BOOL));
+    Schema bqSchema = Schema.of(bqSchemaFields);
+
+    bigQueryClient.createDataset(REGION);
+    bigQueryClient.createTable(bqTable, bqSchema);
+    String tableSpec = PROJECT + ":" + bigQueryClient.getDatasetId() + "." + bqTable;
+
+    // Act
+    JobInfo info =
+        launchTemplate(
+            LaunchConfig.builder(jobName, specPath)
+                .addParameter(SCHEMA_LOCATION_KEY, getGcsPath(SCHEMA_FILE))
+                .addParameter(QPS_KEY, DEFAULT_QPS)
+                .addParameter(SINK_TYPE_KEY, SinkType.BIGQUERY.name())
+                .addParameter(WINDOW_DURATION_KEY, DEFAULT_WINDOW_DURATION)
+                .addParameter(OUTPUT_TABLE_SPEC, tableSpec)
+                .addParameter(NUM_SHARDS_KEY, "1"));
+    assertThat(info.state()).isIn(JobState.ACTIVE_STATES);
+
+    Result result =
+        new DataflowOperator(getDataflowClient())
+            .waitForConditionAndFinish(
+                createConfig(info), () -> bigQueryClient.readTable(bqTable).getTotalRows() != 0);
+
+    // Assert
+    assertThat(result).isEqualTo(Result.CONDITION_MET);
+    assertThatRecords(bigQueryClient.readTable(bqTable)).hasRows();
   }
 }

@@ -251,6 +251,7 @@ public class StreamingDataGenerator {
 
     @TemplateParameter.GcsWriteFolder(
         order = 12,
+        optional = true,
         description = "Output file directory in Cloud Storage",
         helpText =
             "The path and filename prefix for writing output files. Must end with a slash. DateTime formatting is used to parse directory path for date & time formatters.",
