@@ -24,7 +24,7 @@ import (
 
 func main() {
 	mvnFlags := workflows.NewMavenFlags()
-	err := workflows.MvnCleanInstall().Run(
+	err := workflows.MvnCleanVerify().Run(
 		mvnFlags.IncludeDependencies(),
 		mvnFlags.IncludeDependents(),
 		mvnFlags.SkipCheckstyle(),
@@ -34,5 +34,5 @@ func main() {
 	if err != nil {
 		log.Fatalf("%v\n", err)
 	}
-	log.Println("Build Successful!")
+	log.Println("Verification Successful!")
 }
