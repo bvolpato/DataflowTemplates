@@ -94,7 +94,7 @@ public class ResourceManagerUtils {
   }
 
   /**
-   * Checks whether the given project ID is valid according to GCP constraints.
+   * Checks whether the given project ID is valid according to Google Cloud Platform constraints.
    *
    * @param idToCheck the project ID to check.
    * @throws IllegalArgumentException if the project ID is invalid.
