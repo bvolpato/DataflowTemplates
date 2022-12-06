@@ -52,6 +52,7 @@ type MavenFlags interface {
 	SkipCheckstyle() string
 	SkipDependencyAnalysis() string
 	SkipJib() string
+	SkipShade() string
 	SkipTests() string
 	FailAtTheEnd() string
 }
@@ -76,6 +77,10 @@ func (*mvnFlags) SkipDependencyAnalysis() string {
 
 func (*mvnFlags) SkipJib() string {
 	return "-Djib.skip"
+}
+
+func (*mvnFlags) SkipShade() string {
+	return "-DskipShade"
 }
 
 func (*mvnFlags) SkipTests() string {
