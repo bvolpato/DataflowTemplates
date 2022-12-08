@@ -16,6 +16,7 @@
 package com.google.cloud.teleport.v2.options;
 
 import com.google.cloud.spanner.Options.RpcPriority;
+import com.google.cloud.teleport.metadata.TemplateParameter;
 import com.google.cloud.teleport.v2.options.BigQueryCommonOptions.WriteOptions;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryOptions;
 import org.apache.beam.sdk.options.Default;
@@ -25,19 +26,33 @@ import org.apache.beam.sdk.options.Validation.Required;
 
 /** Custom options for {@link com.google.cloud.teleport.v2.templates.SpannerToBigQuery} pipeline. */
 public interface SpannerToBigQueryOptions extends PipelineOptions, WriteOptions, BigQueryOptions {
-  @Description("Spanner table to read data from.")
+  @TemplateParameter.Text(
+      order = 1,
+      regexes = {"^.+$"},
+      description = "Spanner Table Id",
+      helpText = "Spanner Table Id to read from")
   @Required
   String getSpannerTableId();
 
   void setSpannerTableId(String spannerTableId);
 
-  @Description("Instance id for spanner table.")
+  @TemplateParameter.Text(
+      order = 2,
+      regexes = {".+"},
+      description = "Read data from Cloud Spanner Instance",
+      helpText = "Instance of requested table.")
   @Required
   String getSpannerInstanceId();
 
   void setSpannerInstanceId(String spannerInstanceId);
 
-  @Description("Database containing the spanner table.")
+  aaaaaaaaa wip
+
+  @TemplateParameter.Text(
+      order = 3,
+      regexes = {".+"},
+      description = "Read data from Cloud Spanner Database ",
+      helpText = "Database of requested table.")
   @Required
   String getSpannerDatabaseId();
 

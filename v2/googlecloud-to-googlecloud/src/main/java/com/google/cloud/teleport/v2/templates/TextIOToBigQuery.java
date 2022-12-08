@@ -18,6 +18,11 @@ package com.google.cloud.teleport.v2.templates;
 import com.google.api.services.bigquery.model.TableFieldSchema;
 import com.google.api.services.bigquery.model.TableRow;
 import com.google.api.services.bigquery.model.TableSchema;
+import com.google.cloud.teleport.metadata.Template;
+import com.google.cloud.teleport.metadata.TemplateCategory;
+import com.google.cloud.teleport.metadata.TemplateParameter;
+import com.google.cloud.teleport.v2.options.BigQueryStorageWriteOptions;
+import com.google.cloud.teleport.v2.templates.TextIOToBigQuery.Options;
 import com.google.cloud.teleport.v2.transforms.BigQueryConverters;
 import com.google.cloud.teleport.v2.transforms.JavascriptTextTransformer.JavascriptTextTransformerOptions;
 import com.google.cloud.teleport.v2.transforms.JavascriptTextTransformer.TransformTextViaJavascript;
@@ -36,8 +41,6 @@ import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.CreateDisposition;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.WriteDisposition;
-import org.apache.beam.sdk.io.gcp.bigquery.BigQueryOptions;
-import org.apache.beam.sdk.options.Description;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.options.Validation;
 import org.apache.beam.sdk.options.ValueProvider.StaticValueProvider;
@@ -50,39 +53,78 @@ import org.json.JSONObject;
 /**
  * Templated pipeline to read text from TextIO, apply a javascript UDF to it, and write it to GCS.
  */
+@Template(
+    name = "GCS_Text_to_BigQuery_Flex",
+    category = TemplateCategory.BATCH,
+    displayName = "Text Files on Cloud Storage to BigQuery with BigQuery Storage API support",
+    description =
+        "Batch pipeline. Reads text files stored in Cloud Storage, transforms them using a JavaScript user-defined function (UDF), and outputs the result to BigQuery.",
+    optionsClass = Options.class,
+    flexContainerName = "text-to-bigquery",
+    contactInformation = "https://cloud.google.com/support")
 public class TextIOToBigQuery {
 
   /** Options supported by {@link TextIOToBigQuery}. */
   public interface Options
-      extends DataflowPipelineOptions, JavascriptTextTransformerOptions, BigQueryOptions {
-    @Description("The GCS location of the text you'd like to process")
+      extends DataflowPipelineOptions, JavascriptTextTransformerOptions,
+      BigQueryStorageWriteOptions {
+    @TemplateParameter.GcsReadFile(
+        order = 1,
+        description = "Cloud Storage Input File(s)",
+        helpText = "Path of the file pattern glob to read from.",
+        example = "gs://your-bucket/path/*.csv")
     String getInputFilePattern();
 
     void setInputFilePattern(String value);
 
-    @Description("JSON file with BigQuery Schema description")
+    @TemplateParameter.GcsReadFile(
+        order = 2,
+        description = "Cloud Storage location of your BigQuery schema file, described as a JSON",
+        helpText =
+            "JSON file with BigQuery Schema description. JSON Example: {\n"
+                + "\t\"BigQuery Schema\": [\n"
+                + "\t\t{\n"
+                + "\t\t\t\"name\": \"location\",\n"
+                + "\t\t\t\"type\": \"STRING\"\n"
+                + "\t\t},\n"
+                + "\t\t{\n"
+                + "\t\t\t\"name\": \"name\",\n"
+                + "\t\t\t\"type\": \"STRING\"\n"
+                + "\t\t},\n"
+                + "\t\t{\n"
+                + "\t\t\t\"name\": \"age\",\n"
+                + "\t\t\t\"type\": \"STRING\"\n"
+                + "\t\t},\n"
+                + "\t\t{\n"
+                + "\t\t\t\"name\": \"color\",\n"
+                + "\t\t\t\"type\": \"STRING\"\n"
+                + "\t\t},\n"
+                + "\t\t{\n"
+                + "\t\t\t\"name\": \"coffee\",\n"
+                + "\t\t\t\"type\": \"STRING\"\n"
+                + "\t\t}\n"
+                + "\t]\n"
+                + "}")
     String getJSONPath();
 
     void setJSONPath(String value);
 
-    @Description("Output table to write to")
+    @TemplateParameter.BigQueryTable(
+        order = 3,
+        description = "BigQuery output table",
+        helpText =
+            "BigQuery table location to write the output to. The table's schema must match the "
+                + "input objects.")
     String getOutputTable();
 
     void setOutputTable(String value);
 
-    @Description("GCS path to javascript fn for transforming output")
-    String getJavascriptTextTransformGcsPath();
-
-    void setJavascriptTextTransformGcsPath(String jsTransformPath);
-
+    @TemplateParameter.GcsWriteFolder(
+        order = 6,
+        description = "Temporary directory for BigQuery loading process",
+        helpText = "Temporary directory for BigQuery loading process",
+        example = "gs://your-bucket/your-files/temp_dir")
     @Validation.Required
-    @Description("UDF Javascript Function Name")
-    String getJavascriptTextTransformFunctionName();
-
-    void setJavascriptTextTransformFunctionName(String javascriptTextTransformFunctionName);
-
-    @Validation.Required
-    @Description("Temporary directory for BigQuery loading process")
     String getBigQueryLoadingTemporaryDirectory();
 
     void setBigQueryLoadingTemporaryDirectory(String directory);
