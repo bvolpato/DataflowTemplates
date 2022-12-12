@@ -64,7 +64,8 @@ public final class BulkCompressorIT extends TemplateTestBase {
 
   public void testCompressGeneric(Compression compression, String extension) throws IOException {
     // Arrange
-    String jobName = createJobName("testCompress" + StringUtils.capitalize(compression.name().toLowerCase()));
+    String jobName =
+        createJobName("testCompress" + StringUtils.capitalize(compression.name().toLowerCase()));
 
     LaunchConfig.Builder options =
         LaunchConfig.builder(jobName, specPath)
@@ -96,8 +97,8 @@ public final class BulkCompressorIT extends TemplateTestBase {
     assertThat(artifacts.get()).hasSize(1);
     assertThat(artifacts.get().get(0).contents())
         .isEqualTo(
-            Resources.getResource("BulkCompressorIT/compress.txt." + extension).openStream().readAllBytes());
-
+            Resources.getResource("BulkCompressorIT/compress.txt." + extension)
+                .openStream()
+                .readAllBytes());
   }
-
 }
