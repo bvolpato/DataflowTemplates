@@ -161,10 +161,9 @@ public class PubsubToAvro {
 
     void setInputTopic(ValueProvider<String> value);
 
-    @TemplateCreationParameter
+    @TemplateCreationParameter(value = "false")
     @Description(
         "This determines whether the template reads from " + "a pub/sub subscription or a topic")
-    @Default.Boolean(false)
     Boolean getUseSubscription();
 
     void setUseSubscription(Boolean value);

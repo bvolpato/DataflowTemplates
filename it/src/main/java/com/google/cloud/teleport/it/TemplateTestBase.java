@@ -223,7 +223,6 @@ public abstract class TemplateTestBase {
 
     return new String[] {
       "mvn",
-      "compile",
       "package",
       "-q",
       "-f",

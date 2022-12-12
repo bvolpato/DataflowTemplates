@@ -48,7 +48,6 @@ import org.apache.beam.sdk.io.gcp.bigquery.WriteResult;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessageWithAttributesCoder;
-import org.apache.beam.sdk.options.Default;
 import org.apache.beam.sdk.options.Description;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
@@ -214,10 +213,10 @@ public class PubSubToBigQuery {
 
     void setInputSubscription(ValueProvider<String> value);
 
-    @TemplateCreationParameter
+    @TemplateCreationParameter(template = "PubSub_to_BigQuery", value = "false")
+    @TemplateCreationParameter(template = "PubSub_Subscription_to_BigQuery", value = "true")
     @Description(
         "This determines whether the template reads from a Pub/sub subscription or a topic")
-    @Default.Boolean(false)
     Boolean getUseSubscription();
 
     void setUseSubscription(Boolean value);
