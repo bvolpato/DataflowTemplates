@@ -165,10 +165,10 @@ public class BulkCompressor {
 
     @TemplateParameter.Enum(
         order = 4,
-        enumOptions = {"BZIP2", "DEFLATE", "GZIP"},
+        enumOptions = {"BZIP2", "DEFLATE", "GZIP", "ZIP"},
         description = "Compression",
         helpText =
-            "The compression algorithm used to compress the matched files. Valid algorithms: BZIP2, DEFLATE, GZIP")
+            "The compression algorithm used to compress the matched files. Valid algorithms: BZIP2, DEFLATE, GZIP, ZIP")
     @Required
     ValueProvider<Compression> getCompression();
 

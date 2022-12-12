@@ -33,6 +33,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.beam.sdk.io.Compression;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -53,15 +54,24 @@ public final class BulkCompressorIT extends TemplateTestBase {
 
   @Test
   public void testCompressGzip() throws IOException {
+    testCompressGeneric(Compression.GZIP, "gz");
+  }
+
+  @Test
+  public void testCompressZip() throws IOException {
+    testCompressGeneric(Compression.ZIP, "zip");
+  }
+
+  public void testCompressGeneric(Compression compression, String extension) throws IOException {
     // Arrange
-    String jobName = createJobName(testName.getMethodName());
+    String jobName = createJobName("testCompress" + StringUtils.capitalize(compression.name().toLowerCase()));
 
     LaunchConfig.Builder options =
         LaunchConfig.builder(jobName, specPath)
             .addParameter("inputFilePattern", getGcsPath("input") + "/*.txt")
             .addParameter("outputDirectory", getGcsPath("output"))
             .addParameter("outputFailureFile", getGcsPath("output-failure"))
-            .addParameter("compression", Compression.GZIP.name());
+            .addParameter("compression", compression.name());
 
     // Act
     JobInfo info = launchTemplate(options);
@@ -86,6 +96,8 @@ public final class BulkCompressorIT extends TemplateTestBase {
     assertThat(artifacts.get()).hasSize(1);
     assertThat(artifacts.get().get(0).contents())
         .isEqualTo(
-            Resources.getResource("BulkCompressorIT/compress.txt.gz").openStream().readAllBytes());
+            Resources.getResource("BulkCompressorIT/compress.txt." + extension).openStream().readAllBytes());
+
   }
+
 }
