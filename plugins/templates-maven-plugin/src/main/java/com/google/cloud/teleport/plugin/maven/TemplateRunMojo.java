@@ -121,6 +121,8 @@ public class TemplateRunMojo extends TemplateBaseMojo {
 
       LOG.info("Staging template {}...", currentTemplateName);
 
+      String useRegion = StringUtils.isNotEmpty(region) ? region : "us-central1";
+
       // TODO: is there a better way to get the plugin on the _same project_?
       TemplateStageMojo configuredMojo =
           new TemplateStageMojo(
@@ -134,11 +136,10 @@ public class TemplateRunMojo extends TemplateBaseMojo {
               templateName,
               bucketName,
               stagePrefix,
-              region,
+              useRegion,
               artifactRegion,
               baseContainerImage);
 
-      String useRegion = StringUtils.isNotEmpty(region) ? region : "us-central1";
       String useJobName =
           StringUtils.isNotEmpty(jobName)
               ? jobName
