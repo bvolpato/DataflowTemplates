@@ -181,6 +181,7 @@ public class TemplateDefinitions {
             metadata
                 .getRuntimeParameters()
                 .put(getParameterNameFromMethod(method), creationParameter.value());
+            runtime = true;
           }
         }
 
