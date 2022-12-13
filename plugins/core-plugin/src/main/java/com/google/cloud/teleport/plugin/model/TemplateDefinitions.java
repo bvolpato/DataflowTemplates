@@ -160,7 +160,7 @@ public class TemplateDefinitions {
           for (TemplateCreationParameter creationParameterCandidate : creationParameters.value()) {
 
             if (creationParameterCandidate.template().equals(templateAnnotation.name())
-                    || StringUtils.isEmpty(creationParameterCandidate.template())) {
+                || StringUtils.isEmpty(creationParameterCandidate.template())) {
               runtime = true;
 
               if (StringUtils.isNotEmpty(creationParameterCandidate.value())) {
