@@ -122,16 +122,24 @@ public class DataStreamToBigQuery {
   private static final String AVRO_SUFFIX = "avro";
   private static final String JSON_SUFFIX = "json";
 
-  /** The tag for the main output of the json transformation. */
-  public static final TupleTag<TableRow> TRANSFORM_OUT = new TupleTag<TableRow>() {};
+  /**
+   * The tag for the main output of the json transformation.
+   */
+  public static final TupleTag<TableRow> TRANSFORM_OUT = new TupleTag<TableRow>() {
+  };
 
-  /** String/String Coder for FailsafeElement. */
+  /**
+   * String/String Coder for FailsafeElement.
+   */
   public static final FailsafeElementCoder<String, String> FAILSAFE_ELEMENT_CODER =
       FailsafeElementCoder.of(StringUtf8Coder.of(), StringUtf8Coder.of());
 
-  /** The tag for the dead-letter output of the json to table row transform. */
+  /**
+   * The tag for the dead-letter output of the json to table row transform.
+   */
   public static final TupleTag<FailsafeElement<String, String>> TRANSFORM_DEADLETTER_OUT =
-      new TupleTag<FailsafeElement<String, String>>() {};
+      new TupleTag<FailsafeElement<String, String>>() {
+      };
 
   /**
    * Options supported by the pipeline.
@@ -140,9 +148,10 @@ public class DataStreamToBigQuery {
    */
   public interface Options
       extends PipelineOptions,
-          StreamingOptions,
-          InputUDFOptions,
-          BigQueryStorageApiStreamingOptions {
+      StreamingOptions,
+      InputUDFOptions,
+      BigQueryStorageApiStreamingOptions {
+
     @TemplateParameter.Text(
         order = 1,
         description = "File location for Datastream file output in Cloud Storage.",
@@ -345,6 +354,17 @@ public class DataStreamToBigQuery {
     Integer getMergeConcurrency();
 
     void setMergeConcurrency(Integer value);
+
+    @TemplateParameter.Integer(
+        order = 19,
+        optional = true,
+        description = "Partition retention days.",
+        helpText =
+            "The number of days to use for partition retention when running BigQuery merges. Default is 1.")
+    @Default.Integer(MergeConfiguration.DEFAULT_PARTITION_RETENTION_DAYS)
+    Integer getPartitionRetentionDays();
+
+    void setPartitionRetentionDays(Integer value);
   }
 
   /**
@@ -431,11 +451,11 @@ public class DataStreamToBigQuery {
     PCollection<FailsafeElement<String, String>> datastreamJsonRecords =
         pipeline.apply(
             new DataStreamIO(
-                    options.getStreamName(),
-                    options.getInputFilePattern(),
-                    options.getInputFileFormat(),
-                    options.getGcsPubSubSubscription(),
-                    options.getRfcStartDateTime())
+                options.getStreamName(),
+                options.getInputFilePattern(),
+                options.getInputFileFormat(),
+                options.getGcsPubSubSubscription(),
+                options.getRfcStartDateTime())
                 .withFileReadConcurrency(options.getFileReadConcurrency()));
 
     // Elements sent to the Dead Letter Queue are to be reconsumed.
@@ -497,10 +517,10 @@ public class DataStreamToBigQuery {
             .apply(
                 "Map to Staging Tables",
                 new DataStreamMapper(
-                        options.as(GcpOptions.class),
-                        options.getOutputProjectId(),
-                        options.getOutputStagingDatasetTemplate(),
-                        options.getOutputStagingTableNameTemplate())
+                    options.as(GcpOptions.class),
+                    options.getOutputProjectId(),
+                    options.getOutputStagingDatasetTemplate(),
+                    options.getOutputStagingTableNameTemplate())
                     .withDataStreamRootUrl(options.getDataStreamRootUrl())
                     .withDefaultSchema(BigQueryDefaultSchemas.DATASTREAM_METADATA_SCHEMA)
                     .withDayPartitioning(true)
@@ -524,10 +544,10 @@ public class DataStreamToBigQuery {
           .apply(
               "Map To Replica Tables",
               new DataStreamMapper(
-                      options.as(GcpOptions.class),
-                      options.getOutputProjectId(),
-                      options.getOutputDatasetTemplate(),
-                      options.getOutputTableNameTemplate())
+                  options.as(GcpOptions.class),
+                  options.getOutputProjectId(),
+                  options.getOutputDatasetTemplate(),
+                  options.getOutputTableNameTemplate())
                   .withDataStreamRootUrl(options.getDataStreamRootUrl())
                   .withDefaultSchema(BigQueryDefaultSchemas.DATASTREAM_METADATA_SCHEMA)
                   .withIgnoreFields(fieldsToIgnore))
@@ -545,7 +565,8 @@ public class DataStreamToBigQuery {
                   MergeConfiguration.bigQueryConfiguration()
                       .withMergeWindowDuration(
                           Duration.standardMinutes(options.getMergeFrequencyMinutes()))
-                      .withMergeConcurrency(options.getMergeConcurrency())));
+                      .withMergeConcurrency(options.getMergeConcurrency())
+                      .withPartitionRetention(options.getPartitionRetentionDays())));
     }
 
     /*
