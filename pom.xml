@@ -56,10 +56,10 @@
     <conscrypt.version>2.5.2</conscrypt.version>
     <hadoop.version>2.10.2</hadoop.version>
     <hamcrest.version>2.1</hamcrest.version>
-    <mockito-core.version>3.0.0</mockito-core.version>
     <log4j-2.version>2.17.2</log4j-2.version>
     <json.version>20200518</json.version>
     <junit.version>4.13.1</junit.version>
+    <mockito.version>4.11.0</mockito.version>
     <re2j.version>1.5</re2j.version>
     <slf4j.version>1.7.25</slf4j.version>
     <spotless-maven-plugin.version>2.12.1</spotless-maven-plugin.version>

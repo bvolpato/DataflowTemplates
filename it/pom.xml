@@ -31,8 +31,6 @@
     <cloud-storage.version>2.2.2</cloud-storage.version>
     <elasticsearch.version>7.9.2</elasticsearch.version>
     <guava.version>31.0.1-jre</guava.version>
-    <mockito.version>3.7.7</mockito.version>
-    <mockito-inline.version>4.5.1</mockito-inline.version>
     <mongodb.version>3.12.10</mongodb.version>
     <dataflow-api.version>v1b3-rev20220920-2.0.0</dataflow-api.version>
     <testcontainers.version>1.17.5</testcontainers.version>
@@ -168,7 +166,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-inline</artifactId>
-      <version>${mockito-inline.version}</version>
+      <version>${mockito.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
