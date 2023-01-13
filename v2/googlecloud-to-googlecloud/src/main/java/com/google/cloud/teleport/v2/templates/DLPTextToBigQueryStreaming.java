@@ -332,6 +332,7 @@ public class DLPTextToBigQueryStreaming {
                 + " https://console.cloud.google.com/security/dlp/create/template.",
         example =
             "projects/your-project-id/locations/global/deidentifyTemplates/generated_template_id")
+    @Required
     String getDeidentifyTemplateName();
 
     void setDeidentifyTemplateName(String value);

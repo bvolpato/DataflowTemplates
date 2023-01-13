@@ -383,8 +383,8 @@ templates UI.
 
 ### Releasing Templates
 
-There's a specific command to run Template releases, which is a shortcut to
-create specs and stage templates, with more validations.
+There's a specific command to release all Templates, which is a shortcut to
+create specs and stage templates, with additional validations.
 
 ```shell
 mvn clean package -PtemplatesRelease  \

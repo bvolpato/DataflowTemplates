@@ -19,11 +19,9 @@ import com.google.cloud.teleport.metadata.Template;
 import com.google.cloud.teleport.metadata.TemplateCreationParameter;
 import com.google.cloud.teleport.metadata.TemplateCreationParameters;
 import com.google.cloud.teleport.metadata.TemplateParameter;
-import com.google.cloud.teleport.metadata.options.DefaultTemplateOptions;
 import java.beans.Introspector;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -240,19 +238,6 @@ public class TemplateDefinitions {
             "Parameter {} was already added for the Template {}, skipping repetition.",
             parameter.getName(),
             templateAnnotation.name());
-      }
-    }
-
-    for (Field defaultOption : DefaultTemplateOptions.class.getDeclaredFields()) {
-      Annotation parameterAnnotation = getParameterAnnotation(defaultOption);
-      if (parameterAnnotation == null) {
-        continue;
-      }
-      ImageSpecParameter parameter =
-          getImageSpecParameter(defaultOption.getName(), defaultOption, parameterAnnotation);
-
-      if (parameterNames.add(defaultOption.getName())) {
-        metadata.getParameters().add(parameter);
       }
     }
 
