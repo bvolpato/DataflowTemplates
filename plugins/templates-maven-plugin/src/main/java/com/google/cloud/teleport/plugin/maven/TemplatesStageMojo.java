@@ -60,9 +60,9 @@ import org.twdata.maven.mojoexecutor.MojoExecutor.Element;
     name = "stage",
     defaultPhase = LifecyclePhase.PACKAGE,
     requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
-public class TemplateStageMojo extends TemplateBaseMojo {
+public class TemplatesStageMojo extends TemplatesBaseMojo {
 
-  private static final Logger LOG = LoggerFactory.getLogger(TemplateStageMojo.class);
+  private static final Logger LOG = LoggerFactory.getLogger(TemplatesStageMojo.class);
 
   @Parameter(defaultValue = "${projectId}", readonly = true, required = true)
   protected String projectId;
@@ -88,9 +88,9 @@ public class TemplateStageMojo extends TemplateBaseMojo {
       required = false)
   protected String baseContainerImage;
 
-  public TemplateStageMojo() {}
+  public TemplatesStageMojo() {}
 
-  public TemplateStageMojo(
+  public TemplatesStageMojo(
       MavenProject project,
       MavenSession session,
       File outputDirectory,
@@ -159,6 +159,21 @@ public class TemplateStageMojo extends TemplateBaseMojo {
       throw new MojoExecutionException("URL generation failed", e);
     } catch (Exception e) {
       throw new MojoExecutionException("Template staging failed", e);
+    }
+  }
+
+  /**
+   * Stages a template based on its specific type. See {@link
+   * #stageClassicTemplate(TemplateDefinitions, ImageSpec, BuildPluginManager)} and {@link
+   * #stageFlexTemplate(TemplateDefinitions, ImageSpec, BuildPluginManager)} for more details.
+   */
+  public String stageTemplate(
+      TemplateDefinitions definition, ImageSpec imageSpec, BuildPluginManager pluginManager)
+      throws MojoExecutionException, IOException, InterruptedException {
+    if (definition.isClassic()) {
+      return stageClassicTemplate(definition, imageSpec, pluginManager);
+    } else {
+      return stageFlexTemplate(definition, imageSpec, pluginManager);
     }
   }
 

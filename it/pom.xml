@@ -106,7 +106,7 @@
       <version>${slf4j.version}</version>
     </dependency>
 
-    <!-- Apache Beam dpeendnecy -->
+    <!-- Apache Beam dependency -->
     <dependency>
       <groupId>org.apache.beam</groupId>
       <artifactId>beam-sdks-java-core</artifactId>

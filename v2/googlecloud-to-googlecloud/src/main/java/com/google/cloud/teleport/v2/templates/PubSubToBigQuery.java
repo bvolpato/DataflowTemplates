@@ -161,7 +161,7 @@ import org.slf4j.LoggerFactory;
     skipOptions = "inputTopic",
     contactInformation = "https://cloud.google.com/support")
 @Template(
-    name = "PubSub_to_BigQuery",
+    name = "PubSub_to_BigQuery_Flex",
     category = TemplateCategory.STREAMING,
     displayName = "Pub/Sub Topic to BigQuery",
     description =
