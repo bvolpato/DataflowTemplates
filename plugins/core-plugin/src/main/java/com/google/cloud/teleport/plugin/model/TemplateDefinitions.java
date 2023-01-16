@@ -101,15 +101,13 @@ public class TemplateDefinitions {
   public ImageSpec buildSpecModel(boolean validateFlag) {
 
     ImageSpec imageSpec = new ImageSpec();
-    imageSpec.setDefaultEnvironment(Map.of());
-    imageSpec.setImage("gcr.io/{project-id}/" + templateAnnotation.flexContainerName());
 
     SdkInfo sdkInfo = new SdkInfo();
     sdkInfo.setLanguage("JAVA");
     imageSpec.setSdkInfo(sdkInfo);
 
     ImageSpecMetadata metadata = new ImageSpecMetadata();
-    metadata.setName(templateAnnotation.name());
+    metadata.setName(templateAnnotation.displayName());
     metadata.setDescription(templateAnnotation.description());
 
     if (isClassic()) {
@@ -241,6 +239,18 @@ public class TemplateDefinitions {
       }
     }
 
+    boolean isFlex =
+        templateAnnotation.flexContainerName() == null
+            || templateAnnotation.flexContainerName().isEmpty();
+    imageSpec.setDefaultEnvironment(
+        Map.of(
+            "additionalUserLabels",
+            Map.of(
+                "goog-dataflow-provided-template-name",
+                templateAnnotation.name().toLowerCase(),
+                "goog-dataflow-provided-template-type",
+                isFlex ? "flex" : "classic")));
+    imageSpec.setImage("gcr.io/{project-id}/" + templateAnnotation.flexContainerName());
     imageSpec.setMetadata(metadata);
 
     return imageSpec;
