@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 /** Goal which stages and releases a specific Template. */
 @Mojo(
     name = "release",
-    defaultPhase = LifecyclePhase.INSTALL,
+    defaultPhase = LifecyclePhase.PACKAGE,
     requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class TemplatesReleaseMojo extends TemplatesBaseMojo {
 
@@ -53,6 +53,9 @@ public class TemplatesReleaseMojo extends TemplatesBaseMojo {
 
   @Parameter(defaultValue = "${bucketName}", readonly = true, required = true)
   protected String bucketName;
+
+  @Parameter(defaultValue = "${librariesBucketName}", readonly = true, required = false)
+  protected String librariesBucketName;
 
   @Parameter(defaultValue = "${stagePrefix}", readonly = true, required = false)
   protected String stagePrefix;
@@ -70,6 +73,10 @@ public class TemplatesReleaseMojo extends TemplatesBaseMojo {
   protected String baseContainerImage;
 
   public void execute() throws MojoExecutionException {
+
+    if (librariesBucketName == null || librariesBucketName.isEmpty()) {
+      librariesBucketName = bucketName;
+    }
 
     try {
       URLClassLoader loader = buildClassloader();
@@ -119,6 +126,7 @@ public class TemplatesReleaseMojo extends TemplatesBaseMojo {
                 projectId,
                 templateName,
                 bucketName,
+                librariesBucketName,
                 stagePrefix,
                 useRegion,
                 artifactRegion,

@@ -43,7 +43,6 @@ import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.CreateDisposition;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.WriteDisposition;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
-import org.apache.beam.sdk.options.Validation;
 import org.apache.beam.sdk.options.ValueProvider.StaticValueProvider;
 import org.apache.beam.sdk.transforms.MapElements;
 import org.apache.beam.sdk.transforms.SimpleFunction;
@@ -118,7 +117,6 @@ public class TextIOToBigQuery {
 
     void setJavascriptTextTransformGcsPath(String jsTransformPath);
 
-    @Validation.Required
     @TemplateParameter.Text(
         order = 5,
         optional = false,
@@ -132,7 +130,6 @@ public class TextIOToBigQuery {
 
     void setJavascriptTextTransformFunctionName(String javascriptTextTransformFunctionName);
 
-    @Validation.Required
     @TemplateParameter.GcsWriteFolder(
         order = 6,
         optional = false,

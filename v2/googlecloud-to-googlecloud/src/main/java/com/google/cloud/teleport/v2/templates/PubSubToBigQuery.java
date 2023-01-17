@@ -150,17 +150,6 @@ import org.slf4j.LoggerFactory;
  * </pre>
  */
 @Template(
-    name = "PubSub_Subscription_to_BigQuery",
-    category = TemplateCategory.STREAMING,
-    displayName = "Pub/Sub Subscription to BigQuery",
-    description =
-        "Streaming pipeline. Ingests JSON-encoded messages from a Pub/Sub subscription, transforms"
-            + " them using a JavaScript user-defined function (UDF), and writes them to a"
-            + " pre-existing BigQuery table as BigQuery elements.",
-    optionsClass = Options.class,
-    skipOptions = "inputTopic",
-    contactInformation = "https://cloud.google.com/support")
-@Template(
     name = "PubSub_to_BigQuery_Flex",
     category = TemplateCategory.STREAMING,
     displayName = "Pub/Sub Topic to BigQuery",
@@ -169,7 +158,7 @@ import org.slf4j.LoggerFactory;
             + " using a JavaScript user-defined function (UDF), and writes them to a pre-existing"
             + " BigQuery table as BigQuery elements.",
     optionsClass = Options.class,
-    skipOptions = "inputSubscription",
+    flexContainerName = "pubsub-to-bigquery",
     contactInformation = "https://cloud.google.com/support")
 public class PubSubToBigQuery {
 

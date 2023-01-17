@@ -387,9 +387,10 @@ There's a specific command to run Template releases, which is a shortcut to
 create specs and stage templates, with more validations.
 
 ```shell
-mvn clean install -PtemplatesRelease  \
+mvn clean package -PtemplatesRelease  \
   -DprojectId="{projectId}" \
   -DbucketName="{bucketName}" \
+  -DlibrariesBucketName="{bucketName}-libraries" \
   -DstagePrefix="$(date +%Y_%m_%d)-00_RC00"
 ```
 

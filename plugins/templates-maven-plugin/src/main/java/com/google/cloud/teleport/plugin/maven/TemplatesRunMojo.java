@@ -137,6 +137,7 @@ public class TemplatesRunMojo extends TemplatesBaseMojo {
               projectId,
               templateName,
               bucketName,
+              bucketName,
               stagePrefix,
               useRegion,
               artifactRegion,

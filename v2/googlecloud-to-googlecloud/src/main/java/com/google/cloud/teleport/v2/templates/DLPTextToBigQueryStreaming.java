@@ -168,6 +168,7 @@ import org.slf4j.LoggerFactory;
             + " environment and data needs. More details here:"
             + " https://cloud.google.com/solutions/de-identification-re-identification-pii-using-cloud-dlp",
     optionsClass = TokenizePipelineOptions.class,
+    flexContainerName = "stream-dlp-gcs-text-to-bigquery",
     contactInformation = "https://cloud.google.com/support")
 public class DLPTextToBigQueryStreaming {
 
@@ -331,7 +332,6 @@ public class DLPTextToBigQueryStreaming {
                 + " https://console.cloud.google.com/security/dlp/create/template.",
         example =
             "projects/your-project-id/locations/global/deidentifyTemplates/generated_template_id")
-    @Required
     String getDeidentifyTemplateName();
 
     void setDeidentifyTemplateName(String value);

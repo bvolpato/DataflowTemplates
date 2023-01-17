@@ -73,6 +73,9 @@ public class TemplatesStageMojo extends TemplatesBaseMojo {
   @Parameter(defaultValue = "${bucketName}", readonly = true, required = true)
   protected String bucketName;
 
+  @Parameter(defaultValue = "${librariesBucketName}", readonly = true, required = false)
+  protected String librariesBucketName;
+
   @Parameter(defaultValue = "${stagePrefix}", readonly = true, required = true)
   protected String stagePrefix;
 
@@ -100,6 +103,7 @@ public class TemplatesStageMojo extends TemplatesBaseMojo {
       String projectId,
       String templateName,
       String bucketName,
+      String librariesBucketName,
       String stagePrefix,
       String region,
       String artifactRegion,
@@ -113,6 +117,7 @@ public class TemplatesStageMojo extends TemplatesBaseMojo {
     this.projectId = projectId;
     this.templateName = templateName;
     this.bucketName = bucketName;
+    this.librariesBucketName = librariesBucketName;
     this.stagePrefix = stagePrefix;
     this.region = region;
     this.artifactRegion = artifactRegion;
@@ -120,6 +125,11 @@ public class TemplatesStageMojo extends TemplatesBaseMojo {
   }
 
   public void execute() throws MojoExecutionException {
+
+    //
+    if (librariesBucketName == null || librariesBucketName.isEmpty()) {
+      librariesBucketName = bucketName;
+    }
 
     try {
       URLClassLoader loader = buildClassloader();
@@ -199,7 +209,8 @@ public class TemplatesStageMojo extends TemplatesBaseMojo {
             .saveMetadata(definition, imageSpec.getMetadata(), outputClassesDirectory);
     String currentTemplateName = imageSpec.getMetadata().getName();
 
-    String stagingPath = "gs://" + bucketNameOnly(bucketName) + "/" + stagePrefix + "/staging/";
+    String stagingPath =
+        "gs://" + bucketNameOnly(librariesBucketName) + "/" + stagePrefix + "/staging/";
     String templatePath =
         "gs://" + bucketNameOnly(bucketName) + "/" + stagePrefix + "/" + currentTemplateName;
     String templateMetadataPath = templatePath + "_metadata";
