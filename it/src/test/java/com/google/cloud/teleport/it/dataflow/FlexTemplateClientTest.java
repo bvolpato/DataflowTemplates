@@ -139,7 +139,7 @@ public final class FlexTemplateClientTest {
             .setState(JobState.RUNNING)
             .setCreateTime("")
             .setSdk("Apache Beam Java")
-            .setVersion("2.42")
+            .setVersion("2.42.0")
             .setJobType("JOB_TYPE_BATCH")
             .setRunner("Dataflow")
             .setParameters(ImmutableMap.of(PARAM_KEY, PARAM_VALUE))
