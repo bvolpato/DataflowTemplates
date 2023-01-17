@@ -136,7 +136,12 @@ public class SpannerChangeStreamsToPubSub {
                 .withMetadataTable(metadataTableName))
         .apply(
             "Convert each record to a PubsubMessage",
-            FileFormatFactorySpannerChangeStreamsToPubSub.newBuilder().setOptions(options).build());
+            FileFormatFactorySpannerChangeStreamsToPubSub.newBuilder()
+                .setOutputDataFormat(options.getOutputDataFormat())
+                .setProjectId(projectId)
+                .setPubsubAPI(pubsubAPI)
+                .setPubsubTopic(outputPubsubTopic)
+                .build());
     return pipeline.run();
   }
 }
