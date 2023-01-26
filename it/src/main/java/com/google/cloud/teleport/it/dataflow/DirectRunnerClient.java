@@ -27,7 +27,9 @@ import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +39,8 @@ import org.slf4j.LoggerFactory;
  */
 public class DirectRunnerClient extends AbstractDataflowClient {
   private static final Logger LOG = LoggerFactory.getLogger(DirectRunnerClient.class);
+
+  private static final Map<String, DirectRunnerJobThread> MANAGED_JOBS = new HashMap<>();
 
   private final Class<?> mainClass;
 
