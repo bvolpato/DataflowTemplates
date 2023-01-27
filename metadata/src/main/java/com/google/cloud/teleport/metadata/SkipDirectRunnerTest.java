@@ -16,4 +16,4 @@
 package com.google.cloud.teleport.metadata;
 
 /** Annotation that marks tests that can run on Dataflow only. */
-public interface TemplateDataflowOnlyTest {}
+public interface SkipDirectRunnerTest {}

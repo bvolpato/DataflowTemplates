@@ -300,7 +300,7 @@
                 <include>**/*IT.java</include>
               </includes>
               <excludedGroups>
-                com.google.cloud.teleport.metadata.TemplateDataflowOnlyTest
+                com.google.cloud.teleport.metadata.SkipDirectRunnerTest
               </excludedGroups>
               <groups>
                 com.google.cloud.teleport.metadata.TemplateIntegrationTest
