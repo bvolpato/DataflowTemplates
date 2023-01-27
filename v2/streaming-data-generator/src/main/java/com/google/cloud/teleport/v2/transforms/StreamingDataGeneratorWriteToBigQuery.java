@@ -115,7 +115,7 @@ public abstract class StreamingDataGeneratorWriteToBigQuery
             TableRowJsonCoder.of().decode(new ByteArrayInputStream(message), Coder.Context.OUTER));
       } catch (IOException e) {
         throw new RuntimeException(
-            "Failed converting to TableRow with an error: " + e.getMessage());
+            "Failed converting to TableRow", e);
       }
     }
   }
