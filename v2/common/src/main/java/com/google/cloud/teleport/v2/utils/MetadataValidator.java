@@ -36,7 +36,7 @@ public class MetadataValidator {
    * Validates a given instance of {@link PipelineOptions}, and reports divergences for invalid
    * parameter usage.
    *
-   * <pre>Status: for now, errors/warnings will be provided but no exceptions thrown. This behavior
+   * <p>Status: for now, errors/warnings will be provided but no exceptions thrown. This behavior
    * might change in the future.
    *
    * @param options Options instance to validate.
