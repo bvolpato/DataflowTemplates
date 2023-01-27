@@ -111,8 +111,7 @@ class ReadFileShardFn extends DoFn<FileShard, KV<String, CSVRecord>> {
           }
         }
       } catch (IOException e) {
-        throw new RuntimeException(
-            "Unable to readFile: " + readingFile, e);
+        throw new RuntimeException("Unable to readFile: " + readingFile, e);
       }
     } else {
       try {
@@ -145,8 +144,7 @@ class ReadFileShardFn extends DoFn<FileShard, KV<String, CSVRecord>> {
           }
         }
       } catch (IOException e) {
-        throw new RuntimeException(
-            "Unable to readFile: " + readingFile, e);
+        throw new RuntimeException("Unable to readFile: " + readingFile, e);
       }
     }
   }
