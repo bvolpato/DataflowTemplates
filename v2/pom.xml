@@ -60,7 +60,7 @@
     <dependencies>
         <!-- Templates Annotations -->
         <dependency>
-            <groupId>com.google.cloud.teleport.metadata</groupId>
+            <groupId>com.google.cloud.teleport</groupId>
             <artifactId>metadata</artifactId>
             <version>${project.version}</version>
         </dependency>
