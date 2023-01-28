@@ -59,7 +59,11 @@ public class ImageSpecParameter {
   }
 
   public void setOptional(Boolean optional) {
-    isOptional = optional;
+    if (optional == null || !optional) {
+      isOptional = null;
+    } else {
+      isOptional = true;
+    }
   }
 
   public List<String> getRegexes() {
