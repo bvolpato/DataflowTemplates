@@ -47,7 +47,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /** Integration test for {@link PubsubToText} (Cloud_PubSub_to_GCS_Text_Flex). */
-// TemplateDataflowOnlyTest: PubSubIO doesn't trigger panes on the DirectRunner.
+// SkipDirectRunnerTest: PubsubIO doesn't trigger panes on the DirectRunner.
 @Category({TemplateIntegrationTest.class, SkipDirectRunnerTest.class})
 @TemplateIntegrationTest(PubsubToText.class)
 @RunWith(JUnit4.class)

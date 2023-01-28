@@ -64,7 +64,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /** Integration test for {@link PubsubAvroToBigQuery}. */
-// TemplateDataflowOnlyTest: PubSubIO doesn't trigger panes on the DirectRunner.
+// SkipDirectRunnerTest: PubsubIO doesn't trigger panes on the DirectRunner.
 @Category({TemplateIntegrationTest.class, SkipDirectRunnerTest.class})
 @TemplateIntegrationTest(PubsubAvroToBigQuery.class)
 @RunWith(JUnit4.class)
