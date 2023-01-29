@@ -20,6 +20,8 @@ import java.beans.Introspector;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 
 /** Utilities for working with template metadata. */
 public final class MetadataUtils {
@@ -106,5 +108,89 @@ public final class MetadataUtils {
     }
 
     return changedName;
+  }
+
+  /** Get the list of regexes that needs to be used for the validation of a template parameter. */
+  public static List<String> getRegexes(Annotation parameterAnnotation) {
+    switch (parameterAnnotation.annotationType().getSimpleName()) {
+      case "Text":
+        TemplateParameter.Text simpleTextParam = (TemplateParameter.Text) parameterAnnotation;
+        if (simpleTextParam.regexes() != null
+            && simpleTextParam.regexes().length > 0
+            && !(simpleTextParam.regexes().length == 1
+            && simpleTextParam.regexes()[0].equals(""))) {
+          return Arrays.asList(simpleTextParam.regexes());
+        }
+        return null;
+      case "GcsReadFile":
+        TemplateParameter.GcsReadFile gcsReadFileParam =
+            (TemplateParameter.GcsReadFile) parameterAnnotation;
+        return List.of("^gs:\\/\\/[^\\n\\r]+$");
+      case "GcsReadFolder":
+        TemplateParameter.GcsReadFolder gcsReadFolderParam =
+            (TemplateParameter.GcsReadFolder) parameterAnnotation;
+        return List.of("^gs:\\/\\/[^\\n\\r]+$");
+      case "GcsWriteFile":
+        TemplateParameter.GcsWriteFile gcsWriteFileParam =
+            (TemplateParameter.GcsWriteFile) parameterAnnotation;
+        return List.of("^gs:\\/\\/[^\\n\\r]+$");
+      case "GcsWriteFolder":
+        TemplateParameter.GcsWriteFolder gcsWriteFolderParam =
+            (TemplateParameter.GcsWriteFolder) parameterAnnotation;
+        return List.of("^gs:\\/\\/[^\\n\\r]+$");
+      case "PubsubSubscription":
+        TemplateParameter.PubsubSubscription pubsubSubscriptionParam =
+            (TemplateParameter.PubsubSubscription) parameterAnnotation;
+        return List.of("^projects\\/[^\\n\\r\\/]+\\/subscriptions\\/[^\\n\\r\\/]+$|^$");
+      case "PubsubTopic":
+        TemplateParameter.PubsubTopic pubsubTopicParam =
+            (TemplateParameter.PubsubTopic) parameterAnnotation;
+        return List.of("^projects\\/[^\\n\\r\\/]+\\/topics\\/[^\\n\\r\\/]+$|^$");
+      case "Password":
+        TemplateParameter.Password passwordParam = (TemplateParameter.Password) parameterAnnotation;
+        return null;
+      case "ProjectId":
+        TemplateParameter.ProjectId projectIdParam =
+            (TemplateParameter.ProjectId) parameterAnnotation;
+        return List.of("[a-z0-9\\-\\.\\:]+");
+      case "Boolean":
+        TemplateParameter.Boolean booleanParam = (TemplateParameter.Boolean) parameterAnnotation;
+        return List.of("^(true|false)$");
+      case "Integer":
+        TemplateParameter.Integer integerParam = (TemplateParameter.Integer) parameterAnnotation;
+        return List.of("^[0-9]+$");
+      case "Long":
+        TemplateParameter.Long longParam = (TemplateParameter.Long) parameterAnnotation;
+        return List.of("^[0-9]+$");
+      case "Enum":
+        TemplateParameter.Enum enumParam = (TemplateParameter.Enum) parameterAnnotation;
+        return List.of("^(" + String.join("|", enumParam.enumOptions()) + ")$");
+      case "DateTime":
+        TemplateParameter.DateTime dateTimeParam = (TemplateParameter.DateTime) parameterAnnotation;
+        return List.of(
+            "^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):(([0-9]{2})(\\\\.[0-9]+)?)Z$");
+      case "BigQueryTable":
+        TemplateParameter.BigQueryTable bigQueryTableParam =
+            (TemplateParameter.BigQueryTable) parameterAnnotation;
+        return List.of(".+:.+\\..+");
+      case "KmsEncryptionKey":
+        TemplateParameter.KmsEncryptionKey kmsEncryptionKeyParam =
+            (TemplateParameter.KmsEncryptionKey) parameterAnnotation;
+        return List.of(
+            "^projects\\/[^\\n"
+                + "\\r"
+                + "\\/]+\\/locations\\/[^\\n"
+                + "\\r"
+                + "\\/]+\\/keyRings\\/[^\\n"
+                + "\\r"
+                + "\\/]+\\/cryptoKeys\\/[^\\n"
+                + "\\r"
+                + "\\/]+$");
+      case "Duration":
+        TemplateParameter.Duration durationParam = (TemplateParameter.Duration) parameterAnnotation;
+        return List.of("^[1-9][0-9]*[s|m|h]$");
+      default:
+        return null;
+    }
   }
 }
