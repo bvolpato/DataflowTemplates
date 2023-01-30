@@ -118,7 +118,7 @@ public final class MetadataUtils {
         if (simpleTextParam.regexes() != null
             && simpleTextParam.regexes().length > 0
             && !(simpleTextParam.regexes().length == 1
-            && simpleTextParam.regexes()[0].equals(""))) {
+                && simpleTextParam.regexes()[0].equals(""))) {
           return Arrays.asList(simpleTextParam.regexes());
         }
         return null;

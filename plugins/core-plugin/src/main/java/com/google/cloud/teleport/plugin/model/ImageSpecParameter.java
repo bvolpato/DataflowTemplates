@@ -18,7 +18,6 @@ package com.google.cloud.teleport.plugin.model;
 import com.google.cloud.teleport.metadata.TemplateParameter;
 import com.google.cloud.teleport.metadata.util.MetadataUtils;
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.List;
 
 /** Parameters in a template. */
