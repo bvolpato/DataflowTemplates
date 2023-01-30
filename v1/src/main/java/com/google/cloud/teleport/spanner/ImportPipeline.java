@@ -164,7 +164,7 @@ public class ImportPipeline {
     @Default.Integer(30)
     ValueProvider<Integer> getDdlCreationTimeoutInMinutes();
 
-    void setDDLCreationTimeoutInMinutes(ValueProvider<Integer> value);
+    void setDdlCreationTimeoutInMinutes(ValueProvider<Integer> value);
 
     @TemplateParameter.Enum(
         order = 11,
