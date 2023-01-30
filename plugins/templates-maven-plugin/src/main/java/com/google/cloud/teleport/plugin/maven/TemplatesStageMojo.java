@@ -370,11 +370,9 @@ public class TemplatesStageMojo extends TemplatesBaseMojo {
           "--metadata-file",
           outputClassesDirectory.getAbsolutePath() + "/" + metadataFile.getName(),
           "--additional-user-labels",
-          "{\"goog-dataflow-provided-template-name\":\""
-              + currentTemplateName
-              + "\", \"goog-dataflow-provided-template-version\":\""
-              + stagePrefix.toLowerCase()
-              + "\", \"goog-dataflow-provided-template-type\":\"flex\"}"
+          "goog-dataflow-provided-template-name="
+              + currentTemplateName.toLowerCase()
+              + ",goog-dataflow-provided-template-type=flex"
         };
     LOG.info("Running: {}", String.join(" ", flexTemplateBuildCmd));
 
