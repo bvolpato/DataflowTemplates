@@ -198,9 +198,9 @@ public class DirectRunnerClient extends AbstractDataflowClient {
               job.putAll(updateJob);
 
               // Make state transitions instant
-              if (job.containsKey("requestedState")
-                  && !job.get("requestedState").equals(job.containsKey("currentState"))) {
-                String requestedState = (String) job.get("requestedState");
+              String requestedState = (String) job.get("requestedState");
+              String currentState = (String) job.get("currentState");
+              if (requestedState != null && !requestedState.equals(currentState)) {
                 job.put("currentState", requestedState);
 
                 JobState jobState = JobState.parse(requestedState);
