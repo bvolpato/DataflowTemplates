@@ -252,7 +252,7 @@ public class ImageSpecParameter {
             bigQueryTableParam.helpText(),
             bigQueryTableParam.example());
         this.setOptional(bigQueryTableParam.optional());
-        this.setParamType(ImageSpecParameterType.TEXT);
+        this.setParamType(ImageSpecParameterType.BIGQUERY_TABLE);
         break;
       case "KmsEncryptionKey":
         TemplateParameter.KmsEncryptionKey kmsEncryptionKeyParam =
