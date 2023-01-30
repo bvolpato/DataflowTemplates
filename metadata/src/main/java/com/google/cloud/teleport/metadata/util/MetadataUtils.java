@@ -15,10 +15,67 @@
  */
 package com.google.cloud.teleport.metadata.util;
 
+import com.google.cloud.teleport.metadata.TemplateParameter;
+import java.beans.Introspector;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Method;
+
 /** Utilities for working with template metadata. */
 public final class MetadataUtils {
 
+  private static final Class<? extends Annotation>[] PARAMETER_ANNOTATIONS =
+      new Class[] {
+        TemplateParameter.BigQueryTable.class,
+        TemplateParameter.Boolean.class,
+        TemplateParameter.DateTime.class,
+        TemplateParameter.Duration.class,
+        TemplateParameter.Enum.class,
+        TemplateParameter.GcsReadFile.class,
+        TemplateParameter.GcsReadFolder.class,
+        TemplateParameter.GcsWriteFile.class,
+        TemplateParameter.GcsWriteFolder.class,
+        TemplateParameter.Integer.class,
+        TemplateParameter.KmsEncryptionKey.class,
+        TemplateParameter.Long.class,
+        TemplateParameter.Password.class,
+        TemplateParameter.ProjectId.class,
+        TemplateParameter.PubsubSubscription.class,
+        TemplateParameter.PubsubTopic.class,
+        TemplateParameter.Text.class
+      };
+
   private MetadataUtils() {}
+
+  /**
+   * Get the instance of TemplateParameter for a given object.
+   *
+   * @param accessibleObject Object (e.g., {@link Method}) to search the parameter.
+   * @return Annotation if it is annotated, null otherwise.
+   */
+  public static Annotation getParameterAnnotation(AccessibleObject accessibleObject) {
+
+    for (Class<? extends Annotation> annotation : PARAMETER_ANNOTATIONS) {
+      if (accessibleObject.getAnnotation(annotation) != null) {
+        return accessibleObject.getAnnotation(annotation);
+      }
+    }
+
+    return null;
+  }
+
+  /** This method is inspired by {@code org.apache.beam.sdk.options.PipelineOptionsReflector}. */
+  public static String getParameterNameFromMethod(String originalName) {
+    String methodName;
+    if (originalName.startsWith("is")) {
+      methodName = originalName.substring(2);
+    } else if (originalName.startsWith("get")) {
+      methodName = originalName.substring(3);
+    } else {
+      methodName = originalName;
+    }
+    return Introspector.decapitalize(methodName);
+  }
 
   /**
    * There are cases in which users will pass a gs://{bucketName} or a gs://{bucketName}/path
