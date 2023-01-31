@@ -13,12 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.cloud.teleport.it.dataflow;
+package com.google.cloud.teleport.it.launcher;
 
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.auto.value.AutoValue;
-import com.google.cloud.teleport.it.dataflow.DataflowClient.JobState;
+import com.google.cloud.teleport.it.launcher.PipelineLauncher.JobState;
 import com.google.common.base.Strings;
 import java.io.IOException;
 import java.time.Duration;
@@ -29,9 +29,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Utilities for managing Dataflow jobs. */
-public final class DataflowOperator {
+public final class PipelineOperator {
 
-  private static final Logger LOG = LoggerFactory.getLogger(DataflowOperator.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PipelineOperator.class);
 
   /** The result of running an operation. */
   public enum Result {
@@ -41,9 +41,9 @@ public final class DataflowOperator {
     TIMEOUT
   }
 
-  private final DataflowClient client;
+  private final PipelineLauncher client;
 
-  public DataflowOperator(DataflowClient client) {
+  public PipelineOperator(PipelineLauncher client) {
     this.client = client;
   }
 
@@ -254,7 +254,7 @@ public final class DataflowOperator {
     // TODO(zhoufek): Also let users set the maximum number of exceptions.
 
     public static Builder builder() {
-      return new AutoValue_DataflowOperator_Config.Builder()
+      return new AutoValue_PipelineOperator_Config.Builder()
           .setCheckAfter(Duration.ofSeconds(15))
           .setTimeoutAfter(Duration.ofMinutes(15));
     }

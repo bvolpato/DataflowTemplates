@@ -15,20 +15,19 @@
  */
 package com.google.cloud.teleport.v2.elasticsearch.templates;
 
-import static com.google.cloud.teleport.it.dataflow.DataflowUtils.createJobName;
+import static com.google.cloud.teleport.it.PipelineUtils.createJobName;
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatLaunch;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatRecords;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.cloud.teleport.it.TemplateTestBase;
 import com.google.cloud.teleport.it.bigquery.BigQueryResourceManager;
 import com.google.cloud.teleport.it.bigquery.DefaultBigQueryResourceManager;
-import com.google.cloud.teleport.it.dataflow.DataflowClient.JobInfo;
-import com.google.cloud.teleport.it.dataflow.DataflowClient.JobState;
-import com.google.cloud.teleport.it.dataflow.DataflowClient.LaunchConfig;
-import com.google.cloud.teleport.it.dataflow.DataflowOperator;
-import com.google.cloud.teleport.it.dataflow.DataflowOperator.Result;
 import com.google.cloud.teleport.it.elasticsearch.DefaultElasticsearchResourceManager;
 import com.google.cloud.teleport.it.elasticsearch.ElasticsearchResourceManager;
+import com.google.cloud.teleport.it.launcher.PipelineLauncher.LaunchConfig;
+import com.google.cloud.teleport.it.launcher.PipelineLauncher.LaunchInfo;
+import com.google.cloud.teleport.it.launcher.PipelineOperator.Result;
 import com.google.cloud.teleport.metadata.TemplateIntegrationTest;
 import com.google.common.io.Resources;
 import java.io.IOException;
@@ -78,11 +77,8 @@ public final class GCSToElasticsearchIT extends TemplateTestBase {
     elasticsearchResourceManager.createIndex(indexName);
     bigQueryClient.createDataset(REGION);
 
-    String name = testName.getMethodName();
-    String jobName = createJobName(name);
-
     LaunchConfig.Builder options =
-        LaunchConfig.builder(jobName, specPath)
+        LaunchConfig.builder(testName, specPath)
             .addParameter("inputFileSpec", getGcsPath("input") + "/*.csv")
             .addParameter("inputFormat", "csv")
             .addParameter("containsHeaders", "false")
@@ -95,10 +91,10 @@ public final class GCSToElasticsearchIT extends TemplateTestBase {
             .addParameter("apiKey", "elastic");
 
     // Act
-    JobInfo info = launchTemplate(options);
-    assertThat(info.state()).isIn(JobState.ACTIVE_STATES);
+    LaunchInfo info = launchTemplate(options);
+    assertThatLaunch(info).succeeded();
 
-    Result result = new DataflowOperator(getDataflowClient()).waitUntilDone(createConfig(info));
+    Result result = pipelineOperator().waitUntilDone(createConfig(info));
 
     // Assert
     assertThat(result).isEqualTo(Result.JOB_FINISHED);
@@ -118,11 +114,8 @@ public final class GCSToElasticsearchIT extends TemplateTestBase {
     elasticsearchResourceManager.createIndex(indexName);
     bigQueryClient.createDataset(REGION);
 
-    String name = testName.getMethodName();
-    String jobName = createJobName(name);
-
     LaunchConfig.Builder options =
-        LaunchConfig.builder(jobName, specPath)
+        LaunchConfig.builder(testName, specPath)
             .addParameter("inputFileSpec", getGcsPath("input") + "/*.csv")
             .addParameter("inputFormat", "csv")
             .addParameter("containsHeaders", "true")
@@ -133,10 +126,10 @@ public final class GCSToElasticsearchIT extends TemplateTestBase {
             .addParameter("apiKey", "elastic");
 
     // Act
-    JobInfo info = launchTemplate(options);
-    assertThat(info.state()).isIn(JobState.ACTIVE_STATES);
+    LaunchInfo info = launchTemplate(options);
+    assertThatLaunch(info).succeeded();
 
-    Result result = new DataflowOperator(getDataflowClient()).waitUntilDone(createConfig(info));
+    Result result = pipelineOperator().waitUntilDone(createConfig(info));
 
     // Assert
     assertThat(result).isEqualTo(Result.JOB_FINISHED);
