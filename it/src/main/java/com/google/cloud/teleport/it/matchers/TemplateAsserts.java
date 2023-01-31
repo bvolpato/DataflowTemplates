@@ -42,7 +42,7 @@ public final class TemplateAsserts {
    * @param launchInfo Launch information returned from the launcher.
    * @return Truth Subject to chain assertions.
    */
-  public static LaunchInfoSubject assertThatLaunch(LaunchInfo launchInfo) {
+  public static LaunchInfoSubject assertThatPipeline(LaunchInfo launchInfo) {
     return assertAbout(LaunchInfoSubject.launchInfo()).that(launchInfo);
   }
 

@@ -15,7 +15,7 @@
  */
 package com.google.cloud.teleport.v2.templates;
 
-import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatLaunch;
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatPipeline;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatRecords;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
 
@@ -121,7 +121,7 @@ public class TextToBigQueryStreamingIT extends TemplateTestBase {
                     .addParameter("javascriptTextTransformFunctionName", "identity")
                     .addParameter("outputTable", toTableSpec(tableId))
                     .addParameter("bigQueryLoadingTemporaryDirectory", getGcsPath("bq-tmp"))));
-    assertThatLaunch(info).succeeded();
+    assertThatPipeline(info).isRunning();
 
     artifactClient.uploadArtifact("input.txt", Resources.getResource(INPUT_PATH).getPath());
 

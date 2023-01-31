@@ -15,7 +15,7 @@
  */
 package com.google.cloud.teleport.v2.templates;
 
-import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatLaunch;
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatPipeline;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatRecords;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
 
@@ -129,7 +129,7 @@ public final class PubsubAvroToBigQueryIT extends TemplateTestBase {
                 .addParameter("inputSubscription", subscription.toString())
                 .addParameter("outputTableSpec", toTableSpec(people))
                 .addParameter("outputTopic", dlqTopic.toString()));
-    assertThatLaunch(info).succeeded();
+    assertThatPipeline(info).isRunning();
 
     AtomicReference<TableResult> records = new AtomicReference<>();
 

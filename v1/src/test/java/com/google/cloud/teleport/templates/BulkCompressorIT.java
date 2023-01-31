@@ -15,7 +15,7 @@
  */
 package com.google.cloud.teleport.templates;
 
-import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatLaunch;
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatPipeline;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
 import static com.google.common.truth.Truth.assertThat;
 
@@ -61,7 +61,7 @@ public final class BulkCompressorIT extends TemplateTestBase {
 
     // Act
     LaunchInfo info = launchTemplate(options);
-    assertThatLaunch(info).succeeded();
+    assertThatPipeline(info).isRunning();
 
     Result result = pipelineOperator().waitUntilDone(createConfig(info));
 

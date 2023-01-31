@@ -42,7 +42,7 @@ public final class LaunchInfoSubject extends Subject {
    * that the pipeline finished and no errors happened, it just means that the job was able to get
    * itself into an active state (RUNNING, UPDATED).
    */
-  public void succeeded() {
+  public void isRunning() {
     check("check if succeeded").that(actual.state()).isIn(JobState.ACTIVE_STATES);
   }
 

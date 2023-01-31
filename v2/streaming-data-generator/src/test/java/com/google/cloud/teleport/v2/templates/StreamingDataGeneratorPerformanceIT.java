@@ -19,7 +19,7 @@ import static com.google.cloud.teleport.it.PipelineUtils.createJobName;
 import static com.google.cloud.teleport.it.TemplateTestBase.toTableSpec;
 import static com.google.cloud.teleport.it.artifacts.ArtifactUtils.createGcsClient;
 import static com.google.cloud.teleport.it.artifacts.ArtifactUtils.getFullGcsPath;
-import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatLaunch;
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatPipeline;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
 import static com.google.common.truth.Truth.assertThat;
 
@@ -111,7 +111,7 @@ public class StreamingDataGeneratorPerformanceIT extends PerformanceBenchmarking
 
     // Act
     LaunchInfo info = pipelineLauncher.launch(PROJECT, REGION, options);
-    assertThatLaunch(info).succeeded();
+    assertThatPipeline(info).isRunning();
     Result result = pipelineOperator.waitUntilDone(createConfig(info, Duration.ofMinutes(30)));
     // Assert
     assertThatResult(result).isLaunchFinished();
@@ -148,7 +148,7 @@ public class StreamingDataGeneratorPerformanceIT extends PerformanceBenchmarking
 
     // Act
     LaunchInfo info = pipelineLauncher.launch(PROJECT, REGION, options);
-    assertThatLaunch(info).succeeded();
+    assertThatPipeline(info).isRunning();
     Result result = pipelineOperator.waitUntilDone(createConfig(info, Duration.ofMinutes(30)));
     // Assert
     assertThatResult(result).isLaunchFinished();
@@ -195,7 +195,7 @@ public class StreamingDataGeneratorPerformanceIT extends PerformanceBenchmarking
 
     // Act
     LaunchInfo info = pipelineLauncher.launch(PROJECT, REGION, options);
-    assertThatLaunch(info).succeeded();
+    assertThatPipeline(info).isRunning();
     Result result = pipelineOperator.waitUntilDone(createConfig(info, Duration.ofMinutes(30)));
     // Assert
     assertThatResult(result).isLaunchFinished();

@@ -18,7 +18,7 @@ package com.google.cloud.teleport.v2.templates.pubsubtotext;
 import static com.google.cloud.teleport.it.PipelineUtils.createJobName;
 import static com.google.cloud.teleport.it.artifacts.ArtifactUtils.createGcsClient;
 import static com.google.cloud.teleport.it.artifacts.ArtifactUtils.getFullGcsPath;
-import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatLaunch;
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatPipeline;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
 import static com.google.common.truth.Truth.assertThat;
 
@@ -127,7 +127,7 @@ public final class PubsubToTextPerformanceIT extends PerformanceBenchmarkingBase
 
     // Act
     LaunchInfo info = pipelineLauncher.launch(PROJECT, REGION, options);
-    assertThatLaunch(info).succeeded();
+    assertThatPipeline(info).isRunning();
     Result result =
         pipelineOperator.waitForConditionAndFinish(
             createConfig(info, Duration.ofMinutes(30)),
@@ -173,7 +173,7 @@ public final class PubsubToTextPerformanceIT extends PerformanceBenchmarkingBase
 
     // Act
     LaunchInfo info = pipelineLauncher.launch(PROJECT, REGION, options);
-    assertThatLaunch(info).succeeded();
+    assertThatPipeline(info).isRunning();
     Result result =
         pipelineOperator.waitForConditionAndFinish(
             createConfig(info, Duration.ofMinutes(30)),
@@ -214,7 +214,7 @@ public final class PubsubToTextPerformanceIT extends PerformanceBenchmarkingBase
 
     // Act
     LaunchInfo info = pipelineLauncher.launch(PROJECT, REGION, options);
-    assertThatLaunch(info).succeeded();
+    assertThatPipeline(info).isRunning();
     dataGenerator.execute(Duration.ofMinutes(60));
     Result result = pipelineOperator.drainJobAndFinish(createConfig(info, Duration.ofMinutes(20)));
 

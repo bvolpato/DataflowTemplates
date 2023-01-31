@@ -15,7 +15,7 @@
  */
 package com.google.cloud.teleport.templates;
 
-import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatLaunch;
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatPipeline;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
 import static com.google.common.truth.Truth.assertThat;
 
@@ -88,7 +88,7 @@ public class PubSubToAvroIT extends TemplateTestBase {
                 .addParameter("outputDirectory", getGcsPath(testName))
                 .addParameter("avroTempDirectory", getGcsPath("avro_tmp"))
                 .addParameter("outputFilenamePrefix", "topic-output-"));
-    assertThatLaunch(info).succeeded();
+    assertThatPipeline(info).isRunning();
 
     ImmutableSet<String> messages =
         ImmutableSet.of("message1-" + name, "message2-" + name, "message3-" + name);

@@ -15,9 +15,12 @@
  */
 package com.google.cloud.teleport.it.matchers;
 
+import com.google.cloud.teleport.it.launcher.PipelineOperator;
+import com.google.cloud.teleport.it.launcher.PipelineOperator.Config;
 import com.google.cloud.teleport.it.launcher.PipelineOperator.Result;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
+import java.util.function.Supplier;
 
 /**
  * Subject that has assertion operations for {@link Result}, which is the end result of a pipeline
@@ -36,17 +39,25 @@ public final class ResultSubject extends Subject {
     return ResultSubject::new;
   }
 
-  /** Check if the subject meets expected conditions. */
+  /**
+   * Check if the launch meets expected conditions given to a `waitForCondition...` method such as
+   * {@link PipelineOperator#waitForCondition(Config, Supplier)} or {@link
+   * PipelineOperator#waitForConditionAndFinish(Config, Supplier)}.
+   */
   public void meetsConditions() {
     check("check if meets all conditions").that(actual).isEqualTo(Result.CONDITION_MET);
   }
 
-  /** Check if the subject finished correctly. */
+  /**
+   * Check if the launch finished (is in a successful final state). It doesn't mean that the jobs
+   * meet any conditions. For any `waitForCondition...` methods, checking if the launch {@link
+   * #meetsConditions()} is more appropriate for testing purposes.
+   */
   public void isLaunchFinished() {
     check("check if result is finished").that(actual).isEqualTo(Result.LAUNCH_FINISHED);
   }
 
-  /** Check if the subject finished with a timeout. */
+  /** Check if the launch finished with a timeout. */
   public void hasTimedOut() {
     check("check if result timed out").that(actual).isEqualTo(Result.TIMEOUT);
   }

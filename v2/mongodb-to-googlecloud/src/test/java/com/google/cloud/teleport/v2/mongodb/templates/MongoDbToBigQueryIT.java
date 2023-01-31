@@ -15,7 +15,7 @@
  */
 package com.google.cloud.teleport.v2.mongodb.templates;
 
-import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatLaunch;
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatPipeline;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
 import static org.junit.Assert.assertTrue;
 
@@ -174,7 +174,7 @@ public final class MongoDbToBigQueryIT extends TemplateTestBase {
 
     // Act
     LaunchInfo info = launchTemplate(options);
-    assertThatLaunch(info).succeeded();
+    assertThatPipeline(info).isRunning();
 
     Result result =
         pipelineOperator()

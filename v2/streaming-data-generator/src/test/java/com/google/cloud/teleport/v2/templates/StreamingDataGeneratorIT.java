@@ -15,7 +15,7 @@
  */
 package com.google.cloud.teleport.v2.templates;
 
-import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatLaunch;
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatPipeline;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
 
 import com.google.cloud.bigquery.Field;
@@ -120,7 +120,7 @@ public final class StreamingDataGeneratorIT extends TemplateTestBase {
             .addParameter(NUM_SHARDS_KEY, "1");
     // Act
     LaunchInfo info = launchTemplate(options);
-    assertThatLaunch(info).succeeded();
+    assertThatPipeline(info).isRunning();
 
     Result result =
         pipelineOperator()
@@ -149,7 +149,7 @@ public final class StreamingDataGeneratorIT extends TemplateTestBase {
             .addParameter(NUM_SHARDS_KEY, "1");
     // Act
     LaunchInfo info = launchTemplate(options);
-    assertThatLaunch(info).succeeded();
+    assertThatPipeline(info).isRunning();
 
     Result result =
         pipelineOperator()
@@ -184,7 +184,7 @@ public final class StreamingDataGeneratorIT extends TemplateTestBase {
 
     // Act
     LaunchInfo info = launchTemplate(options);
-    assertThatLaunch(info).succeeded();
+    assertThatPipeline(info).isRunning();
     Result result =
         pipelineOperator()
             .waitForConditionAndFinish(
@@ -224,7 +224,7 @@ public final class StreamingDataGeneratorIT extends TemplateTestBase {
 
     // Act
     LaunchInfo info = launchTemplate(options);
-    assertThatLaunch(info).succeeded();
+    assertThatPipeline(info).isRunning();
     Result result =
         pipelineOperator()
             .waitForConditionAndFinish(
@@ -264,7 +264,7 @@ public final class StreamingDataGeneratorIT extends TemplateTestBase {
 
     // Act
     LaunchInfo info = launchTemplate(options);
-    assertThatLaunch(info).succeeded();
+    assertThatPipeline(info).isRunning();
     Result result =
         pipelineOperator()
             .waitForConditionAndFinish(
@@ -326,7 +326,7 @@ public final class StreamingDataGeneratorIT extends TemplateTestBase {
 
     // Act
     LaunchInfo info = launchTemplate(options);
-    assertThatLaunch(info).succeeded();
+    assertThatPipeline(info).isRunning();
 
     Result result =
         pipelineOperator()

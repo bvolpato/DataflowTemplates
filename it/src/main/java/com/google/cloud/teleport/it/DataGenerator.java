@@ -16,7 +16,7 @@
 package com.google.cloud.teleport.it;
 
 import static com.google.cloud.teleport.it.PerformanceBenchmarkingBase.createConfig;
-import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatLaunch;
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatPipeline;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
 
 import com.google.auth.Credentials;
@@ -81,7 +81,7 @@ public class DataGenerator {
   public void execute(Duration timeout) throws IOException {
     LaunchInfo dataGeneratorLaunchInfo =
         pipelineLauncher.launch(PROJECT, REGION, dataGeneratorOptions);
-    assertThatLaunch(dataGeneratorLaunchInfo).succeeded();
+    assertThatPipeline(dataGeneratorLaunchInfo).isRunning();
     PipelineOperator.Config config = createConfig(dataGeneratorLaunchInfo, timeout);
     // check if the job will be BATCH or STREAMING
     Result dataGeneratorResult;
