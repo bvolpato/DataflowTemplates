@@ -15,8 +15,8 @@
  */
 package com.google.cloud.teleport.v2.templates;
 
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatLaunch;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
-import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 
 import com.google.cloud.Tuple;
@@ -122,12 +122,12 @@ public class BigQueryToBigtableIT extends TemplateTestBase {
 
     // Act
     LaunchInfo info = launchTemplate(options);
-    assertThat(info.state()).isIn(PipelineLauncher.JobState.ACTIVE_STATES);
+    assertThatLaunch(info).succeeded();
 
     PipelineOperator.Result result = pipelineOperator().waitUntilDone(createConfig(info));
 
     // Assert
-    assertThatResult(result).isFinished();
+    assertThatResult(result).isLaunchFinished();
 
     List<Row> rows = bigtableClient.readTable(tableName);
     rows.forEach(

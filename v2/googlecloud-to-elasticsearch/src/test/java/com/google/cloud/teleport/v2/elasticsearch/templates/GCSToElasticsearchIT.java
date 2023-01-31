@@ -98,7 +98,7 @@ public final class GCSToElasticsearchIT extends TemplateTestBase {
     Result result = pipelineOperator().waitUntilDone(createConfig(info));
 
     // Assert
-    assertThatResult(result).isFinished();
+    assertThatResult(result).isLaunchFinished();
 
     assertThat(elasticsearchResourceManager.count(indexName)).isEqualTo(10);
     assertThatRecords(elasticsearchResourceManager.fetchAll(indexName))
@@ -133,7 +133,7 @@ public final class GCSToElasticsearchIT extends TemplateTestBase {
     Result result = pipelineOperator().waitUntilDone(createConfig(info));
 
     // Assert
-    assertThatResult(result).isFinished();
+    assertThatResult(result).isLaunchFinished();
 
     assertThat(elasticsearchResourceManager.count(indexName)).isEqualTo(10);
     assertThatRecords(elasticsearchResourceManager.fetchAll(indexName))

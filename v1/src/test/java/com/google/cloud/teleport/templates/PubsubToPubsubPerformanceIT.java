@@ -140,7 +140,7 @@ public class PubsubToPubsubPerformanceIT extends PerformanceBenchmarkingBase {
     dataGenerator.execute(Duration.ofMinutes(60));
     Result result = pipelineOperator.drainJobAndFinish(createConfig(info, Duration.ofMinutes(20)));
     // Assert
-    assertThat(result).isEqualTo(Result.JOB_FINISHED);
+    assertThat(result).isEqualTo(Result.LAUNCH_FINISHED);
     // check to see if messages reached the output topic
     assertThat(pubsubResourceManager.pull(outputSubscription, 5).getReceivedMessagesCount())
         .isGreaterThan(0);

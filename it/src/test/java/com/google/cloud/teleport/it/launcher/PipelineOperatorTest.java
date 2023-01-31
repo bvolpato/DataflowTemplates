@@ -94,7 +94,7 @@ public final class PipelineOperatorTest {
     assertThat(allProjects).containsExactly(PROJECT);
     assertThat(allRegions).containsExactly(REGION);
     assertThat(allJobIds).containsExactly(JOB_ID);
-    assertThat(result).isEqualTo(Result.JOB_FINISHED);
+    assertThat(result).isEqualTo(Result.LAUNCH_FINISHED);
   }
 
   @Test
@@ -134,8 +134,8 @@ public final class PipelineOperatorTest {
 
     Result result = new PipelineOperator(client).waitForCondition(DEFAULT_CONFIG, () -> false);
 
-    assertThat(result).isEqualTo(Result.JOB_FINISHED);
-    assertThatResult(result).isFinished();
+    assertThat(result).isEqualTo(Result.LAUNCH_FINISHED);
+    assertThatResult(result).isLaunchFinished();
   }
 
   @Test
@@ -191,7 +191,7 @@ public final class PipelineOperatorTest {
         new PipelineOperator(client).waitForConditionAndFinish(DEFAULT_CONFIG, () -> false);
 
     verify(client, never()).cancelJob(any(), any(), any());
-    assertThat(result).isEqualTo(Result.JOB_FINISHED);
+    assertThat(result).isEqualTo(Result.LAUNCH_FINISHED);
   }
 
   @Test

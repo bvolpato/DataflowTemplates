@@ -176,7 +176,7 @@ public class PubsubToBigQueryPerformanceIT extends PerformanceBenchmarkingBase {
     // Validate that the template executed as expected
     Result result = pipelineOperator.drainJobAndFinish(createConfig(info, Duration.ofMinutes(20)));
     // Assert
-    assertThat(result).isEqualTo(Result.JOB_FINISHED);
+    assertThat(result).isEqualTo(Result.LAUNCH_FINISHED);
     assertThat(bigQueryResourceManager.readTable(jobName, 5).getTotalRows()).isGreaterThan(0);
 
     // export results

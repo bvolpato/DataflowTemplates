@@ -42,8 +42,8 @@ public final class ResultSubject extends Subject {
   }
 
   /** Check if the subject finished correctly. */
-  public void isFinished() {
-    check("check if result is finished").that(actual).isEqualTo(Result.JOB_FINISHED);
+  public void isLaunchFinished() {
+    check("check if result is finished").that(actual).isEqualTo(Result.LAUNCH_FINISHED);
   }
 
   /** Check if the subject finished with a timeout. */
@@ -53,6 +53,6 @@ public final class ResultSubject extends Subject {
 
   /** Check if the subject finished with a failed state. */
   public void hasFailed() {
-    check("check if result timed out").that(actual).isEqualTo(Result.JOB_FAILED);
+    check("check if result timed out").that(actual).isEqualTo(Result.LAUNCH_FAILED);
   }
 }

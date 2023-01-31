@@ -219,7 +219,7 @@ public final class PubsubToTextPerformanceIT extends PerformanceBenchmarkingBase
     Result result = pipelineOperator.drainJobAndFinish(createConfig(info, Duration.ofMinutes(20)));
 
     // Assert
-    assertThat(result).isEqualTo(Result.JOB_FINISHED);
+    assertThat(result).isEqualTo(Result.LAUNCH_FINISHED);
     assertThat(artifactClient.listArtifacts(name, EXPECTED_PATTERN)).isNotEmpty();
     // export results
     exportMetricsToBigQuery(info, computeMetrics(info));

@@ -21,8 +21,8 @@ import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 
 /**
- * Subject that has assertion operations for {@link LaunchInfo}, usually coming from the result of a
- * pipeline launch.
+ * Subject that has assertion operations for {@link LaunchInfo}, which has the information for a
+ * recently launched pipeline.
  */
 public final class LaunchInfoSubject extends Subject {
 
@@ -37,12 +37,20 @@ public final class LaunchInfoSubject extends Subject {
     return LaunchInfoSubject::new;
   }
 
-  /** Check if the subject reflects succeeded states. */
+  /**
+   * Check if the subject reflects succeeded states. A successfully {@link LaunchInfo} does not mean
+   * that the pipeline finished and no errors happened, it just means that the job was able to get
+   * itself into an active state (RUNNING, UPDATED).
+   */
   public void succeeded() {
     check("check if succeeded").that(actual.state()).isIn(JobState.ACTIVE_STATES);
   }
 
-  /** Check if the subject reflects failure states. */
+  /**
+   * Check if the subject reflects failure states. A failed {@link LaunchInfo} often means that the
+   * request for launching a pipeline didn't make through validations, so the job couldn't even
+   * start or do any processing.
+   */
   public void failed() {
     check("check if succeeded").that(actual.state()).isIn(JobState.FAILED_STATES);
   }

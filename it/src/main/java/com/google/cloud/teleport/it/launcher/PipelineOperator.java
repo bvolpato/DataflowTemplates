@@ -36,8 +36,8 @@ public final class PipelineOperator {
   /** The result of running an operation. */
   public enum Result {
     CONDITION_MET,
-    JOB_FINISHED,
-    JOB_FAILED,
+    LAUNCH_FINISHED,
+    LAUNCH_FAILED,
     TIMEOUT
   }
 
@@ -54,8 +54,8 @@ public final class PipelineOperator {
    * will time out unless the job is explicitly cancelled or drained.
    *
    * @param config the configuration for performing the operation
-   * @return the result, which will be {@link Result#JOB_FINISHED}, {@link Result#JOB_FAILED} or
-   *     {@link Result#TIMEOUT}
+   * @return the result, which will be {@link Result#LAUNCH_FINISHED}, {@link Result#LAUNCH_FAILED}
+   *     or {@link Result#TIMEOUT}
    */
   public Result waitUntilDone(Config config) {
     return finishOrTimeout(
@@ -74,8 +74,8 @@ public final class PipelineOperator {
    * is fully drained.
    *
    * @param config the configuration for performing the operation
-   * @return the result, which will be {@link Result#JOB_FINISHED}, {@link Result#JOB_FAILED} or
-   *     {@link Result#TIMEOUT}
+   * @return the result, which will be {@link Result#LAUNCH_FINISHED}, {@link Result#LAUNCH_FAILED}
+   *     or {@link Result#TIMEOUT}
    */
   public Result waitUntilDoneAndFinish(Config config) throws IOException {
     Result result = waitUntilDone(config);
@@ -131,7 +131,7 @@ public final class PipelineOperator {
       ThrowingConsumer<IOException, Config> executable)
       throws IOException {
     Result conditionStatus = waitForCondition(config, conditionCheck);
-    if (conditionStatus != Result.JOB_FINISHED && conditionStatus != Result.JOB_FAILED) {
+    if (conditionStatus != Result.LAUNCH_FINISHED && conditionStatus != Result.LAUNCH_FAILED) {
       executable.accept(config);
     }
     return conditionStatus;
@@ -185,7 +185,7 @@ public final class PipelineOperator {
       LOG.info("Condition not met. Checking if job is finished.");
       if (stopChecking.get()) {
         LOG.info("Detected that we should stop checking.");
-        return Result.JOB_FINISHED;
+        return Result.LAUNCH_FINISHED;
       }
       LOG.info(
           "Job not finished. Will check again in {} seconds (total wait: "

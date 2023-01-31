@@ -88,7 +88,7 @@ public class DataGenerator {
     if (dataGeneratorOptions.parameters().containsKey(MESSAGES_LIMIT)) {
       // BATCH job, wait till data generator job finishes
       dataGeneratorResult = pipelineOperator.waitUntilDone(config);
-      assertThatResult(dataGeneratorResult).isFinished();
+      assertThatResult(dataGeneratorResult).isLaunchFinished();
     } else {
       // STREAMING job, wait till timeout and drain job
       dataGeneratorResult = pipelineOperator.waitUntilDoneAndFinish(config);

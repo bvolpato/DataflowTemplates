@@ -129,7 +129,7 @@ public final class TextIOToBigQueryIT extends TemplateTestBase {
     Result result = pipelineOperator().waitUntilDone(createConfig(info));
 
     // Assert
-    assertThatResult(result).isFinished();
+    assertThatResult(result).isLaunchFinished();
     TableResult tableRows = bigQueryClient.readTable(bqTable);
     assertThatRecords(tableRows).hasRecord(EXPECTED);
   }

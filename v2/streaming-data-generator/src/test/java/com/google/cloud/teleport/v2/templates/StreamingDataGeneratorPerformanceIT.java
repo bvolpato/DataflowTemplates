@@ -114,7 +114,7 @@ public class StreamingDataGeneratorPerformanceIT extends PerformanceBenchmarking
     assertThatLaunch(info).succeeded();
     Result result = pipelineOperator.waitUntilDone(createConfig(info, Duration.ofMinutes(30)));
     // Assert
-    assertThatResult(result).isFinished();
+    assertThatResult(result).isLaunchFinished();
     assertThat(pubsubResourceManager.pull(subscription, 5).getReceivedMessagesCount())
         .isGreaterThan(0);
 
@@ -151,7 +151,7 @@ public class StreamingDataGeneratorPerformanceIT extends PerformanceBenchmarking
     assertThatLaunch(info).succeeded();
     Result result = pipelineOperator.waitUntilDone(createConfig(info, Duration.ofMinutes(30)));
     // Assert
-    assertThatResult(result).isFinished();
+    assertThatResult(result).isLaunchFinished();
     assertThat(artifactClient.listArtifacts(testName, expectedPattern)).isNotEmpty();
 
     // export results
@@ -198,7 +198,7 @@ public class StreamingDataGeneratorPerformanceIT extends PerformanceBenchmarking
     assertThatLaunch(info).succeeded();
     Result result = pipelineOperator.waitUntilDone(createConfig(info, Duration.ofMinutes(30)));
     // Assert
-    assertThatResult(result).isFinished();
+    assertThatResult(result).isLaunchFinished();
     assertThat(bigQueryResourceManager.readTable(jobName).getTotalRows()).isGreaterThan(0);
 
     // export results

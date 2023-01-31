@@ -65,7 +65,7 @@ public final class BulkDecompressorIT extends TemplateTestBase {
     Result result = pipelineOperator().waitUntilDone(createConfig(info));
 
     // Assert
-    assertThatResult(result).isFinished();
+    assertThatResult(result).isLaunchFinished();
 
     List<Artifact> artifacts =
         artifactClient.listArtifacts("output/", Pattern.compile(".*compress.*"));
