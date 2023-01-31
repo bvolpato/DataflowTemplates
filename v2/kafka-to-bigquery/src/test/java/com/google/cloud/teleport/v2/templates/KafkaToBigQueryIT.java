@@ -43,7 +43,6 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -142,7 +141,6 @@ public final class KafkaToBigQueryIT extends TemplateTestBase {
                 .addParameter("outputDeadletterTable", toTableSpec(deadletterTableId)));
   }
 
-  @NotNull
   private Schema getDeadletterSchema() {
     Schema dlqSchema =
         Schema.of(

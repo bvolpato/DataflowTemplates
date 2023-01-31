@@ -53,7 +53,6 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -466,7 +465,6 @@ public abstract class TemplateTestBase {
         table.getTable());
   }
 
-  @NotNull
   protected PipelineOperator pipelineOperator() {
     return new PipelineOperator(launcher());
   }
