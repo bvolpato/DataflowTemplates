@@ -15,6 +15,8 @@
  */
 package com.google.cloud.teleport.it.launcher;
 
+import static com.google.cloud.teleport.it.PipelineUtils.createJobName;
+
 import com.google.api.services.dataflow.model.Job;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableMap;
@@ -159,7 +161,7 @@ public interface PipelineLauncher {
     }
 
     public static Builder builder(TestName testName, String specPath) {
-      return new Builder(testName.getMethodName(), specPath);
+      return new Builder(createJobName(testName.getMethodName()), specPath);
     }
 
     public static Builder builder(String jobName) {
