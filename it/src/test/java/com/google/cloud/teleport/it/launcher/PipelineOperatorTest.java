@@ -102,6 +102,7 @@ public final class PipelineOperatorTest {
     when(client.getJobStatus(any(), any(), any())).thenReturn(JobState.RUNNING);
     Result result = new PipelineOperator(client).waitUntilDone(DEFAULT_CONFIG);
     assertThat(result).isEqualTo(Result.TIMEOUT);
+    assertThatResult(result).hasTimedOut();
   }
 
   @Test
@@ -121,6 +122,7 @@ public final class PipelineOperatorTest {
     assertThat(projectCaptor.getValue()).isEqualTo(PROJECT);
     assertThat(regionCaptor.getValue()).isEqualTo(REGION);
     assertThat(jobIdCaptor.getValue()).isEqualTo(JOB_ID);
+    assertThat(result).isEqualTo(Result.CONDITION_MET);
     assertThatResult(result).meetsConditions();
   }
 
@@ -133,6 +135,7 @@ public final class PipelineOperatorTest {
     Result result = new PipelineOperator(client).waitForCondition(DEFAULT_CONFIG, () -> false);
 
     assertThat(result).isEqualTo(Result.JOB_FINISHED);
+    assertThatResult(result).isFinished();
   }
 
   @Test

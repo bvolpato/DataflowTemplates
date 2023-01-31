@@ -16,12 +16,12 @@
 package com.google.cloud.teleport.it;
 
 import static com.google.cloud.teleport.it.PerformanceBenchmarkingBase.createConfig;
-import static com.google.common.truth.Truth.assertThat;
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatLaunch;
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
 
 import com.google.auth.Credentials;
 import com.google.cloud.teleport.it.dataflow.FlexTemplateClient;
 import com.google.cloud.teleport.it.launcher.PipelineLauncher;
-import com.google.cloud.teleport.it.launcher.PipelineLauncher.JobState;
 import com.google.cloud.teleport.it.launcher.PipelineLauncher.LaunchConfig;
 import com.google.cloud.teleport.it.launcher.PipelineLauncher.LaunchInfo;
 import com.google.cloud.teleport.it.launcher.PipelineOperator;
@@ -81,18 +81,18 @@ public class DataGenerator {
   public void execute(Duration timeout) throws IOException {
     LaunchInfo dataGeneratorLaunchInfo =
         pipelineLauncher.launch(PROJECT, REGION, dataGeneratorOptions);
-    assertThat(dataGeneratorLaunchInfo.state()).isIn(JobState.ACTIVE_STATES);
+    assertThatLaunch(dataGeneratorLaunchInfo).succeeded();
     PipelineOperator.Config config = createConfig(dataGeneratorLaunchInfo, timeout);
     // check if the job will be BATCH or STREAMING
     Result dataGeneratorResult;
     if (dataGeneratorOptions.parameters().containsKey(MESSAGES_LIMIT)) {
       // BATCH job, wait till data generator job finishes
       dataGeneratorResult = pipelineOperator.waitUntilDone(config);
-      assertThat(dataGeneratorResult).isEqualTo(Result.JOB_FINISHED);
+      assertThatResult(dataGeneratorResult).isFinished();
     } else {
       // STREAMING job, wait till timeout and drain job
       dataGeneratorResult = pipelineOperator.waitUntilDoneAndFinish(config);
-      assertThat(dataGeneratorResult).isEqualTo(Result.TIMEOUT);
+      assertThatResult(dataGeneratorResult).hasTimedOut();
     }
   }
 

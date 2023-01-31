@@ -16,7 +16,6 @@
 package com.google.cloud.teleport.templates;
 
 import static com.google.cloud.teleport.it.PipelineUtils.createJobName;
-import static com.google.cloud.teleport.it.TemplateTestBase.*;
 import static com.google.cloud.teleport.it.TemplateTestBase.toTableSpec;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatLaunch;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;

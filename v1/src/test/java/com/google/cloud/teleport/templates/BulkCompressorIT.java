@@ -16,6 +16,7 @@
 package com.google.cloud.teleport.templates;
 
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatLaunch;
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.cloud.teleport.it.TemplateTestBase;
@@ -65,7 +66,7 @@ public final class BulkCompressorIT extends TemplateTestBase {
     Result result = pipelineOperator().waitUntilDone(createConfig(info));
 
     // Assert
-    assertThat(result).isEqualTo(Result.JOB_FINISHED);
+    assertThatResult(result).isFinished();
 
     List<Artifact> artifacts =
         artifactClient.listArtifacts("output/", Pattern.compile(".*compress.*"));

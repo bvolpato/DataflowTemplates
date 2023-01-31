@@ -37,12 +37,12 @@ public final class LaunchInfoSubject extends Subject {
     return LaunchInfoSubject::new;
   }
 
-  /** Check if the subject reflects succeeded states */
+  /** Check if the subject reflects succeeded states. */
   public void succeeded() {
     check("check if succeeded").that(actual.state()).isIn(JobState.ACTIVE_STATES);
   }
 
-  /** Check if the subject reflects failure states */
+  /** Check if the subject reflects failure states. */
   public void failed() {
     check("check if succeeded").that(actual.state()).isIn(JobState.FAILED_STATES);
   }

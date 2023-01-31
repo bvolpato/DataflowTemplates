@@ -17,7 +17,7 @@ package com.google.cloud.teleport.v2.templates;
 
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatLaunch;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatRecords;
-import static com.google.common.truth.Truth.assertThat;
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
 
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.Schema;
@@ -126,9 +126,10 @@ public final class TextIOToBigQueryIT extends TemplateTestBase {
                     .addParameter("bigQueryLoadingTemporaryDirectory", getGcsPath("bq-tmp"))));
     assertThatLaunch(info).succeeded();
 
-    assertThat(pipelineOperator().waitUntilDone(createConfig(info))).isEqualTo(Result.JOB_FINISHED);
+    Result result = pipelineOperator().waitUntilDone(createConfig(info));
 
     // Assert
+    assertThatResult(result).isFinished();
     TableResult tableRows = bigQueryClient.readTable(bqTable);
     assertThatRecords(tableRows).hasRecord(EXPECTED);
   }

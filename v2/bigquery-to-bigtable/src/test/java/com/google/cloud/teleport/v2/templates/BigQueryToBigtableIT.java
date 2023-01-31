@@ -15,6 +15,7 @@
  */
 package com.google.cloud.teleport.v2.templates;
 
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 
@@ -126,7 +127,7 @@ public class BigQueryToBigtableIT extends TemplateTestBase {
     PipelineOperator.Result result = pipelineOperator().waitUntilDone(createConfig(info));
 
     // Assert
-    assertThat(result).isEqualTo(PipelineOperator.Result.JOB_FINISHED);
+    assertThatResult(result).isFinished();
 
     List<Row> rows = bigtableClient.readTable(tableName);
     rows.forEach(

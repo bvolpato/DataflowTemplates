@@ -36,8 +36,23 @@ public final class ResultSubject extends Subject {
     return ResultSubject::new;
   }
 
-  /** Check if the subject reflects succeeded states */
+  /** Check if the subject meets expected conditions. */
   public void meetsConditions() {
     check("check if meets all conditions").that(actual).isEqualTo(Result.CONDITION_MET);
+  }
+
+  /** Check if the subject finished correctly. */
+  public void isFinished() {
+    check("check if result is finished").that(actual).isEqualTo(Result.JOB_FINISHED);
+  }
+
+  /** Check if the subject finished with a timeout. */
+  public void hasTimedOut() {
+    check("check if result timed out").that(actual).isEqualTo(Result.TIMEOUT);
+  }
+
+  /** Check if the subject finished with a failed state. */
+  public void hasFailed() {
+    check("check if result timed out").that(actual).isEqualTo(Result.JOB_FAILED);
   }
 }

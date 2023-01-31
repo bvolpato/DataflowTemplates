@@ -20,6 +20,7 @@ import static com.google.cloud.teleport.it.TemplateTestBase.toTableSpec;
 import static com.google.cloud.teleport.it.artifacts.ArtifactUtils.createGcsClient;
 import static com.google.cloud.teleport.it.artifacts.ArtifactUtils.getFullGcsPath;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatLaunch;
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.cloud.bigquery.Field;
@@ -113,7 +114,7 @@ public class StreamingDataGeneratorPerformanceIT extends PerformanceBenchmarking
     assertThatLaunch(info).succeeded();
     Result result = pipelineOperator.waitUntilDone(createConfig(info, Duration.ofMinutes(30)));
     // Assert
-    assertThat(result).isEqualTo(Result.JOB_FINISHED);
+    assertThatResult(result).isFinished();
     assertThat(pubsubResourceManager.pull(subscription, 5).getReceivedMessagesCount())
         .isGreaterThan(0);
 
@@ -150,7 +151,7 @@ public class StreamingDataGeneratorPerformanceIT extends PerformanceBenchmarking
     assertThatLaunch(info).succeeded();
     Result result = pipelineOperator.waitUntilDone(createConfig(info, Duration.ofMinutes(30)));
     // Assert
-    assertThat(result).isEqualTo(Result.JOB_FINISHED);
+    assertThatResult(result).isFinished();
     assertThat(artifactClient.listArtifacts(testName, expectedPattern)).isNotEmpty();
 
     // export results
@@ -197,7 +198,7 @@ public class StreamingDataGeneratorPerformanceIT extends PerformanceBenchmarking
     assertThatLaunch(info).succeeded();
     Result result = pipelineOperator.waitUntilDone(createConfig(info, Duration.ofMinutes(30)));
     // Assert
-    assertThat(result).isEqualTo(Result.JOB_FINISHED);
+    assertThatResult(result).isFinished();
     assertThat(bigQueryResourceManager.readTable(jobName).getTotalRows()).isGreaterThan(0);
 
     // export results
