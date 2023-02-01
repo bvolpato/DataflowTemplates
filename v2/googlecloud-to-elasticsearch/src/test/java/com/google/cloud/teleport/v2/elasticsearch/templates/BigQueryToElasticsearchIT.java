@@ -21,8 +21,13 @@ import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatRe
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.cloud.Tuple;
+import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
+import com.google.cloud.bigquery.Schema;
+import com.google.cloud.bigquery.TableId;
 import com.google.cloud.teleport.it.TemplateTestBase;
 import com.google.cloud.teleport.it.bigquery.BigQueryResourceManager;
+import com.google.cloud.teleport.it.bigquery.BigQueryTestUtils;
 import com.google.cloud.teleport.it.bigquery.DefaultBigQueryResourceManager;
 import com.google.cloud.teleport.it.elasticsearch.DefaultElasticsearchResourceManager;
 import com.google.cloud.teleport.it.elasticsearch.ElasticsearchResourceManager;
@@ -30,10 +35,9 @@ import com.google.cloud.teleport.it.launcher.PipelineLauncher.LaunchConfig;
 import com.google.cloud.teleport.it.launcher.PipelineLauncher.LaunchInfo;
 import com.google.cloud.teleport.it.launcher.PipelineOperator.Result;
 import com.google.cloud.teleport.metadata.TemplateIntegrationTest;
-import com.google.common.io.Resources;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,11 +45,11 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Integration test for {@link GCSToElasticsearch}. */
+/** Integration test for {@link BigQueryToElasticsearch}. */
 @Category(TemplateIntegrationTest.class)
-@TemplateIntegrationTest(GCSToElasticsearch.class)
+@TemplateIntegrationTest(BigQueryToElasticsearch.class)
 @RunWith(JUnit4.class)
-public final class GCSToElasticsearchIT extends TemplateTestBase {
+public final class BigQueryToElasticsearchIT extends TemplateTestBase {
 
   private static BigQueryResourceManager bigQueryClient;
   private static ElasticsearchResourceManager elasticsearchResourceManager;
@@ -67,79 +71,22 @@ public final class GCSToElasticsearchIT extends TemplateTestBase {
   }
 
   @Test
-  public void testElasticsearchCsvWithoutHeadersJS() throws IOException {
-    testElasticsearchCsvWithoutHeaders(
-        "no_header_10.csv",
-        "elasticUdf.js",
-        List.of(Map.of("id", "001", "state", "CA", "price", 3.65)));
-  }
-
-  @Test
-  public void testElasticsearchCsvWithoutHeadersES6() throws IOException {
-    testElasticsearchCsvWithoutHeaders(
-        "no_header_10.csv",
-        "elasticUdfES6.js",
-        List.of(Map.of("id", "001", "state", "CA", "price", 3.65)));
-  }
-
-  public void testElasticsearchCsvWithoutHeaders(
-      String csvFileName, String udfFileName, List<Map<String, Object>> expectedRecords)
-      throws IOException {
+  public void testBigQueryToElasticsearch() throws IOException {
     // Arrange
-    artifactClient.uploadArtifact(
-        "input/" + csvFileName,
-        Resources.getResource("GCSToElasticsearch/" + csvFileName).getPath());
-    artifactClient.uploadArtifact(
-        "input/" + udfFileName,
-        Resources.getResource("GCSToElasticsearch/" + udfFileName).getPath());
+    String tableName = testName.getMethodName();
+    Tuple<Schema, List<RowToInsert>> generatedTable =
+        BigQueryTestUtils.generateBigQueryTable("test_id");
+    Schema bigQuerySchema = generatedTable.x();
+    List<RowToInsert> bigQueryRows = generatedTable.y();
+    TableId table = bigQueryClient.createTable(tableName, bigQuerySchema);
+    bigQueryClient.write(tableName, bigQueryRows);
     String indexName = createJobName(testName.getMethodName());
     elasticsearchResourceManager.createIndex(indexName);
-    bigQueryClient.createDataset(REGION);
 
     LaunchConfig.Builder options =
         LaunchConfig.builder(testName, specPath)
-            .addParameter("inputFileSpec", getGcsPath("input") + "/*.csv")
-            .addParameter("inputFormat", "csv")
-            .addParameter("containsHeaders", "false")
-            .addParameter("deadletterTable", PROJECT + ":" + bigQueryClient.getDatasetId() + ".dlq")
-            .addParameter("delimiter", ",")
-            .addParameter("connectionUrl", elasticsearchResourceManager.getUri())
-            .addParameter("index", indexName)
-            .addParameter("javascriptTextTransformGcsPath", getGcsPath("input/" + udfFileName))
-            .addParameter("javascriptTextTransformFunctionName", "transform")
-            .addParameter("apiKey", "elastic");
-
-    // Act
-    LaunchInfo info = launchTemplate(options);
-    assertThatPipeline(info).isRunning();
-
-    Result result = pipelineOperator().waitUntilDone(createConfig(info));
-
-    // Assert
-    assertThatResult(result).isLaunchFinished();
-
-    assertThat(elasticsearchResourceManager.count(indexName)).isEqualTo(10);
-    assertThatRecords(elasticsearchResourceManager.fetchAll(indexName))
-        .hasRecordsUnordered(expectedRecords);
-  }
-
-  @Test
-  public void testElasticsearchCsvWithHeaders() throws IOException {
-    // Arrange
-    artifactClient.uploadArtifact(
-        "input/with_headers_10.csv",
-        Resources.getResource("GCSToElasticsearch/with_headers_10.csv").getPath());
-    String indexName = createJobName(testName.getMethodName());
-    elasticsearchResourceManager.createIndex(indexName);
-    bigQueryClient.createDataset(REGION);
-
-    LaunchConfig.Builder options =
-        LaunchConfig.builder(testName, specPath)
-            .addParameter("inputFileSpec", getGcsPath("input") + "/*.csv")
-            .addParameter("inputFormat", "csv")
-            .addParameter("containsHeaders", "true")
-            .addParameter("deadletterTable", PROJECT + ":" + bigQueryClient.getDatasetId() + ".dlq")
-            .addParameter("delimiter", ",")
+            .addParameter("inputTableSpec", toTableSpec(table))
+            .addParameter("outputDeadletterTable", toTableSpec(table) + "_dlq")
             .addParameter("connectionUrl", elasticsearchResourceManager.getUri())
             .addParameter("index", indexName)
             .addParameter("apiKey", "elastic");
@@ -153,8 +100,45 @@ public final class GCSToElasticsearchIT extends TemplateTestBase {
     // Assert
     assertThatResult(result).isLaunchFinished();
 
-    assertThat(elasticsearchResourceManager.count(indexName)).isEqualTo(10);
+    assertThat(elasticsearchResourceManager.count(indexName)).isEqualTo(20);
     assertThatRecords(elasticsearchResourceManager.fetchAll(indexName))
-        .hasRecordsUnordered(List.of(Map.of("id", "001", "state", "CA", "price", 3.65)));
+        .hasRecordsUnordered(
+            bigQueryRows.stream().map(RowToInsert::getContent).collect(Collectors.toList()));
+  }
+
+  @Test
+  public void testBigQueryToElasticsearchQuery() throws IOException {
+    // Arrange
+    String tableName = testName.getMethodName();
+    Tuple<Schema, List<RowToInsert>> generatedTable =
+        BigQueryTestUtils.generateBigQueryTable("test_id");
+    Schema bigQuerySchema = generatedTable.x();
+    List<RowToInsert> bigQueryRows = generatedTable.y();
+    TableId table = bigQueryClient.createTable(tableName, bigQuerySchema);
+    bigQueryClient.write(tableName, bigQueryRows);
+    String indexName = createJobName(testName.getMethodName());
+    elasticsearchResourceManager.createIndex(indexName);
+
+    LaunchConfig.Builder options =
+        LaunchConfig.builder(testName, specPath)
+            .addParameter("query", "SELECT * FROM `" + toTableSpec(table).replace(':', '.') + "`")
+            .addParameter("outputDeadletterTable", toTableSpec(table) + "_dlq")
+            .addParameter("connectionUrl", elasticsearchResourceManager.getUri())
+            .addParameter("index", indexName)
+            .addParameter("apiKey", "elastic");
+
+    // Act
+    LaunchInfo info = launchTemplate(options);
+    assertThatPipeline(info).isRunning();
+
+    Result result = pipelineOperator().waitUntilDone(createConfig(info));
+
+    // Assert
+    assertThatResult(result).isLaunchFinished();
+
+    assertThat(elasticsearchResourceManager.count(indexName)).isEqualTo(20);
+    assertThatRecords(elasticsearchResourceManager.fetchAll(indexName))
+        .hasRecordsUnordered(
+            bigQueryRows.stream().map(RowToInsert::getContent).collect(Collectors.toList()));
   }
 }
