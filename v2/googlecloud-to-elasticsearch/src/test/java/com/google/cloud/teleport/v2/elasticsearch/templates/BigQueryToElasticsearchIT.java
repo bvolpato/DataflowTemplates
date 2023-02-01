@@ -16,6 +16,7 @@
 package com.google.cloud.teleport.v2.elasticsearch.templates;
 
 import static com.google.cloud.teleport.it.PipelineUtils.createJobName;
+import static com.google.cloud.teleport.it.TestProperties.getProperty;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatPipeline;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatRecords;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
@@ -26,6 +27,7 @@ import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
 import com.google.cloud.bigquery.Schema;
 import com.google.cloud.bigquery.TableId;
 import com.google.cloud.teleport.it.TemplateTestBase;
+import com.google.cloud.teleport.it.TestProperties;
 import com.google.cloud.teleport.it.bigquery.BigQueryResourceManager;
 import com.google.cloud.teleport.it.bigquery.BigQueryTestUtils;
 import com.google.cloud.teleport.it.bigquery.DefaultBigQueryResourceManager;
@@ -54,6 +56,16 @@ public final class BigQueryToElasticsearchIT extends TemplateTestBase {
   private static BigQueryResourceManager bigQueryClient;
   private static ElasticsearchResourceManager elasticsearchResourceManager;
 
+  // Define a set of parameters used to allow configuration of the test size being run.
+  private static final String BIGQUERY_ID_COL = "test_id";
+  private static final int BIGQUERY_NUM_ROWS =
+      Integer.parseInt(getProperty("numRows", "20", TestProperties.Type.PROPERTY));
+  private static final int BIGQUERY_NUM_FIELDS =
+      Integer.parseInt(getProperty("numFields", "100", TestProperties.Type.PROPERTY));
+  private static final int BIGQUERY_MAX_ENTRY_LENTH =
+      Integer.max(
+          300, Integer.parseInt(getProperty("maxEntryLength", "20", TestProperties.Type.PROPERTY)));
+
   @Before
   public void setup() {
     bigQueryClient =
@@ -75,7 +87,8 @@ public final class BigQueryToElasticsearchIT extends TemplateTestBase {
     // Arrange
     String tableName = testName.getMethodName();
     Tuple<Schema, List<RowToInsert>> generatedTable =
-        BigQueryTestUtils.generateBigQueryTable("test_id");
+        BigQueryTestUtils.generateBigQueryTable(
+            BIGQUERY_ID_COL, BIGQUERY_NUM_ROWS, BIGQUERY_NUM_FIELDS, BIGQUERY_MAX_ENTRY_LENTH);
     Schema bigQuerySchema = generatedTable.x();
     List<RowToInsert> bigQueryRows = generatedTable.y();
     TableId table = bigQueryClient.createTable(tableName, bigQuerySchema);
@@ -111,7 +124,8 @@ public final class BigQueryToElasticsearchIT extends TemplateTestBase {
     // Arrange
     String tableName = testName.getMethodName();
     Tuple<Schema, List<RowToInsert>> generatedTable =
-        BigQueryTestUtils.generateBigQueryTable("test_id");
+        BigQueryTestUtils.generateBigQueryTable(
+            BIGQUERY_ID_COL, BIGQUERY_NUM_ROWS, BIGQUERY_NUM_FIELDS, BIGQUERY_MAX_ENTRY_LENTH);
     Schema bigQuerySchema = generatedTable.x();
     List<RowToInsert> bigQueryRows = generatedTable.y();
     TableId table = bigQueryClient.createTable(tableName, bigQuerySchema);

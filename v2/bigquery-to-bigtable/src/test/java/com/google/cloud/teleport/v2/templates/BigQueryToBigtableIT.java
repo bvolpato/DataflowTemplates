@@ -15,6 +15,7 @@
  */
 package com.google.cloud.teleport.v2.templates;
 
+import static com.google.cloud.teleport.it.TestProperties.getProperty;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatPipeline;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
 import static org.junit.Assert.assertEquals;
@@ -24,6 +25,7 @@ import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
 import com.google.cloud.bigquery.Schema;
 import com.google.cloud.bigtable.data.v2.models.Row;
 import com.google.cloud.teleport.it.TemplateTestBase;
+import com.google.cloud.teleport.it.TestProperties;
 import com.google.cloud.teleport.it.bigquery.BigQueryResourceManager;
 import com.google.cloud.teleport.it.bigquery.BigQueryTestUtils;
 import com.google.cloud.teleport.it.bigquery.DefaultBigQueryResourceManager;
@@ -59,7 +61,15 @@ public class BigQueryToBigtableIT extends TemplateTestBase {
   private static final String WRITE_COL_FAMILY = "bigtableWriteColumnFamily";
   private static final String WRITE_APP_PROFILE = "bigtableWriteAppProfile";
 
+  // Define a set of parameters used to allow configuration of the test size being run.
   private static final String BIGQUERY_ID_COL = "test_id";
+  private static final int BIGQUERY_NUM_ROWS =
+      Integer.parseInt(getProperty("numRows", "20", TestProperties.Type.PROPERTY));
+  private static final int BIGQUERY_NUM_FIELDS =
+      Integer.parseInt(getProperty("numFields", "100", TestProperties.Type.PROPERTY));
+  private static final int BIGQUERY_MAX_ENTRY_LENTH =
+      Integer.max(
+          300, Integer.parseInt(getProperty("maxEntryLength", "20", TestProperties.Type.PROPERTY)));
 
   private static BigQueryResourceManager bigQueryClient;
   private static DefaultBigtableResourceManager bigtableClient;
@@ -91,7 +101,8 @@ public class BigQueryToBigtableIT extends TemplateTestBase {
     // Arrange
     String tableName = "test_table";
     Tuple<Schema, List<RowToInsert>> generatedTable =
-        BigQueryTestUtils.generateBigQueryTable(BIGQUERY_ID_COL);
+        BigQueryTestUtils.generateBigQueryTable(
+            BIGQUERY_ID_COL, BIGQUERY_NUM_ROWS, BIGQUERY_NUM_FIELDS, BIGQUERY_MAX_ENTRY_LENTH);
     Schema bigQuerySchema = generatedTable.x();
     List<RowToInsert> bigQueryRows = generatedTable.y();
     bigQueryClient.createTable(tableName, bigQuerySchema);

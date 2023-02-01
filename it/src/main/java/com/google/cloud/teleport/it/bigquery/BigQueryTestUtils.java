@@ -15,14 +15,11 @@
  */
 package com.google.cloud.teleport.it.bigquery;
 
-import static com.google.cloud.teleport.it.TestProperties.getProperty;
-
 import com.google.cloud.Tuple;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
 import com.google.cloud.bigquery.Schema;
 import com.google.cloud.bigquery.StandardSQLTypeName;
-import com.google.cloud.teleport.it.TestProperties.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,15 +35,14 @@ public final class BigQueryTestUtils {
    * Generate data to be persisted to a BigQuery table for testing.
    *
    * @param idColumn Column name containing the ID.
+   * @param numRows Number of rows to generate.
+   * @param numFields Number of fields in the schema.
+   * @param maxEntryLength Maximum length for each field. Please note that maxEntryLength cannot
+   *     exceed 300 characters.
    * @return Tuple containing the schema and the row values.
    */
-  public static Tuple<Schema, List<RowToInsert>> generateBigQueryTable(String idColumn) {
-    // Grab user parameters for table dimensions, or use defaults
-    // *note* maxEntryLength cannot exceed 300 characters
-    int numRows = Integer.parseInt(getProperty("numRows", "20", Type.PROPERTY));
-    int numFields = Integer.parseInt(getProperty("numFields", "100", Type.PROPERTY));
-    int maxEntryLength =
-        Math.max(300, Integer.parseInt(getProperty("maxEntryLength", "20", Type.PROPERTY)));
+  public static Tuple<Schema, List<RowToInsert>> generateBigQueryTable(
+      String idColumn, int numRows, int numFields, int maxEntryLength) {
 
     // List to store BigQuery schema fields
     List<Field> bqSchemaFields = new ArrayList<>();
