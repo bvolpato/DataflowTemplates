@@ -122,6 +122,7 @@ import org.slf4j.LoggerFactory;
     displayName = "Convert file formats between Avro, Parquet & CSV",
     description = "A pipeline to convert file formats between Avro, Parquet & csv.",
     optionsClass = FileFormatConversionOptions.class,
+    optionalOptions = {"deadletterTable"},
     flexContainerName = "file-format-conversion",
     contactInformation = "https://cloud.google.com/support")
 public class FileFormatConversion {
