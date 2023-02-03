@@ -23,7 +23,6 @@ import com.google.cloud.teleport.v2.templates.FileFormatConversion.FileFormatCon
 import com.google.cloud.teleport.v2.transforms.AvroConverters.AvroOptions;
 import com.google.cloud.teleport.v2.transforms.CsvConverters.CsvPipelineOptions;
 import com.google.cloud.teleport.v2.transforms.ParquetConverters.ParquetOptions;
-import java.io.IOException;
 import java.util.EnumMap;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
@@ -198,18 +197,14 @@ public class FileFormatConversion {
     validFileFormats.put(ValidFileFormats.AVRO, "AVRO");
     validFileFormats.put(ValidFileFormats.PARQUET, "PARQUET");
 
-    try {
-      if (inputFileFormat.equals(outputFileFormat)) {
-        LOG.error("Input and output file format cannot be the same.");
-        throw new IOException();
-      }
-      if (!validFileFormats.containsValue(inputFileFormat)
-          || !validFileFormats.containsValue(outputFileFormat)) {
-        LOG.error("Invalid input or output file format.");
-        throw new IOException();
-      }
-    } catch (IOException e) {
-      throw new RuntimeException("Provide correct input/output file format.");
+    if (!validFileFormats.containsValue(inputFileFormat)) {
+      throw new IllegalArgumentException("Invalid input file format.");
+    }
+    if (!validFileFormats.containsValue(outputFileFormat)) {
+      throw new IllegalArgumentException("Invalid output file format.");
+    }
+    if (inputFileFormat.equals(outputFileFormat)) {
+      throw new IllegalArgumentException("Input and output file format cannot be the same.");
     }
 
     // Create the pipeline
