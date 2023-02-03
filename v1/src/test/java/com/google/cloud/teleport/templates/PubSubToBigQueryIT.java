@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.cloud.teleport.v2.templates;
+package com.google.cloud.teleport.templates;
 
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatPipeline;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatRecords;
@@ -29,7 +29,6 @@ import com.google.cloud.teleport.it.TemplateTestBase;
 import com.google.cloud.teleport.it.bigquery.BigQueryResourceManager;
 import com.google.cloud.teleport.it.bigquery.DefaultBigQueryResourceManager;
 import com.google.cloud.teleport.it.conditions.BigQueryRowsCheck;
-import com.google.cloud.teleport.it.conditions.ConditionCheck;
 import com.google.cloud.teleport.it.launcher.PipelineLauncher.LaunchConfig;
 import com.google.cloud.teleport.it.launcher.PipelineLauncher.LaunchInfo;
 import com.google.cloud.teleport.it.launcher.PipelineOperator.Result;
@@ -45,6 +44,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import org.json.JSONObject;
 import org.junit.After;
@@ -54,17 +54,16 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Integration test for {@link PubSubToBigQuery} Flex template. */
+/** Integration test for {@link PubSubToBigQuery} classic template. */
 @Category(TemplateIntegrationTest.class)
-@TemplateIntegrationTest(PubSubToBigQuery.class)
 @RunWith(JUnit4.class)
 public final class PubSubToBigQueryIT extends TemplateTestBase {
 
-  private static PubsubResourceManager pubsubResourceManager;
-  private static BigQueryResourceManager bigQueryResourceManager;
-
   private static final int MESSAGES_COUNT = 10;
   private static final int BAD_MESSAGES_COUNT = 3;
+
+  private static PubsubResourceManager pubsubResourceManager;
+  private static BigQueryResourceManager bigQueryResourceManager;
 
   @Before
   public void setUp() throws IOException {
@@ -87,21 +86,53 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
   }
 
   @Test
-  public void testPubsubToBigQuery() throws IOException {
-    basePubsubToBigQuery(Function.identity()); // no extra parameters
+  @TemplateIntegrationTest(value = PubSubToBigQuery.class, template = "PubSub_to_BigQuery")
+  public void testTopicToBigQuery() throws IOException {
+    // Arrange
+    Map<String, Object> message = Map.of("job", testName.getMethodName(), "msg", "message");
+    List<Field> bqSchemaFields =
+        Arrays.asList(
+            Field.of("job", StandardSQLTypeName.STRING),
+            Field.of("msg", StandardSQLTypeName.STRING));
+    Schema bqSchema = Schema.of(bqSchemaFields);
+
+    TopicName topic = pubsubResourceManager.createTopic("input");
+    bigQueryResourceManager.createDataset(REGION);
+    TableId table = bigQueryResourceManager.createTable(testName.getMethodName(), bqSchema);
+
+    LaunchConfig.Builder options =
+        LaunchConfig.builder(testName, specPath)
+            .addParameter("inputTopic", topic.toString())
+            .addParameter("outputTableSpec", toTableSpec(table))
+            .addParameter("javascriptTextTransformGcsPath", getGcsPath("udf-basic.js"))
+            .addParameter("javascriptTextTransformFunctionName", "uppercaseName");
+
+    // Act
+    LaunchInfo info = launchTemplate(options);
+    assertThatPipeline(info).isRunning();
+
+    Result result =
+        pipelineOperator()
+            .waitForConditionAndFinish(
+                createConfig(info),
+                () -> {
+                  ByteString messageData =
+                      ByteString.copyFromUtf8(new JSONObject(message).toString());
+                  pubsubResourceManager.publish(topic, ImmutableMap.of(), messageData);
+
+                  return new BigQueryRowsCheck(bigQueryResourceManager, table, 1).get();
+                });
+
+    // Assert
+    assertThatResult(result).meetsConditions();
+    assertThatRecords(bigQueryResourceManager.readTable(table)).allMatch(message);
   }
 
   @Test
-  public void testPubsubToBigQueryWithStorageApi() throws IOException {
-    basePubsubToBigQuery(
-        b ->
-            b.addParameter("useStorageWriteApi", "true")
-                .addParameter("numStorageWriteApiStreams", "1")
-                .addParameter("storageWriteApiTriggeringFrequencySec", "5"));
-  }
-
-  private void basePubsubToBigQuery(
-      Function<LaunchConfig.Builder, LaunchConfig.Builder> paramsAdder) throws IOException {
+  @TemplateIntegrationTest(
+      value = PubSubToBigQuery.class,
+      template = "PubSub_Subscription_to_BigQuery")
+  public void testSubscriptionToBigQuery() throws IOException {
     // Arrange
     List<Field> bqSchemaFields =
         Arrays.asList(
@@ -111,8 +142,8 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
     Schema bqSchema = Schema.of(bqSchemaFields);
 
     TopicName topic = pubsubResourceManager.createTopic("input");
+    SubscriptionName subscription = pubsubResourceManager.createSubscription(topic, "input-sub-1");
     bigQueryResourceManager.createDataset(REGION);
-    SubscriptionName subscription = pubsubResourceManager.createSubscription(topic, "sub-1");
     TableId table = bigQueryResourceManager.createTable(testName.getMethodName(), bqSchema);
     TableId dlqTable =
         TableId.of(
@@ -121,28 +152,13 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
             table.getTable() + PubSubToBigQuery.DEFAULT_DEADLETTER_TABLE_SUFFIX);
 
     LaunchConfig.Builder options =
-        paramsAdder.apply(
-            LaunchConfig.builder(testName, specPath)
-                .addParameter("inputSubscription", subscription.toString())
-                .addParameter("outputTableSpec", toTableSpec(table))
-                .addParameter("javascriptTextTransformGcsPath", getGcsPath("udf-basic.js"))
-                .addParameter("javascriptTextTransformFunctionName", "uppercaseName"));
+        LaunchConfig.builder(testName, specPath)
+            .addParameter("inputSubscription", subscription.toString())
+            .addParameter("outputTableSpec", toTableSpec(table));
 
     // Act
     LaunchInfo info = launchTemplate(options);
     assertThatPipeline(info).isRunning();
-
-    for (int i = 1; i <= MESSAGES_COUNT; i++) {
-      Map<String, Object> message =
-          Map.of("id", i, "job", testName.getMethodName(), "name", "message");
-      ByteString messageData = ByteString.copyFromUtf8(new JSONObject(message).toString());
-      pubsubResourceManager.publish(topic, ImmutableMap.of(), messageData);
-    }
-
-    for (int i = 1; i <= BAD_MESSAGES_COUNT; i++) {
-      ByteString messageData = ByteString.copyFromUtf8("bad id " + i);
-      pubsubResourceManager.publish(topic, ImmutableMap.of(), messageData);
-    }
 
     Result result =
         pipelineOperator()
@@ -153,7 +169,6 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
 
     // Assert
     assertThatResult(result).meetsConditions();
-
     TableResult records = bigQueryResourceManager.readTable(table);
 
     // Make sure record can be read and UDF changed name to uppercase
