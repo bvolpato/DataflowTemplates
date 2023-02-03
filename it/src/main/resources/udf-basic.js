@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2018 Google LLC
+ * Copyright (C) 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,3 +22,25 @@
 function identity(value) {
   return value;
 }
+
+/**
+ * Uppercase function.
+ * @param {T?} value input value
+ * @return {T?} provided value all in upper-case
+ */
+function uppercase(value) {
+  return value.toUpperCase();
+}
+
+/**
+ * Uppercase name function.
+ * @param {T?} value input value
+ * @return {T?} provided value with property "name" in upper-case
+ */
+function uppercaseName(value) {
+  const data = JSON.parse(value);
+  data.name = data.name.toUpperCase();
+  return JSON.stringify(data);
+}
+
+
