@@ -23,8 +23,6 @@ import com.google.common.base.Strings;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
 import java.util.function.Supplier;
 import org.apache.beam.sdk.function.ThrowingConsumer;
 import org.slf4j.Logger;
@@ -124,8 +122,8 @@ public final class PipelineOperator {
    * cancel the job and wait for the job to enter a done state.
    *
    * @param config the configuration for performing operations
-   * @param conditionChecks {@link Supplier} varargs that will be called periodically to check if the
-   *     condition is met
+   * @param conditionChecks {@link Supplier} varargs that will be called periodically to check if
+   *     the condition is met
    * @return the result of waiting for the condition, not of waiting for the job to be done
    * @throws IOException if there is an issue cancelling the job
    */

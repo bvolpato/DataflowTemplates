@@ -19,7 +19,6 @@ import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
 import com.google.cloud.bigquery.Schema;
 import com.google.cloud.bigquery.TableId;
 import com.google.cloud.bigquery.TableResult;
-import com.google.cloud.teleport.it.conditions.BigQueryRowsCheck;
 import java.util.List;
 
 /** Interface for managing BigQuery resources in integration tests. */
@@ -161,5 +160,4 @@ public interface BigQueryResourceManager {
   TableResult runQuery(String query);
 
   Long getRowCount(String project, String dataset, String table);
-
 }

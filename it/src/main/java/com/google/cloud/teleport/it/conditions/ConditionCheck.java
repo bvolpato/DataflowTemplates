@@ -15,10 +15,7 @@
  */
 package com.google.cloud.teleport.it.conditions;
 
-import com.google.cloud.teleport.it.TemplateTestBase;
 import java.util.function.Supplier;
-import org.apache.arrow.flatbuf.Bool;
-import org.apache.zookeeper.OpResult.CheckResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +35,7 @@ public abstract class ConditionCheck implements Supplier<Boolean> {
 
   @Override
   public Boolean get() {
-    LOG.info("--- Checking for condition '{}' ---", getDescription());
+    LOG.info("[?] Checking for condition '{}'...", getDescription());
 
     CheckResult result = check();
     if (!result.success) {
