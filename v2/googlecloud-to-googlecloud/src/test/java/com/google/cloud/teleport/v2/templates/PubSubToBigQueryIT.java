@@ -147,8 +147,12 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
         pipelineOperator()
             .waitForConditionsAndFinish(
                 createConfig(info),
-                new BigQueryRowsCheck(bigQueryResourceManager, table, MESSAGES_COUNT),
-                new BigQueryRowsCheck(bigQueryResourceManager, dlqTable, BAD_MESSAGES_COUNT));
+                BigQueryRowsCheck.builder(bigQueryResourceManager, table)
+                    .setMinRows(MESSAGES_COUNT)
+                    .build(),
+                BigQueryRowsCheck.builder(bigQueryResourceManager, dlqTable)
+                    .setMinRows(BAD_MESSAGES_COUNT)
+                    .build());
 
     // Assert
     assertThatResult(result).meetsConditions();

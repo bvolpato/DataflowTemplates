@@ -15,66 +15,81 @@
  */
 package com.google.cloud.teleport.it.conditions;
 
+import com.google.auto.value.AutoValue;
 import com.google.cloud.bigquery.TableId;
 import com.google.cloud.bigquery.TableResult;
 import com.google.cloud.teleport.it.bigquery.BigQueryResourceManager;
+import javax.annotation.Nullable;
 
 /** ConditionCheck to validate if BigQuery has received a certain amount of rows. */
-public class BigQueryRowsCheck extends ConditionCheck {
+@AutoValue
+public abstract class BigQueryRowsCheck extends ConditionCheck {
 
-  private BigQueryResourceManager resourceManager;
-  private TableId tableId;
-  private Integer minRows;
-  private Integer maxRows;
+  abstract BigQueryResourceManager resourceManager();
 
-  public BigQueryRowsCheck(
-      BigQueryResourceManager resourceManager, TableId tableId, Integer minRows) {
-    this.resourceManager = resourceManager;
-    this.tableId = tableId;
-    this.minRows = minRows;
-  }
+  abstract TableId tableId();
 
-  public BigQueryRowsCheck(
-      BigQueryResourceManager resourceManager, TableId tableId, Integer minRows, Integer maxRows) {
-    this.resourceManager = resourceManager;
-    this.tableId = tableId;
-    this.minRows = minRows;
-    this.maxRows = maxRows;
-  }
+  abstract Integer minRows();
+
+  @Nullable
+  abstract Integer maxRows();
 
   @Override
   String getDescription() {
-    if (this.maxRows != null) {
+    if (maxRows() != null) {
       return String.format(
           "BigQuery check if table %s has between %d and %d rows",
-          this.tableId.getTable(), this.minRows, this.maxRows);
+          tableId().getTable(), minRows(), maxRows());
     }
-    return String.format(
-        "BigQuery check if table %s has %d rows", this.tableId.getTable(), this.minRows);
+    return String.format("BigQuery check if table %s has %d rows", tableId().getTable(), minRows());
   }
 
   @Override
   CheckResult check() {
-    TableResult tableResult = resourceManager.readTable(tableId);
+    TableResult tableResult = resourceManager().readTable(tableId());
     long totalRows = tableResult.getTotalRows();
-    if (totalRows < this.minRows) {
+    if (totalRows < minRows()) {
       return new CheckResult(
-          false, String.format("Expected %d but has only %d", this.minRows, totalRows));
+          false, String.format("Expected %d but has only %d", minRows(), totalRows));
     }
-    if (this.maxRows != null && totalRows > this.maxRows) {
+    if (maxRows() != null && totalRows > maxRows()) {
       return new CheckResult(
-          false, String.format("Expected up to %d but found %d rows", this.maxRows, totalRows));
+          false, String.format("Expected up to %d but found %d rows", maxRows(), totalRows));
     }
 
-    if (this.maxRows != null) {
+    if (maxRows() != null) {
       return new CheckResult(
           true,
           String.format(
-              "Expected between %d and %d rows and found %d",
-              this.minRows, this.maxRows, totalRows));
+              "Expected between %d and %d rows and found %d", minRows(), maxRows(), totalRows));
     }
 
     return new CheckResult(
-        true, String.format("Expected at least %d rows and found %d", this.minRows, totalRows));
+        true, String.format("Expected at least %d rows and found %d", minRows(), totalRows));
+  }
+
+  public static Builder builder(BigQueryResourceManager resourceManager, TableId tableId) {
+    return new AutoValue_BigQueryRowsCheck.Builder()
+        .setResourceManager(resourceManager)
+        .setTableId(tableId);
+  }
+
+  /** Builder for {@link BigQueryRowsCheck}. */
+  @AutoValue.Builder
+  public abstract static class Builder {
+
+    public abstract Builder setResourceManager(BigQueryResourceManager resourceManager);
+
+    public abstract Builder setTableId(TableId tableId);
+
+    public abstract Builder setMinRows(Integer minRows);
+
+    public abstract Builder setMaxRows(Integer maxRows);
+
+    abstract BigQueryRowsCheck autoBuild();
+
+    public BigQueryRowsCheck build() {
+      return autoBuild();
+    }
   }
 }

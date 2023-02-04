@@ -172,7 +172,7 @@ public final class PipelineOperator {
       Config config, Supplier<Boolean>[] conditionCheck, Supplier<Boolean>... stopChecking) {
     Instant start = Instant.now();
 
-    LOG.info("Making initial finish check.");
+    LOG.debug("Making initial finish check.");
     try {
       if (allMatch(conditionCheck)) {
         return Result.CONDITION_MET;
@@ -189,7 +189,7 @@ public final class PipelineOperator {
         LOG.warn("Wait interrupted. Checking now.");
       }
 
-      LOG.info("Checking if condition is met.");
+      LOG.debug("Checking if condition is met.");
       try {
         if (allMatch(conditionCheck)) {
           LOG.info("Condition met!");
@@ -199,18 +199,16 @@ public final class PipelineOperator {
         LOG.warn("Error happened when checking for condition: {}", e.getMessage());
       }
 
-      LOG.info("Condition not met. Checking if job is finished.");
+      LOG.info("Condition was not met yet. Checking if job is finished.");
       if (allMatch(stopChecking)) {
         LOG.info("Detected that we should stop checking.");
         return Result.LAUNCH_FINISHED;
       }
       LOG.info(
-          "Job not finished. Will check again in {} seconds (total wait: "
-              + Duration.between(start, Instant.now()).getSeconds()
-              + "s of max "
-              + config.timeoutAfter().getSeconds()
-              + "s)",
-          config.checkAfter().getSeconds());
+          "Job not finished and conditions not met. Will check again in {} seconds (total wait: {}s of max{}s)",
+          config.checkAfter().getSeconds(),
+          Duration.between(start, Instant.now()).getSeconds(),
+          config.timeoutAfter().getSeconds());
     }
 
     LOG.warn("Neither the condition or job completion were fulfilled on time.");

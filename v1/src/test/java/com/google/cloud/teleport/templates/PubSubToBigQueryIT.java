@@ -120,12 +120,16 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
                 createConfig(info),
                 () -> {
                   pubsubResourceManager.publish(topic, ImmutableMap.of(), messageData);
-                  return new BigQueryRowsCheck(bigQueryResourceManager, table, 1).get();
+                  return BigQueryRowsCheck.builder(bigQueryResourceManager, table)
+                      .setMinRows(1)
+                      .build()
+                      .get();
                 });
 
     // Assert
     assertThatResult(result).meetsConditions();
-    assertThatRecords(bigQueryResourceManager.readTable(table)).allMatch(Map.of("id", 1, "job", testName.getMethodName(), "name", "MESSAGE"));
+    assertThatRecords(bigQueryResourceManager.readTable(table))
+        .allMatch(Map.of("id", 1, "job", testName.getMethodName(), "name", "MESSAGE"));
   }
 
   @Test
@@ -177,8 +181,12 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
         pipelineOperator()
             .waitForConditionsAndFinish(
                 createConfig(info),
-                new BigQueryRowsCheck(bigQueryResourceManager, table, MESSAGES_COUNT),
-                new BigQueryRowsCheck(bigQueryResourceManager, dlqTable, BAD_MESSAGES_COUNT));
+                BigQueryRowsCheck.builder(bigQueryResourceManager, table)
+                    .setMinRows(MESSAGES_COUNT)
+                    .build(),
+                BigQueryRowsCheck.builder(bigQueryResourceManager, dlqTable)
+                    .setMinRows(BAD_MESSAGES_COUNT)
+                    .build());
 
     // Assert
     assertThatResult(result).meetsConditions();
