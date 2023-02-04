@@ -36,7 +36,6 @@ import com.google.cloud.teleport.it.pubsub.DefaultPubsubResourceManager;
 import com.google.cloud.teleport.it.pubsub.PubsubResourceManager;
 import com.google.cloud.teleport.metadata.TemplateIntegrationTest;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.io.Resources;
 import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.SubscriptionName;
 import com.google.pubsub.v1.TopicName;
@@ -76,7 +75,13 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
             .setCredentials(credentials)
             .build();
 
-    artifactClient.uploadArtifact("udf-basic.js", Resources.getResource("udf-basic.js").getPath());
+    artifactClient.createArtifact(
+        "udf.js",
+        "function uppercaseName(value) {\n"
+            + "  const data = JSON.parse(value);\n"
+            + "  data.name = data.name.toUpperCase();\n"
+            + "  return JSON.stringify(data);\n"
+            + "}");
   }
 
   @After
@@ -124,7 +129,7 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
             LaunchConfig.builder(testName, specPath)
                 .addParameter("inputSubscription", subscription.toString())
                 .addParameter("outputTableSpec", toTableSpec(table))
-                .addParameter("javascriptTextTransformGcsPath", getGcsPath("udf-basic.js"))
+                .addParameter("javascriptTextTransformGcsPath", getGcsPath("udf.js"))
                 .addParameter("javascriptTextTransformFunctionName", "uppercaseName"));
 
     // Act
