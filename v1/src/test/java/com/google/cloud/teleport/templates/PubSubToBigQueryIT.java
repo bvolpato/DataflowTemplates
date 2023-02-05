@@ -59,8 +59,8 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
   private static final int MESSAGES_COUNT = 10;
   private static final int BAD_MESSAGES_COUNT = 3;
 
-  private static PubsubResourceManager pubsubResourceManager;
-  private static BigQueryResourceManager bigQueryResourceManager;
+  private PubsubResourceManager pubsubResourceManager;
+  private BigQueryResourceManager bigQueryResourceManager;
 
   @Before
   public void setUp() throws IOException {
