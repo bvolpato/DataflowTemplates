@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The {@link FileFormatFactory} class is a {@link PTransform} that takes in {@link PCollection} of
- * KV<String,String> records.The transform writes this records to GCS file(s) in user specified
+ * KV&lt;String, String&gt; records.The transform writes this records to GCS file(s) in user specified
  * format.
  */
 @AutoValue
