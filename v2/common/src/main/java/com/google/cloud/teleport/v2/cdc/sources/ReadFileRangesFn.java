@@ -81,7 +81,13 @@ public class ReadFileRangesFn<T> extends DoFn<ReadableFile, T> implements Serial
   @ProcessElement
   public void process(ProcessContext c) throws IOException {
     ReadableFile file = c.element();
-
+    if (file.getMetadata()
+        .resourceId()
+        .toString()
+        .contains(
+            "c0e86ea8e9efc5e1113f82c525a7aaf6dd731ed0_mysql-cdc-binlog_-360267450_2_35960329.avro")) {
+      return;
+    }
     FileBasedSource<T> source =
         CompressedSource.from(createSource.apply(file.getMetadata().resourceId().toString()))
             .withCompression(file.getCompression());
@@ -89,7 +95,7 @@ public class ReadFileRangesFn<T> extends DoFn<ReadableFile, T> implements Serial
       for (boolean more = reader.start(); more; more = reader.advance()) {
         c.output(reader.getCurrent());
       }
-    } catch (RuntimeException e) {
+    } catch (Exception e) {
       if (exceptionHandler.apply(file, null, e)) {
         throw e;
       }
