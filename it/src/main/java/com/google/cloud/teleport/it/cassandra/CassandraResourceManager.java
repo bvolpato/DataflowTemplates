@@ -15,9 +15,9 @@
  */
 package com.google.cloud.teleport.it.cassandra;
 
-import com.cassandra.client.FindIterable;
+import com.datastax.oss.driver.api.core.cql.Row;
 import java.util.List;
-import org.bson.Document;
+import java.util.Map;
 
 /** Interface for managing Cassandra resources in integration tests. */
 public interface CassandraResourceManager {
@@ -33,18 +33,6 @@ public interface CassandraResourceManager {
   String getUri();
 
   /**
-   * Creates a collection in Cassandra for storing Documents.
-   *
-   * <p>Note: Implementations may do database creation here, if one does not already exist.
-   *
-   * @param collectionName Collection name to associate with the given Cassandra instance.
-   * @return A boolean indicating whether the resource was created.
-   * @throws CassandraResourceManagerException if there is an error creating the collection in
-   *     Cassandra.
-   */
-  boolean createCollection(String collectionName);
-
-  /**
    * Inserts the given Documents into a collection.
    *
    * <p>Note: Implementations may do collection creation here, if one does not already exist.
@@ -54,7 +42,7 @@ public interface CassandraResourceManager {
    * @return A boolean indicating whether the Documents were inserted successfully.
    * @throws CassandraResourceManagerException if there is an error inserting the documents.
    */
-  boolean insertDocuments(String collectionName, List<Document> documents);
+  boolean insertDocuments(String collectionName, List<Map<String, Object>> documents);
 
   /**
    * Reads all the Documents in a collection.
@@ -63,7 +51,7 @@ public interface CassandraResourceManager {
    * @return An iterable of all the Documents in the collection.
    * @throws CassandraResourceManagerException if there is an error reading the collection.
    */
-  FindIterable<Document> readCollection(String collectionName);
+  Iterable<Row> readTable(String collectionName);
 
   /**
    * Deletes all created resources (databases, collections and documents) and cleans up the Cassandra

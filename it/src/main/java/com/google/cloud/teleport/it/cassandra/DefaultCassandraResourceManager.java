@@ -15,26 +15,23 @@
  */
 package com.google.cloud.teleport.it.cassandra;
 
-import static com.google.cloud.teleport.it.cassandra.CassandraResourceManagerUtils.checkValidCollectionName;
 import static com.google.cloud.teleport.it.cassandra.CassandraResourceManagerUtils.generateDatabaseName;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.cql.ResultSet;
+import com.datastax.oss.driver.api.core.cql.Row;
+import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.google.cloud.teleport.it.testcontainers.TestContainerResourceManager;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.cassandra.client.FindIterable;
-import com.cassandra.client.CassandraClient;
-import com.cassandra.client.CassandraClients;
-import com.cassandra.client.CassandraCollection;
-import com.cassandra.client.CassandraDatabase;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
-import org.bson.Document;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.CassandraContainer;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
 
 /**
@@ -108,113 +105,53 @@ public class DefaultCassandraResourceManager
     return databaseName;
   }
 
-  private synchronized CassandraDatabase getDatabase() {
-    try {
-      return cassandraClient.getDatabase(databaseName);
-    } catch (Exception e) {
-      throw new CassandraResourceManagerException(
-          "Error retrieving database " + databaseName + " from Cassandra.", e);
-    }
-  }
-
-  private synchronized boolean collectionExists(String collectionName) {
-    // Check collection name
-    checkValidCollectionName(databaseName, collectionName);
-
-    Iterable<String> collectionNames = getDatabase().listCollectionNames();
-    for (String name : collectionNames) {
-      // The Collection already exists in the database, return false.
-      if (collectionName.equals(name)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  @Override
-  public synchronized boolean createCollection(String collectionName) {
-    LOG.info("Creating collection using tableName '{}'.", collectionName);
-
-    try {
-      // Check to see if the Collection exists
-      if (collectionExists(collectionName)) {
-        return false;
-      }
-      // The Collection does not exist in the database, create it and return true.
-      getDatabase().getCollection(collectionName);
-    } catch (Exception e) {
-      throw new CassandraResourceManagerException("Error creating collection.", e);
-    }
-
-    LOG.info("Successfully created collection {}.{}", databaseName, collectionName);
-
-    return true;
-  }
-
   /**
-   * Helper method to retrieve a CassandraCollection with the given name from the database and
-   * return it.
-   *
-   * @param collectionName The name of the CassandraCollection.
-   * @param createCollection A boolean that specifies to create the Collection if it does not exist.
-   * @return A CassandraCollection with the given name.
-   */
-  private CassandraCollection<Document> getCassandraCollection(
-      String collectionName, boolean createCollection) {
-    if (!collectionExists(collectionName) && !createCollection) {
-      throw new CassandraResourceManagerException(
-          "Collection " + collectionName + " does not exists in database " + databaseName);
-    }
-
-    return getDatabase().getCollection(collectionName);
-  }
-
-  /**
-   * Inserts the given Document into a collection.
+   * Inserts the given Document into a table.
    *
    * <p>A database will be created here, if one does not already exist.
    *
-   * @param collectionName The name of the collection to insert the document into.
-   * @param document The document to insert into the collection.
+   * @param tableName The name of the table to insert the document into.
+   * @param document The document to insert into the table.
    * @return A boolean indicating whether the Document was inserted successfully.
    */
-  public synchronized boolean insertDocument(String collectionName, Document document) {
-    return insertDocuments(collectionName, ImmutableList.of(document));
+  public synchronized boolean insertDocument(String tableName, Map<String, Object> document) {
+    return insertDocuments(tableName, ImmutableList.of(document));
   }
 
   @Override
-  public synchronized boolean insertDocuments(String collectionName, List<Document> documents) {
+  public synchronized boolean insertDocuments(
+      String tableName, List<Map<String, Object>> documents) {
     LOG.info(
-        "Attempting to write {} documents to {}.{}.",
-        documents.size(),
-        databaseName,
-        collectionName);
+        "Attempting to write {} documents to {}.{}.", documents.size(), databaseName, tableName);
 
     try {
-      getCassandraCollection(collectionName, /*createCollection=*/ true).insertMany(documents);
+      for (Map<String, Object> document : documents) {
+        cassandraClient.execute(
+            SimpleStatement.newInstance(createInsertStatement(tableName, document)));
+      }
     } catch (Exception e) {
       throw new CassandraResourceManagerException("Error inserting documents.", e);
     }
 
-    LOG.info(
-        "Successfully wrote {} documents to {}.{}", documents.size(), databaseName, collectionName);
+    LOG.info("Successfully wrote {} documents to {}.{}", documents.size(), databaseName, tableName);
 
     return true;
   }
 
   @Override
-  public synchronized FindIterable<Document> readCollection(String collectionName) {
-    LOG.info("Reading all documents from {}.{}", databaseName, collectionName);
+  public synchronized Iterable<Row> readTable(String tableName) {
+    LOG.info("Reading all documents from {}.{}", databaseName, tableName);
 
-    FindIterable<Document> documents;
+    Iterable<Row> documents;
     try {
-      documents = getCassandraCollection(collectionName, /*createCollection=*/ false).find();
+      ResultSet resultSet = cassandraClient.execute(
+          SimpleStatement.newInstance("SELECT * FROM " + tableName));
+      documents = resultSet.all();
     } catch (Exception e) {
       throw new CassandraResourceManagerException("Error reading collection.", e);
     }
 
-    LOG.info("Successfully loaded documents from {}.{}", databaseName, collectionName);
+    LOG.info("Successfully loaded documents from {}.{}", databaseName, tableName);
 
     return documents;
   }
@@ -228,7 +165,7 @@ public class DefaultCassandraResourceManager
     // First, delete the database if it was not given as a static argument
     try {
       if (!usingStaticDatabase) {
-        cassandraClient.getDatabase(databaseName).drop();
+        //cassandraClient..getDatabase(databaseName).drop();
       }
     } catch (Exception e) {
       LOG.error("Failed to delete Cassandra database {}.", databaseName, e);
@@ -252,6 +189,22 @@ public class DefaultCassandraResourceManager
     LOG.info("Cassandra manager successfully cleaned up.");
 
     return true;
+  }
+
+  private String createInsertStatement(String tableName, Map<String, Object> map) {
+    StringBuilder columns = new StringBuilder();
+    StringBuilder values = new StringBuilder();
+
+    for (Map.Entry<String, Object> entry : map.entrySet()) {
+      columns.append(entry.getKey()).append(", ");
+      values.append("'").append(entry.getValue()).append("', ");
+    }
+
+    // Remove trailing comma and space
+    columns.delete(columns.length() - 2, columns.length());
+    values.delete(values.length() - 2, values.length());
+
+    return "INSERT INTO " + tableName + " (" + columns + ") VALUES (" + values + ");";
   }
 
   /** Builder for {@link DefaultCassandraResourceManager}. */
