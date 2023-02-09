@@ -22,6 +22,7 @@ import org.apache.beam.sdk.io.BoundedSource;
 import org.apache.beam.sdk.io.CompressedSource;
 import org.apache.beam.sdk.io.FileBasedSource;
 import org.apache.beam.sdk.io.FileIO.ReadableFile;
+import org.apache.beam.sdk.io.ReadAllViaFileBasedSource.ReadFileRangesFnExceptionHandler;
 import org.apache.beam.sdk.io.fs.ResourceId;
 import org.apache.beam.sdk.io.range.OffsetRange;
 import org.apache.beam.sdk.transforms.DoFn;
@@ -88,17 +89,21 @@ public class ReadFileRangesFn<T> extends DoFn<ReadableFile, T> implements Serial
             "c0e86ea8e9efc5e1113f82c525a7aaf6dd731ed0_mysql-cdc-binlog_-360267450_2_35960329.avro")) {
       return;
     }
-    FileBasedSource<T> source =
-        CompressedSource.from(createSource.apply(file.getMetadata().resourceId().toString()))
-            .withCompression(file.getCompression());
-    try (BoundedSource.BoundedReader<T> reader = source.createReader(c.getPipelineOptions())) {
-      for (boolean more = reader.start(); more; more = reader.advance()) {
-        c.output(reader.getCurrent());
+    try {
+      FileBasedSource<T> source =
+          CompressedSource.from(createSource.apply(file.getMetadata().resourceId().toString()))
+              .withCompression(file.getCompression());
+      try (BoundedSource.BoundedReader<T> reader = source.createReader(c.getPipelineOptions())) {
+        for (boolean more = reader.start(); more; more = reader.advance()) {
+          c.output(reader.getCurrent());
+        }
+      } catch (Exception e) {
+        if (exceptionHandler.apply(file, null, e)) {
+          throw e;
+        }
       }
     } catch (Exception e) {
-      if (exceptionHandler.apply(file, null, e)) {
-        throw e;
-      }
+      LOG.warn("Error reading file {}, skipping.", file.getMetadata().resourceId(), e);
     }
   }
 
