@@ -52,7 +52,7 @@ public final class RecordsSubject extends Subject {
    * @param expectedRows Expected Rows
    */
   public void hasRows(int expectedRows) {
-    check("there are %d rows", expectedRows).that(actual.size()).isEqualTo(expectedRows);
+    check("there are %s rows", expectedRows).that(actual.size()).isEqualTo(expectedRows);
   }
 
   /**

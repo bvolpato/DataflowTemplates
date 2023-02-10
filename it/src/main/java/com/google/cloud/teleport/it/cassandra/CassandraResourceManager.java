@@ -15,6 +15,7 @@
  */
 package com.google.cloud.teleport.it.cassandra;
 
+import com.datastax.oss.driver.api.core.cql.ResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
 import java.util.List;
 import java.util.Map;
@@ -27,10 +28,18 @@ public interface CassandraResourceManager {
    *
    * @return the name of the Cassandra Database.
    */
-  String getDatabaseName();
+  String getKeyspaceName();
 
   /** Returns the URI connection string to the Cassandra Database. */
   String getUri();
+
+  /**
+   * Execute the given statement on the managed keyspace.
+   *
+   * @param statement The statement to execute.
+   * @return ResultSet from Cassandra.
+   */
+  ResultSet executeStatement(String statement);
 
   /**
    * Inserts the given Documents into a collection.
@@ -54,10 +63,11 @@ public interface CassandraResourceManager {
   Iterable<Row> readTable(String collectionName);
 
   /**
-   * Deletes all created resources (databases, collections and documents) and cleans up the Cassandra
-   * client, making the manager object unusable.
+   * Deletes all created resources (databases, collections and documents) and cleans up the
+   * Cassandra client, making the manager object unusable.
    *
-   * @throws CassandraResourceManagerException if there is an error deleting the Cassandra resources.
+   * @throws CassandraResourceManagerException if there is an error deleting the Cassandra
+   *     resources.
    */
   boolean cleanupAll();
 }

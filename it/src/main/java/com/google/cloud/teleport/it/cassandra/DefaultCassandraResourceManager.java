@@ -15,7 +15,7 @@
  */
 package com.google.cloud.teleport.it.cassandra;
 
-import static com.google.cloud.teleport.it.cassandra.CassandraResourceManagerUtils.generateDatabaseName;
+import static com.google.cloud.teleport.it.cassandra.CassandraResourceManagerUtils.generateKeyspaceName;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
@@ -60,7 +60,7 @@ public class DefaultCassandraResourceManager
   private static final int CASSANDRA_INTERNAL_PORT = 9042;
 
   private final CqlSession cassandraClient;
-  private final String databaseName;
+  private final String keyspaceName;
   private final String connectionString;
   private final boolean usingStaticDatabase;
 
@@ -77,9 +77,9 @@ public class DefaultCassandraResourceManager
       CqlSession cassandraClient, CassandraContainer container, Builder builder) {
     super(container, builder);
 
-    this.usingStaticDatabase = builder.databaseName != null;
-    this.databaseName =
-        usingStaticDatabase ? builder.databaseName : generateDatabaseName(builder.testId);
+    this.usingStaticDatabase = builder.keyspaceName != null;
+    this.keyspaceName =
+        usingStaticDatabase ? builder.keyspaceName : generateKeyspaceName(builder.testId);
     this.connectionString =
         String.format("cassandra://%s:%d", this.getHost(), this.getPort(CASSANDRA_INTERNAL_PORT));
     this.cassandraClient =
@@ -87,8 +87,16 @@ public class DefaultCassandraResourceManager
             ? CqlSession.builder()
                 .addContactPoint(
                     new InetSocketAddress(this.getHost(), this.getPort(CASSANDRA_INTERNAL_PORT)))
+                .withLocalDatacenter("datacenter1")
                 .build()
             : cassandraClient;
+
+    if (!usingStaticDatabase) {
+      this.cassandraClient.execute(
+          String.format(
+              "CREATE KEYSPACE IF NOT EXISTS %s WITH replication = {'class':'SimpleStrategy', 'replication_factor':1}",
+              this.keyspaceName));
+    }
   }
 
   public static Builder builder(String testId) throws IOException {
@@ -101,8 +109,20 @@ public class DefaultCassandraResourceManager
   }
 
   @Override
-  public synchronized String getDatabaseName() {
-    return databaseName;
+  public synchronized String getKeyspaceName() {
+    return keyspaceName;
+  }
+
+  @Override
+  public synchronized ResultSet executeStatement(String statement) {
+    LOG.info("Executing statement: {}", statement);
+
+    try {
+      return cassandraClient.execute(
+          SimpleStatement.newInstance(statement).setKeyspace(this.keyspaceName));
+    } catch (Exception e) {
+      throw new CassandraResourceManagerException("Error reading collection.", e);
+    }
   }
 
   /**
@@ -122,36 +142,34 @@ public class DefaultCassandraResourceManager
   public synchronized boolean insertDocuments(
       String tableName, List<Map<String, Object>> documents) {
     LOG.info(
-        "Attempting to write {} documents to {}.{}.", documents.size(), databaseName, tableName);
+        "Attempting to write {} documents to {}.{}.", documents.size(), keyspaceName, tableName);
 
     try {
       for (Map<String, Object> document : documents) {
-        cassandraClient.execute(
-            SimpleStatement.newInstance(createInsertStatement(tableName, document)));
+        executeStatement(createInsertStatement(tableName, document));
       }
     } catch (Exception e) {
       throw new CassandraResourceManagerException("Error inserting documents.", e);
     }
 
-    LOG.info("Successfully wrote {} documents to {}.{}", documents.size(), databaseName, tableName);
+    LOG.info("Successfully wrote {} documents to {}.{}", documents.size(), keyspaceName, tableName);
 
     return true;
   }
 
   @Override
   public synchronized Iterable<Row> readTable(String tableName) {
-    LOG.info("Reading all documents from {}.{}", databaseName, tableName);
+    LOG.info("Reading all documents from {}.{}", keyspaceName, tableName);
 
     Iterable<Row> documents;
     try {
-      ResultSet resultSet = cassandraClient.execute(
-          SimpleStatement.newInstance("SELECT * FROM " + tableName));
+      ResultSet resultSet = executeStatement(String.format("SELECT * FROM %s", tableName));
       documents = resultSet.all();
     } catch (Exception e) {
-      throw new CassandraResourceManagerException("Error reading collection.", e);
+      throw new CassandraResourceManagerException("Error reading table.", e);
     }
 
-    LOG.info("Successfully loaded documents from {}.{}", databaseName, tableName);
+    LOG.info("Successfully loaded documents from {}.{}", keyspaceName, tableName);
 
     return documents;
   }
@@ -165,10 +183,10 @@ public class DefaultCassandraResourceManager
     // First, delete the database if it was not given as a static argument
     try {
       if (!usingStaticDatabase) {
-        //cassandraClient..getDatabase(databaseName).drop();
+        executeStatement(String.format("DROP KEYSPACE IF EXISTS %s", this.keyspaceName));
       }
     } catch (Exception e) {
-      LOG.error("Failed to delete Cassandra database {}.", databaseName, e);
+      LOG.error("Failed to delete Cassandra keyspace {}.", keyspaceName, e);
       producedError = true;
     }
 
@@ -197,21 +215,28 @@ public class DefaultCassandraResourceManager
 
     for (Map.Entry<String, Object> entry : map.entrySet()) {
       columns.append(entry.getKey()).append(", ");
-      values.append("'").append(entry.getValue()).append("', ");
+
+      // add quotes around strings
+      if (entry.getValue() instanceof String) {
+        values.append("'").append(entry.getValue()).append("'");
+      } else {
+        values.append(entry.getValue());
+      }
+      values.append(", ");
     }
 
     // Remove trailing comma and space
     columns.delete(columns.length() - 2, columns.length());
     values.delete(values.length() - 2, values.length());
 
-    return "INSERT INTO " + tableName + " (" + columns + ") VALUES (" + values + ");";
+    return String.format("INSERT INTO %s (%s) VALUES (%s)", tableName, columns, values);
   }
 
   /** Builder for {@link DefaultCassandraResourceManager}. */
   public static final class Builder
       extends TestContainerResourceManager.Builder<DefaultCassandraResourceManager> {
 
-    private String databaseName;
+    private String keyspaceName;
 
     private Builder(String testId) {
       super(testId);
@@ -220,7 +245,7 @@ public class DefaultCassandraResourceManager
     }
 
     /**
-     * Sets the database name to that of a static database instance. Use this method only when
+     * Sets the keyspace name to that of a static database instance. Use this method only when
      * attempting to operate on a pre-existing Cassandra database.
      *
      * <p>Note: if a database name is set, and a static Cassandra server is being used
@@ -228,11 +253,11 @@ public class DefaultCassandraResourceManager
      * static server if it does not exist, and it will not be removed when cleanupAll() is called on
      * the CassandraResourceManager.
      *
-     * @param databaseName The database name.
+     * @param keyspaceName The database name.
      * @return this builder object with the database name set.
      */
-    public Builder setDatabaseName(String databaseName) {
-      this.databaseName = databaseName;
+    public Builder setKeyspaceName(String keyspaceName) {
+      this.keyspaceName = keyspaceName;
       return this;
     }
 
