@@ -17,7 +17,9 @@ package com.google.cloud.teleport.bigtable;
 
 import static com.google.cloud.teleport.it.TestProperties.getProperty;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatPipeline;
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatRecords;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 
 import com.google.cloud.Tuple;
@@ -39,10 +41,12 @@ import com.google.cloud.teleport.it.launcher.PipelineOperator;
 import com.google.cloud.teleport.it.matchers.TemplateAsserts;
 import com.google.cloud.teleport.metadata.TemplateIntegrationTest;
 import com.google.common.collect.ImmutableList;
+import com.google.common.truth.Truth;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -118,21 +122,15 @@ public class CassandraToBigtableIT extends TemplateTestBase {
     assertThatResult(result).isLaunchFinished();
 
     List<Row> rows = bigtableClient.readTable(tableName);
-    System.out.println(rows);
-    // TemplateAsserts.assertThatRecords(rows).hasRecordsUnordered();
-    // rows.forEach(
-    //     row -> {
-    //       row.getCells(colFamily)
-    //           .forEach(
-    //               rowCell -> {
-    //                 RowToInsert bqRow =
-    //                     bigQueryRows.get(Integer.parseInt(row.getKey().toStringUtf8()));
-    //                 String col = rowCell.getQualifier().toStringUtf8();
-    //                 String val = rowCell.getValue().toStringUtf8();
-    //
-    //                 assertEquals(rowCell.getFamily(), colFamily);
-    //                 assertEquals(bqRow.getContent().get(col), val);
-    //               });
-    //     });
+
+    // Create a map of <id, name>
+    Map<String, String> values =
+        rows.stream()
+            .collect(
+                Collectors.toMap(
+                    row -> row.getKey().toStringUtf8(),
+                    row -> row.getCells().get(0).getValue().toStringUtf8()));
+    assertThat(values.get("1")).isEqualTo("Google");
+    assertThat(values.get("2")).isEqualTo("Alphabet");
   }
 }
