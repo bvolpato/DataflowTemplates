@@ -30,8 +30,11 @@ public interface CassandraResourceManager {
    */
   String getKeyspaceName();
 
-  /** Returns the URI connection string to the Cassandra Database. */
-  String getUri();
+  /** Returns the host to connect to the Cassandra Database. */
+  String getHost();
+
+  /** Returns the port to connect to the Cassandra Database. */
+  int getPort();
 
   /**
    * Execute the given statement on the managed keyspace.

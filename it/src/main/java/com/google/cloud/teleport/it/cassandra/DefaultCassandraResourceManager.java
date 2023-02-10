@@ -61,7 +61,6 @@ public class DefaultCassandraResourceManager
 
   private final CqlSession cassandraClient;
   private final String keyspaceName;
-  private final String connectionString;
   private final boolean usingStaticDatabase;
 
   private DefaultCassandraResourceManager(Builder builder) {
@@ -80,8 +79,6 @@ public class DefaultCassandraResourceManager
     this.usingStaticDatabase = builder.keyspaceName != null;
     this.keyspaceName =
         usingStaticDatabase ? builder.keyspaceName : generateKeyspaceName(builder.testId);
-    this.connectionString =
-        String.format("cassandra://%s:%d", this.getHost(), this.getPort(CASSANDRA_INTERNAL_PORT));
     this.cassandraClient =
         cassandraClient == null
             ? CqlSession.builder()
@@ -104,8 +101,8 @@ public class DefaultCassandraResourceManager
   }
 
   @Override
-  public synchronized String getUri() {
-    return connectionString;
+  public int getPort() {
+    return super.getPort(CASSANDRA_INTERNAL_PORT);
   }
 
   @Override

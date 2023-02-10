@@ -68,7 +68,7 @@ public class DefaultCassandraResourceManagerTest {
 
   @Test
   public void testGetUriShouldReturnCorrectValue() {
-    assertThat(testManager.getUri()).matches("cassandra://" + HOST + ":" + MAPPED_PORT);
+    assertThat(testManager.getHost()).matches(HOST);
   }
 
   @Test
