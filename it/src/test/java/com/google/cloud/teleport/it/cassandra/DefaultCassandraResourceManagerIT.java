@@ -15,7 +15,7 @@
  */
 package com.google.cloud.teleport.it.cassandra;
 
-import static com.google.cloud.teleport.it.matchers.TemplateAsserts.*;
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatRecords;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.datastax.oss.driver.api.core.cql.Row;
