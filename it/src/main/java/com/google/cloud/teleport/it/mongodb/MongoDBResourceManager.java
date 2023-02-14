@@ -71,5 +71,5 @@ public interface MongoDBResourceManager {
    *
    * @throws MongoDBResourceManagerException if there is an error deleting the MongoDB resources.
    */
-  boolean cleanupAll();
+  void cleanupAll();
 }
