@@ -155,6 +155,10 @@ public interface PipelineLauncher {
       return mainClassname;
     }
 
+    public static Builder builderWithName(String jobName, String specPath) {
+      return new Builder(jobName, specPath);
+    }
+
     public static Builder builder(String testName, String specPath) {
       return new Builder(createJobName(testName), specPath);
     }
