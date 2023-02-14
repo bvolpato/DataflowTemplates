@@ -118,7 +118,7 @@ public final class GcsArtifactClient implements ArtifactClient {
 
   @Override
   public List<Artifact> listArtifacts(TestName testName, Pattern regex) {
-    return listArtifacts(testName, regex);
+    return listArtifacts(testName.getMethodName(), regex);
   }
 
   @Override

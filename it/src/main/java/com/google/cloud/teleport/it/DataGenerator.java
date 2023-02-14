@@ -71,13 +71,13 @@ public class DataGenerator {
   public static DataGenerator.Builder builderWithSchemaLocation(
       TestName testName, String schemaLocation) {
     return DataGenerator.builderWithSchemaLocation(
-        createJobName(testName + "-data-generator"), schemaLocation);
+        createJobName(testName.getMethodName() + "-data-generator"), schemaLocation);
   }
 
   public static DataGenerator.Builder builderWithSchemaTemplate(
       TestName testName, String schemaTemplate) {
     return DataGenerator.builderWithSchemaTemplate(
-        createJobName(testName + "-data-generator"), schemaTemplate);
+        createJobName(testName.getMethodName() + "-data-generator"), schemaTemplate);
   }
 
   /**

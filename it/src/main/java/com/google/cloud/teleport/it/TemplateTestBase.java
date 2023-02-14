@@ -392,7 +392,7 @@ public abstract class TemplateTestBase {
 
   /** Get the Cloud Storage base path for a specific test. */
   protected String getGcsPath(TestName testName) {
-    return getGcsPath(testName);
+    return getGcsPath(testName.getMethodName());
   }
 
   /** Get the Cloud Storage base path for a specific testing method or artifact id. */
