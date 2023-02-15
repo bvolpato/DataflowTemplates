@@ -31,6 +31,7 @@ import com.google.cloud.teleport.it.artifacts.Artifact;
 import com.google.cloud.teleport.it.bigquery.BigQueryResourceManager;
 import com.google.cloud.teleport.it.bigquery.BigQueryTestUtils;
 import com.google.cloud.teleport.it.bigquery.DefaultBigQueryResourceManager;
+import com.google.cloud.teleport.it.common.ResourceManagerUtils;
 import com.google.cloud.teleport.it.launcher.PipelineLauncher.LaunchConfig;
 import com.google.cloud.teleport.it.launcher.PipelineLauncher.LaunchInfo;
 import com.google.cloud.teleport.it.launcher.PipelineOperator.Result;
@@ -54,7 +55,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class BigQueryToParquetIT extends TemplateTestBase {
 
-  private static BigQueryResourceManager bigQueryClient;
+  private static BigQueryResourceManager bigQueryResourceManager;
 
   // Define a set of parameters used to allow configuration of the test size being run.
   private static final String BIGQUERY_ID_COL = "test_id";
@@ -68,28 +69,27 @@ public final class BigQueryToParquetIT extends TemplateTestBase {
 
   @Before
   public void setup() {
-    bigQueryClient =
-        DefaultBigQueryResourceManager.builder(testName.getMethodName(), PROJECT)
+    bigQueryResourceManager =
+        DefaultBigQueryResourceManager.builder(testName, PROJECT)
             .setCredentials(credentials)
             .build();
   }
 
   @After
   public void tearDown() {
-    bigQueryClient.cleanupAll();
+    ResourceManagerUtils.cleanResources(bigQueryResourceManager);
   }
 
   @Test
   public void testBigQueryToParquet() throws IOException {
     // Arrange
-    String tableName = testName.getMethodName();
     Tuple<Schema, List<RowToInsert>> generatedTable =
         BigQueryTestUtils.generateBigQueryTable(
             BIGQUERY_ID_COL, BIGQUERY_NUM_ROWS, BIGQUERY_NUM_FIELDS, BIGQUERY_MAX_ENTRY_LENGTH);
     Schema bigQuerySchema = generatedTable.x();
     List<RowToInsert> bigQueryRows = generatedTable.y();
-    TableId table = bigQueryClient.createTable(tableName, bigQuerySchema);
-    bigQueryClient.write(tableName, bigQueryRows);
+    TableId table = bigQueryResourceManager.createTable(testName, bigQuerySchema);
+    bigQueryResourceManager.write(testName, bigQueryRows);
     Pattern expectedFilePattern = Pattern.compile(".*");
 
     LaunchConfig.Builder options =
