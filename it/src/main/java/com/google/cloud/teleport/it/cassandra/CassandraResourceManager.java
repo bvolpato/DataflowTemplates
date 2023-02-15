@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Google LLC
+ * Copyright (C) 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,11 +17,12 @@ package com.google.cloud.teleport.it.cassandra;
 
 import com.datastax.oss.driver.api.core.cql.ResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
+import com.google.cloud.teleport.it.common.ResourceManager;
 import java.util.List;
 import java.util.Map;
 
 /** Interface for managing Cassandra resources in integration tests. */
-public interface CassandraResourceManager {
+public interface CassandraResourceManager extends ResourceManager {
 
   /**
    * Returns the name of the Database that this Cassandra manager will operate in.
@@ -64,13 +65,4 @@ public interface CassandraResourceManager {
    * @throws CassandraResourceManagerException if there is an error reading the collection.
    */
   Iterable<Row> readTable(String collectionName);
-
-  /**
-   * Deletes all created resources (databases, collections and documents) and cleans up the
-   * Cassandra client, making the manager object unusable.
-   *
-   * @throws CassandraResourceManagerException if there is an error deleting the Cassandra
-   *     resources.
-   */
-  boolean cleanupAll();
 }

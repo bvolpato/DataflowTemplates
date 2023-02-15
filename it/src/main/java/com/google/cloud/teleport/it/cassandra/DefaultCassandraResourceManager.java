@@ -172,7 +172,7 @@ public class DefaultCassandraResourceManager
   }
 
   @Override
-  public synchronized boolean cleanupAll() {
+  public synchronized void cleanupAll() {
     LOG.info("Attempting to cleanup Cassandra manager.");
 
     boolean producedError = false;
@@ -196,14 +196,14 @@ public class DefaultCassandraResourceManager
     }
 
     // Throw Exception at the end if there were any errors
-    if (producedError || !super.cleanupAll()) {
+    if (producedError) {
       throw new CassandraResourceManagerException(
           "Failed to delete resources. Check above for errors.");
     }
 
-    LOG.info("Cassandra manager successfully cleaned up.");
+    super.cleanupAll();
 
-    return true;
+    LOG.info("Cassandra manager successfully cleaned up.");
   }
 
   private String createInsertStatement(String tableName, Map<String, Object> map) {

@@ -95,7 +95,7 @@ public class DefaultCassandraResourceManagerTest {
     DefaultCassandraResourceManager tm =
         new DefaultCassandraResourceManager(cassandraClient, container, builder);
 
-    assertThat(tm.cleanupAll()).isEqualTo(true);
+    tm.cleanupAll();
 
     verify(cassandraClient, never()).execute(any(SimpleStatement.class));
     verify(cassandraClient).close();
@@ -104,7 +104,7 @@ public class DefaultCassandraResourceManagerTest {
   @Test
   public void testCleanupShouldDropNonStaticDatabase() {
 
-    assertThat(testManager.cleanupAll()).isEqualTo(true);
+    testManager.cleanupAll();
 
     verify(cassandraClient).execute(any(SimpleStatement.class));
     verify(cassandraClient).close();

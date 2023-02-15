@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Google LLC
+ * Copyright (C) 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,6 +24,7 @@ import com.google.cloud.teleport.it.TemplateTestBase;
 import com.google.cloud.teleport.it.bigtable.DefaultBigtableResourceManager;
 import com.google.cloud.teleport.it.cassandra.CassandraResourceManager;
 import com.google.cloud.teleport.it.cassandra.DefaultCassandraResourceManager;
+import com.google.cloud.teleport.it.common.ResourceManagerUtils;
 import com.google.cloud.teleport.it.launcher.PipelineLauncher;
 import com.google.cloud.teleport.it.launcher.PipelineLauncher.LaunchInfo;
 import com.google.cloud.teleport.it.launcher.PipelineOperator;
@@ -36,10 +37,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
@@ -48,29 +47,23 @@ import org.junit.runners.JUnit4;
 @TemplateIntegrationTest(CassandraToBigtable.class)
 @RunWith(JUnit4.class)
 public class CassandraToBigtableIT extends TemplateTestBase {
-  @Rule public final TestName testName = new TestName();
 
   private CassandraResourceManager cassandraResourceManager;
-  private DefaultBigtableResourceManager bigtableClient;
+  private DefaultBigtableResourceManager bigtableResourceManager;
 
   @Before
   public void setup() throws IOException {
     cassandraResourceManager =
-        DefaultCassandraResourceManager.builder(testName.getMethodName()).setHost(HOST_IP).build();
-    bigtableClient =
-        DefaultBigtableResourceManager.builder(testName.getMethodName(), PROJECT)
+        DefaultCassandraResourceManager.builder(testName).setHost(HOST_IP).build();
+    bigtableResourceManager =
+        DefaultBigtableResourceManager.builder(testName, PROJECT)
             .setCredentialsProvider(credentialsProvider)
             .build();
   }
 
   @After
   public void tearDownClass() {
-    if (cassandraResourceManager != null) {
-      cassandraResourceManager.cleanupAll();
-    }
-    if (bigtableClient != null) {
-      bigtableClient.cleanupAll();
-    }
+    ResourceManagerUtils.cleanResources(cassandraResourceManager, bigtableResourceManager);
   }
 
   @Test
@@ -86,7 +79,7 @@ public class CassandraToBigtableIT extends TemplateTestBase {
     cassandraResourceManager.insertDocuments("source_data", records);
 
     String colFamily = "names";
-    bigtableClient.createTable(tableName, ImmutableList.of(colFamily));
+    bigtableResourceManager.createTable(tableName, ImmutableList.of(colFamily));
 
     PipelineLauncher.LaunchConfig.Builder options =
         PipelineLauncher.LaunchConfig.builder(testName, specPath)
@@ -95,7 +88,7 @@ public class CassandraToBigtableIT extends TemplateTestBase {
             .addParameter("cassandraKeyspace", cassandraResourceManager.getKeyspaceName())
             .addParameter("cassandraTable", "source_data")
             .addParameter("bigtableProjectId", PROJECT)
-            .addParameter("bigtableInstanceId", bigtableClient.getInstanceId())
+            .addParameter("bigtableInstanceId", bigtableResourceManager.getInstanceId())
             .addParameter("bigtableTableId", tableName)
             .addParameter("defaultColumnFamily", colFamily);
 
@@ -108,7 +101,7 @@ public class CassandraToBigtableIT extends TemplateTestBase {
     // Assert
     assertThatResult(result).isLaunchFinished();
 
-    List<Row> rows = bigtableClient.readTable(tableName);
+    List<Row> rows = bigtableResourceManager.readTable(tableName);
 
     // Create a map of <id, name>
     Map<String, String> values =
