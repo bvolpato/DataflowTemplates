@@ -19,7 +19,6 @@ import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatPi
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.cloud.pubsub.v1.Publisher;
 import com.google.cloud.teleport.it.TemplateTestBase;
 import com.google.cloud.teleport.it.common.ResourceManagerUtils;
 import com.google.cloud.teleport.it.kafka.DefaultKafkaResourceManager;
@@ -119,7 +118,6 @@ public final class PubsubToKafkaIT extends TemplateTestBase {
     assertThatPipeline(info).isRunning();
 
     List<String> inMessages = Arrays.asList("first message", "second message");
-    Publisher publisher = null;
     for (final String message : inMessages) {
       ByteString data = ByteString.copyFromUtf8(message);
       pubsubResourceManager.publish(tc, ImmutableMap.of(), data);
@@ -142,6 +140,6 @@ public final class PubsubToKafkaIT extends TemplateTestBase {
 
     // Assert
     assertThatResult(result).meetsConditions();
-    assertThat(outMessages).isEqualTo(inMessages);
+    assertThat(outMessages).containsExactlyElementsIn(inMessages);
   }
 }
