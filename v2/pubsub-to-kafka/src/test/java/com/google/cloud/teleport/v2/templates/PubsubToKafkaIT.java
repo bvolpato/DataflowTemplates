@@ -26,6 +26,7 @@ import com.google.cloud.teleport.it.launcher.PipelineLauncher.LaunchConfig;
 import com.google.cloud.teleport.it.launcher.PipelineLauncher.LaunchInfo;
 import com.google.cloud.teleport.it.launcher.PipelineOperator.Result;
 import com.google.cloud.teleport.it.pubsub.DefaultPubsubResourceManager;
+import com.google.cloud.teleport.metadata.SkipDirectRunnerTest;
 import com.google.cloud.teleport.metadata.TemplateIntegrationTest;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
@@ -51,8 +52,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Integration test for {@link PubsubToKafka}. */
-@Category(TemplateIntegrationTest.class)
 @TemplateIntegrationTest(PubsubToKafka.class)
+// SkipDirectRunnerTest: PubsubIO doesn't trigger panes on the DirectRunner.
+@Category({TemplateIntegrationTest.class, SkipDirectRunnerTest.class})
 @RunWith(JUnit4.class)
 public final class PubsubToKafkaIT extends TemplateTestBase {
 
