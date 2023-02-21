@@ -70,7 +70,14 @@ public class TextIOToBigQueryTest {
             .setFields(
                 ImmutableList.of(
                     new TableFieldSchema().setName("BOOK_ID").setType("STRING"),
-                    new TableFieldSchema().setName("TITLE").setType("STRING")));
+                    new TableFieldSchema().setName("TITLE").setType("STRING"),
+                    new TableFieldSchema()
+                        .setName("DETAILS")
+                        .setType("RECORD")
+                        .setFields(
+                            ImmutableList.of(
+                                new TableFieldSchema().setName("YEAR").setType("INTEGER"),
+                                new TableFieldSchema().setName("SUMMARY").setType("STRING")))));
     fakeDatasetService.createTable(
         new Table()
             .setTableReference(
