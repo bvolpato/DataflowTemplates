@@ -205,26 +205,15 @@ public class TextIOToBigQuery {
   private static TableSchema parseSchema(String jsonPath) {
     TableSchema tableSchema = new TableSchema();
     List<TableFieldSchema> fields = new ArrayList<>();
-    JSONObject jsonSchema;
 
     try {
-
-      jsonSchema = parseJson(jsonPath);
+      JSONObject jsonSchema = parseJson(jsonPath);
 
       JSONArray bqSchemaJsonArray = jsonSchema.getJSONArray(BIGQUERY_SCHEMA);
 
       for (int i = 0; i < bqSchemaJsonArray.length(); i++) {
         JSONObject inputField = bqSchemaJsonArray.getJSONObject(i);
-        TableFieldSchema field =
-            new TableFieldSchema()
-                .setName(inputField.getString(NAME))
-                .setType(inputField.getString(TYPE));
-
-        if (inputField.has(MODE)) {
-          field.setMode(inputField.getString(MODE));
-        }
-
-        fields.add(field);
+        fields.add(convertToTableFieldSchema(inputField));
       }
       tableSchema.setFields(fields);
 
@@ -232,6 +221,35 @@ public class TextIOToBigQuery {
       throw new RuntimeException(e);
     }
     return tableSchema;
+  }
+
+  /**
+   * Convert a JSONObject from the Schema JSON to a TableFieldSchema. In case of RECORD, it handles
+   * it recursively.
+   *
+   * @param inputField Input field to convert.
+   * @return TableFieldSchema instance to populate the schema.
+   */
+  private static TableFieldSchema convertToTableFieldSchema(JSONObject inputField) {
+    TableFieldSchema field =
+        new TableFieldSchema()
+            .setName(inputField.getString(NAME))
+            .setType(inputField.getString(TYPE));
+
+    if (inputField.has(MODE)) {
+      field.setMode(inputField.getString(MODE));
+    }
+    if (inputField.getString(TYPE) != null && inputField.getString(TYPE).equals("RECORD")) {
+      List<TableFieldSchema> nestedFields = new ArrayList<>();
+      field.setFields(nestedFields);
+      JSONArray fieldsArr = inputField.getJSONArray("fields");
+      for (int i = 0; i < fieldsArr.length(); i++) {
+        JSONObject nestedJSON = fieldsArr.getJSONObject(i);
+        nestedFields.add(convertToTableFieldSchema(nestedJSON));
+      }
+    }
+
+    return field;
   }
 
   /**

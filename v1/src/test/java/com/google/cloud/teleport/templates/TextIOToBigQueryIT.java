@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.cloud.teleport.v2.templates;
+package com.google.cloud.teleport.templates;
 
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatPipeline;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatRecords;
@@ -37,7 +37,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import java.util.Map;
-import java.util.function.Function;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,6 +69,7 @@ public final class TextIOToBigQueryIT extends TemplateTestBase {
           "ABC",
           "details",
           ImmutableMap.of("year", "2023", "summary", "LOREM IPSUM LOREM IPSUM"));
+
   private BigQueryResourceManager bigQueryClient;
 
   @Before
@@ -87,16 +87,6 @@ public final class TextIOToBigQueryIT extends TemplateTestBase {
 
   @Test
   public void testTextIOToBigQuery() throws IOException {
-    testTextIOToBigQuery(Function.identity());
-  }
-
-  @Test
-  public void testTextIOToBigQueryWithStorageApi() throws IOException {
-    testTextIOToBigQuery(b -> b.addParameter("useStorageWriteApi", "true"));
-  }
-
-  private void testTextIOToBigQuery(
-      Function<LaunchConfig.Builder, LaunchConfig.Builder> paramsAdder) throws IOException {
     // Arrange
     String bqTable = testName;
 
@@ -122,14 +112,13 @@ public final class TextIOToBigQueryIT extends TemplateTestBase {
     // Act
     LaunchInfo info =
         launchTemplate(
-            paramsAdder.apply(
-                LaunchConfig.builder(testName, specPath)
-                    .addParameter("JSONPath", getGcsPath("schema.json"))
-                    .addParameter("inputFilePattern", getGcsPath("input.txt"))
-                    .addParameter("javascriptTextTransformGcsPath", getGcsPath("udf.js"))
-                    .addParameter("javascriptTextTransformFunctionName", "identity")
-                    .addParameter("outputTable", toTableSpec(table))
-                    .addParameter("bigQueryLoadingTemporaryDirectory", getGcsPath("bq-tmp"))));
+            LaunchConfig.builder(testName, specPath)
+                .addParameter("JSONPath", getGcsPath("schema.json"))
+                .addParameter("inputFilePattern", getGcsPath("input.txt"))
+                .addParameter("javascriptTextTransformGcsPath", getGcsPath("udf.js"))
+                .addParameter("javascriptTextTransformFunctionName", "identity")
+                .addParameter("outputTable", toTableSpec(table))
+                .addParameter("bigQueryLoadingTemporaryDirectory", getGcsPath("bq-tmp")));
     assertThatPipeline(info).isRunning();
 
     Result result = pipelineOperator().waitUntilDone(createConfig(info));
