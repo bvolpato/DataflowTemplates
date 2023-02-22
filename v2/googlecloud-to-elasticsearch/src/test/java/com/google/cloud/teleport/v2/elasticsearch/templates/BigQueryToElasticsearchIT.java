@@ -99,16 +99,15 @@ public final class BigQueryToElasticsearchIT extends TemplateTestBase {
     String indexName = createJobName(testName);
     elasticsearchResourceManager.createIndex(indexName);
 
-    LaunchConfig.Builder options =
-        LaunchConfig.builder(testName, specPath)
-            .addParameter("inputTableSpec", toTableSpec(table))
-            .addParameter("outputDeadletterTable", toTableSpec(table) + "_dlq")
-            .addParameter("connectionUrl", elasticsearchResourceManager.getUri())
-            .addParameter("index", indexName)
-            .addParameter("apiKey", "elastic");
-
     // Act
-    LaunchInfo info = launchTemplate(options);
+    LaunchInfo info =
+        launchTemplate(
+            LaunchConfig.builder(testName, specPath)
+                .addParameter("inputTableSpec", toTableSpec(table))
+                .addParameter("outputDeadletterTable", toTableSpec(table) + "_dlq")
+                .addParameter("connectionUrl", elasticsearchResourceManager.getUri())
+                .addParameter("index", indexName)
+                .addParameter("apiKey", "elastic"));
     assertThatPipeline(info).isRunning();
 
     Result result = pipelineOperator().waitUntilDone(createConfig(info));
@@ -135,17 +134,17 @@ public final class BigQueryToElasticsearchIT extends TemplateTestBase {
     String indexName = createJobName(testName);
     elasticsearchResourceManager.createIndex(indexName);
 
-    LaunchConfig.Builder options =
-        LaunchConfig.builder(testName, specPath)
-            .addParameter("inputTableSpec", toTableSpec(table))
-            .addParameter("query", "SELECT * FROM `" + toTableSpec(table).replace(':', '.') + "`")
-            .addParameter("outputDeadletterTable", toTableSpec(table) + "_dlq")
-            .addParameter("connectionUrl", elasticsearchResourceManager.getUri())
-            .addParameter("index", indexName)
-            .addParameter("apiKey", "elastic");
-
     // Act
-    LaunchInfo info = launchTemplate(options);
+    LaunchInfo info =
+        launchTemplate(
+            LaunchConfig.builder(testName, specPath)
+                .addParameter("inputTableSpec", toTableSpec(table))
+                .addParameter(
+                    "query", "SELECT * FROM `" + toTableSpec(table).replace(':', '.') + "`")
+                .addParameter("outputDeadletterTable", toTableSpec(table) + "_dlq")
+                .addParameter("connectionUrl", elasticsearchResourceManager.getUri())
+                .addParameter("index", indexName)
+                .addParameter("apiKey", "elastic"));
     assertThatPipeline(info).isRunning();
 
     Result result = pipelineOperator().waitUntilDone(createConfig(info));
@@ -182,18 +181,17 @@ public final class BigQueryToElasticsearchIT extends TemplateTestBase {
     String indexName = createJobName(testName);
     elasticsearchResourceManager.createIndex(indexName);
 
-    LaunchConfig.Builder options =
-        LaunchConfig.builder(testName, specPath)
-            .addParameter("inputTableSpec", toTableSpec(table))
-            .addParameter("outputDeadletterTable", toTableSpec(table) + "_dlq")
-            .addParameter("connectionUrl", elasticsearchResourceManager.getUri())
-            .addParameter("index", indexName)
-            .addParameter("apiKey", "elastic")
-            .addParameter("javascriptTextTransformGcsPath", getGcsPath("udf.js"))
-            .addParameter("javascriptTextTransformFunctionName", "uppercaseName");
-
     // Act
-    LaunchInfo info = launchTemplate(options);
+    LaunchInfo info =
+        launchTemplate(
+            LaunchConfig.builder(testName, specPath)
+                .addParameter("inputTableSpec", toTableSpec(table))
+                .addParameter("outputDeadletterTable", toTableSpec(table) + "_dlq")
+                .addParameter("connectionUrl", elasticsearchResourceManager.getUri())
+                .addParameter("index", indexName)
+                .addParameter("apiKey", "elastic")
+                .addParameter("javascriptTextTransformGcsPath", getGcsPath("udf.js"))
+                .addParameter("javascriptTextTransformFunctionName", "uppercaseName"));
     assertThatPipeline(info).isRunning();
 
     Result result = pipelineOperator().waitUntilDone(createConfig(info));
