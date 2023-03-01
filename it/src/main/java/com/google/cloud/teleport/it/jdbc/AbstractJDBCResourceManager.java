@@ -140,7 +140,11 @@ public abstract class AbstractJDBCResourceManager<T extends JdbcDatabaseContaine
 
     } catch (Exception e) {
       throw new JDBCResourceManagerException(
-          "Error creating table with SQL statement: " + sql + " (for connection with URL " + getUri() + ")",
+          "Error creating table with SQL statement: "
+              + sql
+              + " (for connection with URL "
+              + getUri()
+              + ")",
           e);
     }
 
