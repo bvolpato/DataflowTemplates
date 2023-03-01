@@ -27,11 +27,15 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Integration tests for JDBC Resource Managers. */
 @Category(TestContainersIntegrationTest.class)
 @RunWith(JUnit4.class)
 public class AbstractJDBCResourceManagerIT {
+
+  private static final Logger LOG = LoggerFactory.getLogger(AbstractJDBCResourceManagerIT.class);
 
   private static final String TEST_ID = "dummy-test";
   private static final String TABLE_NAME = "dummy_table";
@@ -53,15 +57,21 @@ public class AbstractJDBCResourceManagerIT {
 
   @Test
   public void testDefaultOracleResourceManagerE2E() {
-    if (System.getProperty("testOnM1") == null) {
+    // Oracle image does not work on M1
+    if (System.getProperty("testOnM1") != null) {
+      LOG.info("M1 is being used, Oracle tests are not being executed.");
+      return;
+    }
+
       DefaultOracleResourceManager oracle = DefaultOracleResourceManager.builder(TEST_ID).build();
       simpleTest(oracle);
-    }
   }
 
   @Test
   public void testDefaultMSSQLResourceManagerE2E() {
     DefaultMSSQLResourceManager.Builder mssqlBuilder = DefaultMSSQLResourceManager.builder(TEST_ID);
+
+    // SQL Server image is different for M1
     if (System.getProperty("testOnM1") != null) {
       mssqlBuilder
           .setContainerImageName("mcr.microsoft.com/azure-sql-edge")
