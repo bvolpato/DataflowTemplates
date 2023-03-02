@@ -381,6 +381,8 @@ public class DataplexBigQueryToGcs {
       throw e;
     }
 
+    LOG.info("Asset {} resolved! {}", assetName, asset);
+
     checkNotNull(asset.getResourceSpec(), "Asset has no ResourceSpec.");
 
     String type = asset.getResourceSpec().getType();
