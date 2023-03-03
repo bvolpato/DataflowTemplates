@@ -25,6 +25,9 @@ import javax.annotation.Nullable;
 import org.apache.beam.sdk.options.ValueProvider;
 import org.apache.beam.vendor.guava.v26_0_jre.com.google.common.annotations.VisibleForTesting;
 import org.apache.beam.vendor.guava.v26_0_jre.com.google.common.collect.ImmutableSet;
+import org.checkerframework.checker.initialization.qual.Initialized;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.UnknownKeyFor;
 import org.joda.time.Duration;
 
 /** Exposed spanner config. */
@@ -54,6 +57,10 @@ public class ExposedSpannerConfig extends SpannerConfig {
 
   private final ValueProvider<Duration> maxCumulativeBackoff;
 
+  private final ValueProvider<Duration> partitionQueryTimeout;
+
+  private final ValueProvider<Duration> partitionReadTimeout;
+
   private final RetrySettings executeStreamingSqlRetrySettings;
 
   private final RetrySettings commitRetrySettings;
@@ -74,6 +81,8 @@ public class ExposedSpannerConfig extends SpannerConfig {
       @Nullable ValueProvider<Boolean> isLocalChannelProvider,
       @Nullable ValueProvider<Duration> commitDeadline,
       @Nullable ValueProvider<Duration> maxCumulativeBackoff,
+      @Nullable ValueProvider<Duration> partitionQueryTimeout,
+      @Nullable ValueProvider<Duration> partitionReadTimeout,
       @Nullable RetrySettings executeStreamingSqlRetrySettings,
       @Nullable RetrySettings commitRetrySettings,
       @Nullable ImmutableSet<Code> retryableCodes,
@@ -88,6 +97,8 @@ public class ExposedSpannerConfig extends SpannerConfig {
     this.isLocalChannelProvider = isLocalChannelProvider;
     this.commitDeadline = commitDeadline;
     this.maxCumulativeBackoff = maxCumulativeBackoff;
+    this.partitionQueryTimeout = partitionQueryTimeout;
+    this.partitionReadTimeout = partitionReadTimeout;
     this.executeStreamingSqlRetrySettings = executeStreamingSqlRetrySettings;
     this.commitRetrySettings = commitRetrySettings;
     this.retryableCodes = retryableCodes;
@@ -117,6 +128,16 @@ public class ExposedSpannerConfig extends SpannerConfig {
   @Override
   public ValueProvider<String> getDatabaseRole() {
     return databaseRole;
+  }
+
+  @Override
+  public ValueProvider<Duration> getPartitionQueryTimeout() {
+    return partitionQueryTimeout;
+  }
+
+  @Override
+  public ValueProvider<Duration> getPartitionReadTimeout() {
+    return partitionReadTimeout;
   }
 
   @Nullable
@@ -300,6 +321,10 @@ public class ExposedSpannerConfig extends SpannerConfig {
     private ValueProvider<Boolean> isLocalChannelProvider;
     private ValueProvider<Duration> commitDeadline;
     private ValueProvider<Duration> maxCumulativeBackoff;
+
+    private ValueProvider<Duration> partitionReadTimeout;
+
+    private ValueProvider<Duration> partitionQueryTimeout;
     private RetrySettings executeStreamingSqlRetrySettings;
     private RetrySettings commitRetrySettings;
     private ImmutableSet<Code> retryableCodes;
@@ -320,6 +345,8 @@ public class ExposedSpannerConfig extends SpannerConfig {
       this.maxCumulativeBackoff = source.getMaxCumulativeBackoff();
       this.executeStreamingSqlRetrySettings = source.getExecuteStreamingSqlRetrySettings();
       this.commitRetrySettings = source.getCommitRetrySettings();
+      this.partitionQueryTimeout = source.getPartitionQueryTimeout();
+      this.partitionReadTimeout = source.getPartitionReadTimeout();
       this.retryableCodes = source.getRetryableCodes();
       this.rpcPriority = source.getRpcPriority();
       this.serviceFactory = source.getServiceFactory();
@@ -346,6 +373,20 @@ public class ExposedSpannerConfig extends SpannerConfig {
     @Override
     ExposedSpannerConfig.Builder setDatabaseRole(ValueProvider<String> databaseRole) {
       this.databaseRole = databaseRole;
+      return this;
+    }
+
+    @Override
+    ExposedSpannerConfig.Builder setPartitionQueryTimeout(
+        ValueProvider<Duration> partitionQueryTimeout) {
+      this.partitionQueryTimeout = partitionQueryTimeout;
+      return this;
+    }
+
+    @Override
+    ExposedSpannerConfig.Builder setPartitionReadTimeout(
+        ValueProvider<Duration> partitionReadTimeout) {
+      this.partitionReadTimeout = partitionReadTimeout;
       return this;
     }
 
@@ -424,6 +465,8 @@ public class ExposedSpannerConfig extends SpannerConfig {
           this.isLocalChannelProvider,
           this.commitDeadline,
           this.maxCumulativeBackoff,
+          this.partitionQueryTimeout,
+          this.partitionReadTimeout,
           this.executeStreamingSqlRetrySettings,
           this.commitRetrySettings,
           this.retryableCodes,
