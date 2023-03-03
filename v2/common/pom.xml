@@ -44,6 +44,15 @@
             <artifactId>metadata</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.beam</groupId>
+            <artifactId>beam-sdks-java-io-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.re2j</groupId>
+            <artifactId>re2j</artifactId>
+            <version>${re2j.version}</version>
+        </dependency>
 
         <!-- Excluding com.google.protobuf transitive dependencies to avoid version conflicts -->
         <dependency>

@@ -42,6 +42,11 @@
       <version>${project.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.beam</groupId>
+      <artifactId>beam-sdks-java-io-jdbc</artifactId>
+    </dependency>
+
     <!-- Json -->
     <dependency>
       <groupId>com.github.vincentrussell</groupId>

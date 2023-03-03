@@ -665,14 +665,6 @@
                 </ignoredUsedUndeclaredDependency>
               </ignoredUsedUndeclaredDependencies>
               <ignoredUnusedDeclaredDependencies>
-                <ignoredUnusedDeclaredDependency>org.threeten:threetenbp</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>org.json:json</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>org.apache.hadoop:hadoop-mapreduce-client-core</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>org.apache.hadoop:hadoop-common</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>org.codehaus.jackson:jackson-core-asl</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>org.codehaus.jackson:jackson-mapper-asl</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>io.opencensus:opencensus-api</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>com.google.auto.service:auto-service</ignoredUnusedDeclaredDependency>
                 <!-- com.google.cloud.bigtable:bigtable-beam-import has the Main-Class on some templates. -->
                 <ignoredUnusedDeclaredDependency>com.google.cloud.bigtable:bigtable-beam-import</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>com.google.cloud.bigtable:bigtable-hbase-1.x</ignoredUnusedDeclaredDependency>
