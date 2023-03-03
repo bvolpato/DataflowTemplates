@@ -92,10 +92,9 @@ public final class TextIOToBigQueryIT extends TemplateTestBase {
       Function<LaunchConfig.Builder, LaunchConfig.Builder> paramsAdder) throws IOException {
     // Arrange
     String bqTable = testName;
-
-    artifactClient.uploadArtifact("schema.json", Resources.getResource(SCHEMA_PATH).getPath());
-    artifactClient.uploadArtifact("input.txt", Resources.getResource(INPUT_PATH).getPath());
-    artifactClient.uploadArtifact("udf.js", Resources.getResource(UDF_PATH).getPath());
+    gcsClient.uploadArtifact("schema.json", Resources.getResource(SCHEMA_PATH).getPath());
+    gcsClient.uploadArtifact("input.txt", Resources.getResource(INPUT_PATH).getPath());
+    gcsClient.uploadArtifact("udf.js", Resources.getResource(UDF_PATH).getPath());
 
     bigQueryClient.createDataset(REGION);
     TableId table =
