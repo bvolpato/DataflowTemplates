@@ -103,7 +103,7 @@ public abstract class TemplateTestBase {
   protected Template template;
   private Class<?> templateClass;
 
-  /** Client to interact with GCS */
+  /** Client to interact with GCS. */
   protected GcsArtifactClient gcsClient;
 
   /**
