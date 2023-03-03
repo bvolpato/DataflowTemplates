@@ -70,6 +70,10 @@ public abstract class SpannerConfig implements Serializable {
 
   public abstract @Nullable ValueProvider<Duration> getMaxCumulativeBackoff();
 
+  public abstract @Nullable ValueProvider<Duration> getPartitionQueryTimeout();
+
+  public abstract @Nullable ValueProvider<Duration> getPartitionReadTimeout();
+
   public abstract @Nullable RetrySettings getExecuteStreamingSqlRetrySettings();
 
   public abstract @Nullable RetrySettings getCommitRetrySettings();
@@ -140,6 +144,12 @@ public abstract class SpannerConfig implements Serializable {
 
     abstract Builder setCommitDeadline(ValueProvider<Duration> commitDeadline);
 
+    abstract Builder setPartitionQueryTimeout(
+        ValueProvider<Duration> partitionQueryTimeout);
+
+    abstract Builder setPartitionReadTimeout(
+        ValueProvider<Duration> partitionReadTimeout);
+
     abstract Builder setMaxCumulativeBackoff(ValueProvider<Duration> maxCumulativeBackoff);
 
     abstract Builder setExecuteStreamingSqlRetrySettings(
@@ -154,6 +164,9 @@ public abstract class SpannerConfig implements Serializable {
     abstract Builder setRpcPriority(ValueProvider<RpcPriority> rpcPriority);
 
     public abstract SpannerConfig build();
+
+
+
   }
 
   /** Specifies the Cloud Spanner project ID. */
@@ -221,6 +234,20 @@ public abstract class SpannerConfig implements Serializable {
   /** Specifies the commit deadline. This is overridden if the CommitRetrySettings is specified. */
   public SpannerConfig withCommitDeadline(ValueProvider<Duration> commitDeadline) {
     return toBuilder().setCommitDeadline(commitDeadline).build();
+  }
+
+  public SpannerConfig withPartitionReadTimeout(Duration partitionReadTimeout) {
+    return withPartitionReadTimeout(ValueProvider.StaticValueProvider.of(partitionReadTimeout));
+  }
+  public SpannerConfig withPartitionReadTimeout(ValueProvider<Duration> partitionReadTimeout) {
+    return toBuilder().setPartitionReadTimeout(partitionReadTimeout).build();
+  }
+
+  public SpannerConfig withPartitionQueryTimeout(Duration partitionQueryTimeout) {
+    return withPartitionQueryTimeout(ValueProvider.StaticValueProvider.of(partitionQueryTimeout));
+  }
+  public SpannerConfig withPartitionQueryTimeout(ValueProvider<Duration> partitionQueryTimeout) {
+    return toBuilder().setPartitionQueryTimeout(partitionQueryTimeout).build();
   }
 
   /** Specifies the maximum cumulative backoff. */
