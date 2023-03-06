@@ -37,6 +37,7 @@ import org.apache.beam.sdk.transforms.ParDo;
     description = "A pipeline to extract from Mqtt Broker Server to Pubsub Topic.",
     optionsClass = MqttToPubsub.MqttToPubsubOptions.class,
     flexContainerName = "mqtt-to-pubsub",
+    hidden = true,
     contactInformation = "https://cloud.google.com/support")
 public class MqttToPubsub {
 

@@ -157,7 +157,7 @@ import org.slf4j.LoggerFactory;
  * </pre>
  */
 @Template(
-    name = "Stream_DLP_GCS_Text_to_BigQuery",
+    name = "Stream_DLP_GCS_Text_to_BigQuery_Flex",
     category = TemplateCategory.STREAMING,
     displayName = "Data Masking/Tokenization from Cloud Storage to BigQuery (using Cloud DLP)",
     description =

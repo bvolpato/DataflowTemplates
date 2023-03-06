@@ -1,0 +1,142 @@
+BigQuery export to Parquet (via Storage API) Template
+---
+A pipeline to export a BigQuery table into Parquet files using the BigQuery Storage API.
+
+:memo: This is a Google-provided template! Please
+check [Provided templates documentation](https://cloud.google.com/dataflow/docs/guides/templates/provided-templates)
+on how to use it without having to build from sources.
+
+:bulb: This is a generated documentation based
+on [Metadata Annotations](https://github.com/GoogleCloudPlatform/DataflowTemplates#metadata-annotations)
+. Do not change this file directly.
+
+## Parameters
+
+### Mandatory Parameters
+
+* **tableRef** (BigQuery table to export): BigQuery table location to export in the format <project>:<dataset>.<table>. (Example: your-project:your-dataset.your-table-name).
+* **bucket** (Output Cloud Storage file(s)): Path and filename prefix for writing output files. (Example: gs://your-bucket/export/).
+
+### Optional Parameters
+
+* **numShards** (Maximum output shards): The maximum number of output shards produced when writing. A higher number of shards means higher throughput for writing to Cloud Storage, but potentially higher data aggregation cost across shards when processing output Cloud Storage files. Defaults to: 0.
+* **fields** (List of field names): Comma separated list of fields to select from the table.
+* **rowRestriction** (Row restrictions/filter.): Read only rows which match the specified filter, which must be a SQL expression compatible with Google standard SQL (https://cloud.google.com/bigquery/docs/reference/standard-sql). If no value is specified, then all rows are returned.
+
+## Getting Started
+
+### Requirements
+
+* Java 11
+* Maven
+* Valid resources for mandatory parameters.
+* [gcloud CLI](https://cloud.google.com/sdk/gcloud), and execution of the
+  following command:
+    * `gcloud auth login`
+
+This README uses
+the [Templates Plugin](https://github.com/GoogleCloudPlatform/DataflowTemplates#templates-plugin)
+. Install the plugin with the following command to proceed:
+
+```shell
+mvn clean install -pl plugins/templates-maven-plugin -am
+```
+
+### Building Template
+
+This template is a Flex Template, meaning that the pipeline code will be
+containerized and the container will be executed on Dataflow. Please
+check [Use Flex Templates](https://cloud.google.com/dataflow/docs/guides/templates/using-flex-templates)
+for more information.
+
+#### Staging the Template
+
+If the plan is to just stage the template (i.e., make it available to use) by
+the `gcloud` command or Dataflow "Create job from template" UI,
+the `-PtemplatesStage` profile should be used:
+
+```shell
+export PROJECT=<my-project>
+export BUCKET_NAME=<bucket-name>
+
+mvn clean package -PtemplatesStage  \
+-DskipTests \
+-DprojectId="$PROJECT" \
+-DbucketName="$BUCKET_NAME" \
+-DstagePrefix="templates" \
+-DtemplateName="BigQuery_to_Parquet" \
+-pl v2/bigquery-to-parquet -am
+```
+
+The command should print what is the template location on Cloud Storage:
+
+```
+Flex Template was staged! gs://{BUCKET}/{PATH}
+```
+
+
+#### Running the Template
+
+**Using the staged template**:
+
+You can use the path above to share or run the template.
+
+To start a job with the template at any time using `gcloud`, you can use:
+
+```shell
+export TEMPLATE_SPEC_GCSPATH="gs://$BUCKET_NAME/templates/flex/BigQuery_to_Parquet"
+export PROJECT=<my-project>
+export BUCKET_NAME=<bucket-name>
+export REGION=us-central1
+
+### Mandatory
+export TABLE_REF=<tableRef>
+export BUCKET=<bucket>
+
+### Optional
+export NUM_SHARDS=0
+export FIELDS=<fields>
+export ROW_RESTRICTION=<rowRestriction>
+
+gcloud dataflow flex-template run "bigquery-to-parquet-job" \
+  --project "$PROJECT" \
+  --region "$REGION" \
+  --template-file-gcs-location "$TEMPLATE_SPEC_GCSPATH" \
+  --parameters "tableRef=$TABLE_REF" \
+  --parameters "bucket=$BUCKET" \
+  --parameters "numShards=$NUM_SHARDS" \
+  --parameters "fields=$FIELDS" \
+  --parameters "rowRestriction=$ROW_RESTRICTION"
+```
+
+
+**Using the plugin**:
+
+Instead of just generating the template in the folder, it is possible to stage
+and run the template in a single command. This may be useful for testing when
+changing the templates.
+
+```shell
+export PROJECT=<my-project>
+export BUCKET_NAME=<bucket-name>
+export REGION=us-central1
+
+### Mandatory
+export TABLE_REF=<tableRef>
+export BUCKET=<bucket>
+
+### Optional
+export NUM_SHARDS=0
+export FIELDS=<fields>
+export ROW_RESTRICTION=<rowRestriction>
+
+mvn clean package -PtemplatesRun \
+-DskipTests \
+-DprojectId="$PROJECT" \
+-DbucketName="$BUCKET_NAME" \
+-Dregion="$REGION" \
+-DjobName="bigquery-to-parquet-job" \
+-DtemplateName="BigQuery_to_Parquet" \
+-Dparameters="tableRef=$TABLE_REF,bucket=$BUCKET,numShards=$NUM_SHARDS,fields=$FIELDS,rowRestriction=$ROW_RESTRICTION" \
+-pl v2/bigquery-to-parquet -am
+```

@@ -78,15 +78,13 @@ public class PubsubToPubsub {
     // Create the pipeline
     Pipeline pipeline = Pipeline.create(options);
 
-    /**
-     * Steps: 1) Read PubSubMessage with attributes from input PubSub subscription. 2) Apply any
-     * filters if an attribute=value pair is provided. 3) Write each PubSubMessage to output PubSub
-     * topic.
-     */
+    // 1) Read PubSubMessage with attributes from input PubSub subscription.
     pipeline
         .apply(
             "Read PubSub Events",
             PubsubIO.readMessagesWithAttributes().fromSubscription(options.getInputSubscription()))
+
+        // 2) Apply any filters if an attribute=value pair is provided.
         .apply(
             "Filter Events If Enabled",
             ParDo.of(
@@ -94,6 +92,8 @@ public class PubsubToPubsub {
                     .withFilterKey(options.getFilterKey())
                     .withFilterValue(options.getFilterValue())
                     .build()))
+
+        // 3) Write each PubSubMessage to output PubSub topic.
         .apply("Write PubSub Events", PubsubIO.writeMessages().to(options.getOutputTopic()));
 
     // Execute the pipeline and return the result.

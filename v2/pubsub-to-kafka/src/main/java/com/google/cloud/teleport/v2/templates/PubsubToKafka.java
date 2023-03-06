@@ -142,6 +142,7 @@ import org.slf4j.LoggerFactory;
             + "and writes them to kafka topic",
     optionsClass = PubsubToKafkaOptions.class,
     flexContainerName = "pubsub-to-kafka",
+    hidden = true,
     contactInformation = "https://cloud.google.com/support")
 public class PubsubToKafka {
 

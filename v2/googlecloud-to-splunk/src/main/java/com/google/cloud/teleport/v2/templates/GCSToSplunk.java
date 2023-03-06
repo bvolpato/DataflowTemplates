@@ -67,6 +67,7 @@ import org.slf4j.LoggerFactory;
             + " HTTP Event Collector (HEC).",
     optionsClass = GCSToSplunkOptions.class,
     flexContainerName = "gcs-to-splunk",
+    hidden = true,
     contactInformation = "https://cloud.google.com/support")
 public final class GCSToSplunk {
 

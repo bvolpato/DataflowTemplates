@@ -75,7 +75,8 @@ import org.slf4j.LoggerFactory;
     description = "Copy data from Google Cloud (BigQuery, Text) into Neo4j.",
     optionsClass = Neo4jFlexTemplateOptions.class,
     flexContainerName = "googlecloud-to-neo4j",
-    contactInformation = "https://support.neo4j.com/")
+    contactInformation = "https://support.neo4j.com/",
+    hidden = true)
 public class GoogleCloudToNeo4j {
 
   private static final Logger LOG = LoggerFactory.getLogger(GoogleCloudToNeo4j.class);

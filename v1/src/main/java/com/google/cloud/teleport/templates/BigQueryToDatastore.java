@@ -47,6 +47,7 @@ import org.apache.beam.sdk.values.TupleTag;
       "firestoreWriteNamespace",
       "firestoreHintNumWorkers"
     },
+    hidden = true,
     contactInformation = "https://cloud.google.com/support")
 public class BigQueryToDatastore {
 
