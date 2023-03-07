@@ -44,11 +44,7 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Integration test for {@link TextIOToBigQuery} (GCS_Text_to_BigQuery_Flex).
- *
- * <p>Example Usage:
- */
+/** Integration test for {@link TextIOToBigQuery} (GCS_Text_to_BigQuery_Flex). */
 @Category(TemplateIntegrationTest.class)
 @TemplateIntegrationTest(TextIOToBigQuery.class)
 @RunWith(JUnit4.class)
