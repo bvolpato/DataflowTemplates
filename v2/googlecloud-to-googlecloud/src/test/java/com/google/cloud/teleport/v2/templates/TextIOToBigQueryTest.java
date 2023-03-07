@@ -74,6 +74,7 @@ public class TextIOToBigQueryTest {
                     new TableFieldSchema()
                         .setName("DETAILS")
                         .setType("RECORD")
+                        .setMode("NULLABLE")
                         .setFields(
                             ImmutableList.of(
                                 new TableFieldSchema().setName("YEAR").setType("INTEGER"),

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Google LLC
+ * Copyright (C) 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -36,15 +36,12 @@ import com.google.cloud.teleport.metadata.TemplateIntegrationTest;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import java.io.IOException;
-import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Integration test for {@link TextIOToBigQuery} (GCS_Text_to_BigQuery_Flex).
@@ -56,19 +53,9 @@ import org.slf4j.LoggerFactory;
 @RunWith(JUnit4.class)
 public final class TextIOToBigQueryIT extends TemplateTestBase {
 
-  private static final Logger LOG = LoggerFactory.getLogger(TextIOToBigQueryIT.class);
-
   private static final String SCHEMA_PATH = "TextIOToBigQueryTest/schema.json";
   private static final String INPUT_PATH = "TextIOToBigQueryTest/input.txt";
   private static final String UDF_PATH = "TextIOToBigQueryTest/udf.js";
-  private static final Map<String, Object> EXPECTED =
-      ImmutableMap.of(
-          "book_id",
-          1,
-          "title",
-          "ABC",
-          "details",
-          ImmutableMap.of("year", "2023", "summary", "LOREM IPSUM LOREM IPSUM"));
 
   private BigQueryResourceManager bigQueryClient;
 
@@ -126,6 +113,14 @@ public final class TextIOToBigQueryIT extends TemplateTestBase {
     // Assert
     assertThatResult(result).isLaunchFinished();
     TableResult tableRows = bigQueryClient.readTable(bqTable);
-    assertThatRecords(tableRows).hasRecordUnordered(EXPECTED);
+    assertThatRecords(tableRows)
+        .hasRecordUnordered(
+            ImmutableMap.of(
+                "book_id",
+                1,
+                "title",
+                "ABC",
+                "details",
+                ImmutableMap.of("year", "2023", "summary", "LOREM IPSUM LOREM IPSUM")));
   }
 }

@@ -21,8 +21,10 @@ import com.google.common.truth.Subject;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 /**
  * Subject that has assertion operations for record lists, usually coming from the result of a
@@ -146,9 +148,7 @@ public final class RecordsSubject extends Subject {
   private TreeMap<String, Object> convertKeysToUpperCase(Map<String, Object> map) {
     return new TreeMap<>(
         map.entrySet().stream()
-            .collect(
-                Collectors.toMap(
-                    entry -> entry.getKey().toUpperCase(), entry -> entry.getValue())));
+            .collect(Collectors.toMap(entry -> entry.getKey().toUpperCase(), Entry::getValue)));
   }
 
   /**

@@ -36,7 +36,6 @@ import com.google.cloud.teleport.metadata.TemplateIntegrationTest;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import java.io.IOException;
-import java.util.Map;
 import java.util.function.Function;
 import org.junit.After;
 import org.junit.Before;
@@ -44,8 +43,6 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Integration test for {@link TextIOToBigQuery} (GCS_Text_to_BigQuery_Flex).
@@ -57,19 +54,9 @@ import org.slf4j.LoggerFactory;
 @RunWith(JUnit4.class)
 public final class TextIOToBigQueryIT extends TemplateTestBase {
 
-  private static final Logger LOG = LoggerFactory.getLogger(TextIOToBigQueryIT.class);
-
   private static final String SCHEMA_PATH = "TextIOToBigQueryTest/schema.json";
   private static final String INPUT_PATH = "TextIOToBigQueryTest/input.txt";
   private static final String UDF_PATH = "TextIOToBigQueryTest/udf.js";
-  private static final Map<String, Object> EXPECTED =
-      ImmutableMap.of(
-          "book_id",
-          1,
-          "title",
-          "ABC",
-          "details",
-          ImmutableMap.of("year", "2023", "summary", "LOREM IPSUM LOREM IPSUM"));
   private BigQueryResourceManager bigQueryClient;
 
   @Before
@@ -98,8 +85,6 @@ public final class TextIOToBigQueryIT extends TemplateTestBase {
   private void testTextIOToBigQuery(
       Function<LaunchConfig.Builder, LaunchConfig.Builder> paramsAdder) throws IOException {
     // Arrange
-    String bqTable = testName;
-
     artifactClient.uploadArtifact("schema.json", Resources.getResource(SCHEMA_PATH).getPath());
     artifactClient.uploadArtifact("input.txt", Resources.getResource(INPUT_PATH).getPath());
     artifactClient.uploadArtifact("udf.js", Resources.getResource(UDF_PATH).getPath());
@@ -107,7 +92,7 @@ public final class TextIOToBigQueryIT extends TemplateTestBase {
     bigQueryClient.createDataset(REGION);
     TableId table =
         bigQueryClient.createTable(
-            bqTable,
+            testName,
             Schema.of(
                 Field.of("book_id", StandardSQLTypeName.INT64),
                 Field.of("title", StandardSQLTypeName.STRING),
@@ -136,7 +121,15 @@ public final class TextIOToBigQueryIT extends TemplateTestBase {
 
     // Assert
     assertThatResult(result).isLaunchFinished();
-    TableResult tableRows = bigQueryClient.readTable(bqTable);
-    assertThatRecords(tableRows).hasRecordUnordered(EXPECTED);
+    TableResult tableRows = bigQueryClient.readTable(testName);
+    assertThatRecords(tableRows)
+        .hasRecordUnordered(
+            ImmutableMap.of(
+                "book_id",
+                1,
+                "title",
+                "ABC",
+                "details",
+                ImmutableMap.of("year", "2023", "summary", "LOREM IPSUM LOREM IPSUM")));
   }
 }
