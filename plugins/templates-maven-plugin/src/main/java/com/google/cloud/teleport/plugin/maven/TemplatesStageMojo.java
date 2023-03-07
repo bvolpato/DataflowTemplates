@@ -372,6 +372,8 @@ public class TemplatesStageMojo extends TemplatesBaseMojo {
           "--additional-user-labels",
           "goog-dataflow-provided-template-name="
               + currentTemplateName.toLowerCase()
+              + ",goog-dataflow-provided-template-version="
+              + stagePrefix.toLowerCase()
               + ",goog-dataflow-provided-template-type=flex"
         };
     LOG.info("Running: {}", String.join(" ", flexTemplateBuildCmd));
