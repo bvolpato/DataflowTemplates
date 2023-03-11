@@ -17,6 +17,7 @@ package com.google.cloud.teleport.spanner;
 
 import com.google.cloud.spanner.Dialect;
 import com.google.cloud.spanner.Mutation;
+import com.google.cloud.teleport.spanner.FileShard.Coder;
 import com.google.cloud.teleport.spanner.common.Type.Code;
 import com.google.cloud.teleport.spanner.ddl.Column;
 import com.google.cloud.teleport.spanner.ddl.Ddl;
@@ -24,6 +25,7 @@ import com.google.cloud.teleport.spanner.ddl.Table;
 import com.google.cloud.teleport.spanner.proto.ExportProtos.ProtoDialect;
 import com.google.cloud.teleport.spanner.proto.TextImportProtos.ImportManifest;
 import com.google.cloud.teleport.spanner.proto.TextImportProtos.ImportManifest.TableManifest;
+import com.google.cloud.teleport.templates.common.ErrorConverters.LogErrors;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.HashMultimap;
 import com.google.protobuf.util.JsonFormat;
@@ -69,8 +71,11 @@ import org.apache.beam.sdk.transforms.Wait;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
+import org.apache.beam.sdk.values.PCollectionTuple;
 import org.apache.beam.sdk.values.PCollectionView;
 import org.apache.beam.sdk.values.PDone;
+import org.apache.beam.sdk.values.TupleTag;
+import org.apache.beam.sdk.values.TupleTagList;
 import org.apache.beam.sdk.values.TypeDescriptor;
 import org.joda.time.Duration;
 import org.slf4j.Logger;
@@ -85,10 +90,15 @@ public class TextImportTransform extends PTransform<PBegin, PDone> {
   private final SpannerConfig spannerConfig;
 
   private final ValueProvider<String> importManifest;
+  private final ValueProvider<String> invalidOutputPath;
 
-  public TextImportTransform(SpannerConfig spannerConfig, ValueProvider<String> importManifest) {
+  public TextImportTransform(
+      SpannerConfig spannerConfig,
+      ValueProvider<String> importManifest,
+      ValueProvider<String> invalidOutputPath) {
     this.spannerConfig = spannerConfig;
     this.importManifest = importManifest;
+    this.invalidOutputPath = invalidOutputPath;
   }
 
   @Override
@@ -227,52 +237,68 @@ public class TextImportTransform extends PTransform<PBegin, PDone> {
       TextImportPipeline.Options options =
           filesToTables.getPipeline().getOptions().as(TextImportPipeline.Options.class);
 
-      return filesToTables
-          .apply("Get Filenames", Keys.create())
-          // PCollection<String>
-          .apply(FileIO.matchAll().withEmptyMatchTreatment(EmptyMatchTreatment.DISALLOW))
-          // PCollection<Match.Metadata>
-          .apply(FileIO.readMatches())
-          // PCollection<FileIO.ReadableFile>
-          .apply(
-              "Split into ranges",
-              ParDo.of(
-                      new SplitIntoRangesFn(
-                          SplitIntoRangesFn.DEFAULT_BUNDLE_SIZE,
-                          filesToTablesMapView,
-                          options.getFieldQualifier(),
-                          options.getColumnDelimiter(),
-                          options.getEscape(),
-                          options.getHandleNewLine()))
-                  .withSideInputs(filesToTablesMapView))
-          .setCoder(FileShard.Coder.of())
-          // PCollection<FileShard>
-          .apply("Reshuffle", Reshuffle.viaRandomKey())
-          // PCollection<FileShard>
-          .apply(
-              "Read lines",
-              ParDo.of(
-                  new ReadFileShardFn(
-                      options.getColumnDelimiter(),
-                      options.getFieldQualifier(),
-                      options.getTrailingDelimiter(),
-                      options.getEscape(),
-                      options.getNullString(),
-                      options.getHandleNewLine())))
-          // PCollection<KV<String, CSVRecord>>: tableName, row
-          .apply(
-              ParDo.of(
-                      new CSVRecordToMutation(
-                          ddlView,
-                          tableColumnsView,
+      TupleTag<String> errorTag = new TupleTag<>() {};
+      TupleTag<Mutation> mutationTag = new TupleTag<>() {};
+
+      PCollectionTuple outputCollections =
+          filesToTables
+              .apply("Get Filenames", Keys.create())
+              // PCollection<String>
+              .apply(FileIO.matchAll().withEmptyMatchTreatment(EmptyMatchTreatment.DISALLOW))
+              // PCollection<Match.Metadata>
+              .apply(FileIO.readMatches())
+              // PCollection<FileIO.ReadableFile>
+              .apply(
+                  "Split into ranges",
+                  ParDo.of(
+                          new SplitIntoRangesFn(
+                              SplitIntoRangesFn.DEFAULT_BUNDLE_SIZE,
+                              filesToTablesMapView,
+                              options.getFieldQualifier(),
+                              options.getColumnDelimiter(),
+                              options.getEscape(),
+                              options.getHandleNewLine()))
+                      .withSideInputs(filesToTablesMapView))
+              .setCoder(Coder.of())
+              // PCollection<FileShard>
+              .apply("Reshuffle", Reshuffle.viaRandomKey())
+              // PCollection<FileShard>
+              .apply(
+                  "Read lines",
+                  ParDo.of(
+                      new ReadFileShardFn(
                           options.getColumnDelimiter(),
                           options.getFieldQualifier(),
                           options.getTrailingDelimiter(),
                           options.getEscape(),
                           options.getNullString(),
-                          options.getDateFormat(),
-                          options.getTimestampFormat()))
-                  .withSideInputs(ddlView, tableColumnsView));
+                          options.getHandleNewLine())))
+              // PCollection<KV<String, CSVRecord>>: tableName, row
+              .apply(
+                  ParDo.of(
+                          new CSVRecordToMutation(
+                              ddlView,
+                              tableColumnsView,
+                              options.getColumnDelimiter(),
+                              options.getFieldQualifier(),
+                              options.getTrailingDelimiter(),
+                              options.getEscape(),
+                              options.getNullString(),
+                              options.getDateFormat(),
+                              options.getTimestampFormat(),
+                              options.getInvalidOutputPath(),
+                              errorTag))
+                      .withOutputTags(mutationTag, TupleTagList.of(errorTag))
+                      .withSideInputs(ddlView, tableColumnsView));
+
+      outputCollections.apply(
+          "Output Invalid To GCS",
+          LogErrors.newBuilder()
+              .setErrorWritePath(options.getInvalidOutputPath())
+              .setErrorTag(errorTag)
+              .build());
+
+      return outputCollections.get(mutationTag);
     }
   }
 
@@ -498,27 +524,27 @@ public class TextImportTransform extends PTransform<PBegin, PDone> {
         }
       }
 
-      for (TableManifest.Column manifiestColumn : tableManifest.getColumnsList()) {
-        Column dbColumn = table.column(manifiestColumn.getColumnName());
+      for (TableManifest.Column manifestColumn : tableManifest.getColumnsList()) {
+        Column dbColumn = table.column(manifestColumn.getColumnName());
         if (dbColumn == null) {
           throw new RuntimeException(
               String.format(
                   "Column %s in manifest does not exist in DB table %s.",
-                  manifiestColumn.getColumnName(), table.name()));
+                  manifestColumn.getColumnName(), table.name()));
         }
         if (dbColumn.isGenerated()) {
           throw new RuntimeException(
               String.format(
                   "Column %s in manifest is a generated column in DB table %s. "
                       + "Generated columns cannot be imported.",
-                  manifiestColumn.getColumnName(), table.name()));
+                  manifestColumn.getColumnName(), table.name()));
         }
-        if (parseSpannerDataType(manifiestColumn.getTypeName(), ddl.dialect())
+        if (parseSpannerDataType(manifestColumn.getTypeName(), ddl.dialect())
             != dbColumn.type().getCode()) {
           throw new RuntimeException(
               String.format(
                   "Mismatching type: Table %s Column %s [%s from DB and %s from manifest]",
-                  table.name(), dbColumn.name(), dbColumn.type(), manifiestColumn.getTypeName()));
+                  table.name(), dbColumn.name(), dbColumn.type(), manifestColumn.getTypeName()));
         }
       }
     }

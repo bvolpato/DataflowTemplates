@@ -273,6 +273,19 @@ public class TextImportPipeline {
     ValueProvider<Boolean> getHandleNewLine();
 
     void setHandleNewLine(ValueProvider<Boolean> value);
+
+    @TemplateParameter.GcsWriteFolder(
+        order = 16,
+        description = "Invalid rows output path",
+        optional = true,
+        helpText =
+            "Cloud Storage path where to write rows that cannot be imported.",
+        example = "gs://your-bucket/your-path")
+    @Default.String("")
+    ValueProvider<String> getInvalidOutputPath();
+
+    void setInvalidOutputPath(ValueProvider<String> value);
+
   }
 
   public static void main(String[] args) {
@@ -299,7 +312,7 @@ public class TextImportPipeline {
             .withDatabaseId(options.getDatabaseId())
             .withRpcPriority(options.getSpannerPriority());
 
-    p.apply(new TextImportTransform(spannerConfig, options.getImportManifest()));
+    p.apply(new TextImportTransform(spannerConfig, options.getImportManifest(), options.getInvalidOutputPath()));
 
     PipelineResult result = p.run();
     if (options.getWaitUntilFinish()
