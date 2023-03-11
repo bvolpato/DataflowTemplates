@@ -25,7 +25,6 @@ import com.google.cloud.teleport.spanner.ddl.Table;
 import com.google.cloud.teleport.spanner.proto.ExportProtos.ProtoDialect;
 import com.google.cloud.teleport.spanner.proto.TextImportProtos.ImportManifest;
 import com.google.cloud.teleport.spanner.proto.TextImportProtos.ImportManifest.TableManifest;
-import com.google.cloud.teleport.templates.common.ErrorConverters.LogErrors;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.HashMultimap;
 import com.google.protobuf.util.JsonFormat;
@@ -50,6 +49,7 @@ import org.apache.beam.sdk.extensions.gcp.util.GcsUtil;
 import org.apache.beam.sdk.extensions.gcp.util.gcsfs.GcsPath;
 import org.apache.beam.sdk.io.FileIO;
 import org.apache.beam.sdk.io.FileSystems;
+import org.apache.beam.sdk.io.TextIO;
 import org.apache.beam.sdk.io.fs.EmptyMatchTreatment;
 import org.apache.beam.sdk.io.fs.MatchResult;
 import org.apache.beam.sdk.io.fs.ResourceId;
@@ -66,6 +66,7 @@ import org.apache.beam.sdk.transforms.MapElements;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.Reshuffle;
+import org.apache.beam.sdk.transforms.SerializableFunctions;
 import org.apache.beam.sdk.transforms.View;
 import org.apache.beam.sdk.transforms.Wait;
 import org.apache.beam.sdk.values.KV;
@@ -291,12 +292,15 @@ public class TextImportTransform extends PTransform<PBegin, PDone> {
                       .withOutputTags(mutationTag, TupleTagList.of(errorTag))
                       .withSideInputs(ddlView, tableColumnsView));
 
-      outputCollections.apply(
-          "Output Invalid To GCS",
-          LogErrors.newBuilder()
-              .setErrorWritePath(options.getInvalidOutputPath())
-              .setErrorTag(errorTag)
-              .build());
+      // Need to use writeCustomType to avoid errors when output path is not given
+      outputCollections
+          .get(errorTag)
+          .apply(
+              TextIO.<String>writeCustomType()
+                  .to(options.getInvalidOutputPath())
+                  .skipIfEmpty()
+                  .withFormatFunction(SerializableFunctions.identity())
+                  .withNumShards(1));
 
       return outputCollections.get(mutationTag);
     }
