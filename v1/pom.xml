@@ -947,6 +947,7 @@
                       <path>${basedir}/target/extra_libs</path>
                     </paths>
                   </extraDirectories>
+                  <createDependencyReducedPom>false</createDependencyReducedPom>
                   <shadeTestJar>true</shadeTestJar>
                   <artifactSet>
                     <excludes>
