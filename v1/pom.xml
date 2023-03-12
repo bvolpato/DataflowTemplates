@@ -947,9 +947,6 @@
                       <path>${basedir}/target/extra_libs</path>
                     </paths>
                   </extraDirectories>
-                  <dependencyReducedPomLocation>
-                    ${basedir}/target/dependency-reduced-pom.xml
-                  </dependencyReducedPomLocation>
                   <shadeTestJar>true</shadeTestJar>
                   <artifactSet>
                     <excludes>
