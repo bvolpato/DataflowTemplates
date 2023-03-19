@@ -17,8 +17,10 @@ package com.google.cloud.teleport.it.datastore;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.QueryResults;
+import com.google.cloud.teleport.it.TestProperties;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +32,8 @@ public class DefaultDatastoreResourceManagerIT {
   public void testInsert() throws IOException {
     DefaultDatastoreResourceManager resourceManager =
         DefaultDatastoreResourceManager.builder("person", DatastoreUtils.createTestId("testInsert"))
+            .credentialsProvider(
+                FixedCredentialsProvider.create(TestProperties.buildCredentialsFromEnv()))
             .build();
     List<Entity> entities =
         resourceManager.insert(
@@ -48,6 +52,8 @@ public class DefaultDatastoreResourceManagerIT {
     DefaultDatastoreResourceManager resourceManager =
         DefaultDatastoreResourceManager.builder(
                 "person", DatastoreUtils.createTestId("testInsertQuery"))
+            .credentialsProvider(
+                FixedCredentialsProvider.create(TestProperties.buildCredentialsFromEnv()))
             .build();
     List<Entity> entities =
         resourceManager.insert(Map.of(1L, Entity.newBuilder().set("name", "John Doe").build()));
@@ -70,6 +76,8 @@ public class DefaultDatastoreResourceManagerIT {
     DefaultDatastoreResourceManager resourceManager =
         DefaultDatastoreResourceManager.builder(
                 "person", DatastoreUtils.createTestId("testInsertCleanUp"))
+            .credentialsProvider(
+                FixedCredentialsProvider.create(TestProperties.buildCredentialsFromEnv()))
             .build();
     List<Entity> entities =
         resourceManager.insert(Map.of(1L, Entity.newBuilder().set("name", "John Doe").build()));
