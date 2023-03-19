@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.Test;
 
+/** Integration tests for {@link DefaultDatastoreResourceManager}. */
 public class DefaultDatastoreResourceManagerIT {
 
   @Test
@@ -55,16 +56,15 @@ public class DefaultDatastoreResourceManagerIT {
             .credentialsProvider(
                 FixedCredentialsProvider.create(TestProperties.buildCredentialsFromEnv()))
             .build();
+
     List<Entity> entities =
         resourceManager.insert(Map.of(1L, Entity.newBuilder().set("name", "John Doe").build()));
-    assertThat(entities).hasSize(1);
 
+    assertThat(entities).hasSize(1);
     QueryResults<Entity> queryResults = resourceManager.query("SELECT * from person");
     assertThat(queryResults).isNotNull();
-
     Entity person = queryResults.next();
     assertThat(person).isNotNull();
-
     assertThat(person.getKey().getId()).isEqualTo(1L);
     assertThat(person.getString("name")).isEqualTo("John Doe");
 
@@ -79,9 +79,7 @@ public class DefaultDatastoreResourceManagerIT {
             .credentialsProvider(
                 FixedCredentialsProvider.create(TestProperties.buildCredentialsFromEnv()))
             .build();
-    List<Entity> entities =
-        resourceManager.insert(Map.of(1L, Entity.newBuilder().set("name", "John Doe").build()));
-    assertThat(entities).hasSize(1);
+    resourceManager.insert(Map.of(1L, Entity.newBuilder().set("name", "John Doe").build()));
 
     resourceManager.cleanupAll();
 

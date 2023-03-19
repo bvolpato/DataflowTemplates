@@ -26,7 +26,7 @@ import com.google.cloud.datastore.GqlQuery;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query.ResultType;
 import com.google.cloud.datastore.QueryResults;
-import com.google.cloud.teleport.it.pubsub.DefaultPubsubResourceManager;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,6 +50,14 @@ public class DefaultDatastoreResourceManager implements DatastoreResourceManager
             .setCredentials(builder.credentialsProvider.getCredentials())
             .build()
             .getService();
+    this.keys = new ArrayList<>();
+  }
+
+  @VisibleForTesting
+  DefaultDatastoreResourceManager(String kind, String namespace, Datastore datastore) {
+    this.kind = kind;
+    this.namespace = namespace;
+    this.datastore = datastore;
     this.keys = new ArrayList<>();
   }
 
