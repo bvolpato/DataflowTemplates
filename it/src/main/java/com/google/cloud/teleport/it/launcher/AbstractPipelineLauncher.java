@@ -254,6 +254,7 @@ public abstract class AbstractPipelineLauncher implements PipelineLauncher {
    */
   private <T> RetryPolicy<T> clientRetryPolicy() {
     return RetryPolicy.<T>builder()
+        .handle(IOException.class)
         .handleIf(
             throwable ->
                 throwable.getMessage() != null
