@@ -16,11 +16,11 @@
 package com.google.cloud.teleport.it.datastore;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -91,13 +91,17 @@ public class DefaultDatastoreResourceManagerTest {
 
     // Mock the Datastore run method
     QueryResults<Entity> mockResult = mock(QueryResults.class);
+    Entity mockEntity = mock(Entity.class);
     when(datastoreMock.run(any(GqlQuery.class))).thenReturn(mockResult);
+    when(mockResult.hasNext()).thenReturn(true).thenReturn(false);
+    when(mockResult.next()).thenReturn(mockEntity);
 
     // Execute the method under test
-    QueryResults<Entity> result = resourceManager.query(gqlQuery);
+    List<Entity> result = resourceManager.query(gqlQuery);
 
     // Verify the result
-    assertEquals(mockResult, result);
+    assertThat(result).isNotEmpty();
+    assertThat(result.get(0)).isEqualTo(mockEntity);
   }
 
   @Test
@@ -109,8 +113,9 @@ public class DefaultDatastoreResourceManagerTest {
 
     // Execute the method under test
     resourceManager.cleanupAll();
+    resourceManager.cleanupAll();
 
     // Verify that the Datastore delete method was called with the correct key
-    verify(datastoreMock).delete(key);
+    verify(datastoreMock, times(1)).delete(key);
   }
 }

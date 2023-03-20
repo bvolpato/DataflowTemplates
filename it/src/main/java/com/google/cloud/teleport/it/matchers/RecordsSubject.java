@@ -33,6 +33,7 @@ import com.google.common.truth.Fact;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -379,12 +380,11 @@ public final class RecordsSubject extends Subject {
    * @param results Results to parse.
    * @return List of maps to use in {@link RecordsSubject}.
    */
-  public static List<Map<String, Object>> datastoreResultsToRecords(QueryResults<Entity> results) {
+  public static List<Map<String, Object>> datastoreResultsToRecords(Collection<Entity> results) {
     try {
       List<Map<String, Object>> records = new ArrayList<>();
 
-      while (results.hasNext()) {
-        Entity entity = results.next();
+      for (Entity entity : results) {
         Map<String, Object> converted = new HashMap<>();
 
         for (Map.Entry<String, com.google.cloud.datastore.Value<?>> entry :

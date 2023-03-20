@@ -18,7 +18,6 @@ package com.google.cloud.teleport.it.datastore;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.teleport.it.TestProperties;
 import java.io.IOException;
 import java.util.List;
@@ -59,9 +58,9 @@ public class DefaultDatastoreResourceManagerIT {
             "person", Map.of(1L, Entity.newBuilder().set("name", "John Doe").build()));
 
     assertThat(entities).hasSize(1);
-    QueryResults<Entity> queryResults = resourceManager.query("SELECT * from person");
-    assertThat(queryResults).isNotNull();
-    Entity person = queryResults.next();
+    List<Entity> queryResults = resourceManager.query("SELECT * from person");
+    assertThat(queryResults).isNotEmpty();
+    Entity person = queryResults.get(0);
     assertThat(person).isNotNull();
     assertThat(person.getKey().getId()).isEqualTo(1L);
     assertThat(person.getString("name")).isEqualTo("John Doe");
@@ -80,8 +79,7 @@ public class DefaultDatastoreResourceManagerIT {
 
     resourceManager.cleanupAll();
 
-    QueryResults<Entity> queryResults = resourceManager.query("SELECT * from person");
-    assertThat(queryResults).isNotNull();
-    assertThat(queryResults.hasNext()).isFalse();
+    List<Entity> queryResults = resourceManager.query("SELECT * from person");
+    assertThat(queryResults).isEmpty();
   }
 }

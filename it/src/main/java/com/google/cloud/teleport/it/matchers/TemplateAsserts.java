@@ -31,6 +31,7 @@ import com.google.cloud.spanner.Struct;
 import com.google.cloud.teleport.it.artifacts.Artifact;
 import com.google.cloud.teleport.it.launcher.PipelineLauncher.LaunchInfo;
 import com.google.cloud.teleport.it.launcher.PipelineOperator.Result;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.apache.avro.generic.GenericRecord;
@@ -129,7 +130,7 @@ public final class TemplateAsserts {
    *     the comparison.
    * @return Truth Subject to chain assertions.
    */
-  public static RecordsSubject assertThatDatastoreRecords(QueryResults<Entity> results) {
+  public static RecordsSubject assertThatDatastoreRecords(Collection<Entity> results) {
     return assertThatRecords(datastoreResultsToRecords(results));
   }
 

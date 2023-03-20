@@ -115,9 +115,8 @@ public final class BigQueryToDatastoreIT extends TemplateTestBase {
     // Assert
     assertThatResult(result).isLaunchFinished();
 
-    QueryResults<Entity> queryResults = datastoreResourceManager.query("SELECT * from person");
-    assertThat(queryResults).isNotNull();
-    assertThat(queryResults.hasNext()).isTrue();
+    List<Entity> queryResults = datastoreResourceManager.query("SELECT * from person");
+    assertThat(queryResults).isNotEmpty();
 
     assertThatDatastoreRecords(queryResults)
         .hasRecordsUnordered(

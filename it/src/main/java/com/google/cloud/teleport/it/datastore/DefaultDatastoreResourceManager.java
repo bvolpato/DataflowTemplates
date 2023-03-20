@@ -29,29 +29,31 @@ import com.google.cloud.datastore.QueryResults;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class DefaultDatastoreResourceManager implements DatastoreResourceManager {
 
   private final String namespace;
 
   private final Datastore datastore;
-  private final List<Key> keys;
+  private final Set<Key> keys;
 
   public DefaultDatastoreResourceManager(Builder builder) {
     this.namespace = builder.namespace;
 
     this.datastore =
         DatastoreOptions.newBuilder().setCredentials(builder.credentials).build().getService();
-    this.keys = new ArrayList<>();
+    this.keys = new HashSet<>();
   }
 
   @VisibleForTesting
   DefaultDatastoreResourceManager(String namespace, Datastore datastore) {
     this.namespace = namespace;
     this.datastore = datastore;
-    this.keys = new ArrayList<>();
+    this.keys = new HashSet<>();
   }
 
   @Override
@@ -70,14 +72,31 @@ public class DefaultDatastoreResourceManager implements DatastoreResourceManager
   }
 
   @Override
-  public QueryResults<Entity> query(String gqlQuery) {
-    return datastore.run(
-        GqlQuery.newGqlQueryBuilder(ResultType.ENTITY, gqlQuery).setNamespace(namespace).build());
+  public List<Entity> query(String gqlQuery) {
+    QueryResults<Entity> queryResults =
+        datastore.run(
+            GqlQuery.newGqlQueryBuilder(ResultType.ENTITY, gqlQuery)
+                .setNamespace(namespace)
+                .build());
+
+    List<Entity> entities = new ArrayList<>();
+
+    while (queryResults.hasNext()) {
+      Entity entity = queryResults.next();
+      entities.add(entity);
+
+      // Mark for deletion if namespace matches the test
+      if (entity.getKey().getNamespace().equals(namespace)) {
+        keys.add(entity.getKey());
+      }
+    }
+    return entities;
   }
 
   @Override
   public void cleanupAll() {
     datastore.delete(keys.toArray(new Key[0]));
+    keys.clear();
   }
 
   public static Builder builder(String namespace) {

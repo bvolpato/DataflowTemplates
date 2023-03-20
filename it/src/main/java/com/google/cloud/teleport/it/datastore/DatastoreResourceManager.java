@@ -17,7 +17,6 @@ package com.google.cloud.teleport.it.datastore;
 
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.FullEntity;
-import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.teleport.it.common.ResourceManager;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +39,7 @@ public interface DatastoreResourceManager extends ResourceManager {
    * @param gqlQuery Gql Query to run.
    * @return Entities returned from the query.
    */
-  QueryResults<Entity> query(String gqlQuery);
+  List<Entity> query(String gqlQuery);
 
   /**
    * Deletes all created entities and cleans up the Datastore client.

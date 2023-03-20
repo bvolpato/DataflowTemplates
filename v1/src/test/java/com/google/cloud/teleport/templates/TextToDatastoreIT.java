@@ -22,6 +22,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.QueryResults;
+import com.google.cloud.teleport.it.PipelineUtils;
 import com.google.cloud.teleport.it.TemplateTestBase;
 import com.google.cloud.teleport.it.common.ResourceManagerUtils;
 import com.google.cloud.teleport.it.datastore.DatastoreResourceManager;
@@ -50,6 +51,8 @@ public final class TextToDatastoreIT extends TemplateTestBase {
 
   @Before
   public void setup() {
+    testId = PipelineUtils.createJobName("");
+
     datastoreResourceManager =
         DefaultDatastoreResourceManager.builder(testId).credentials(credentials).build();
   }
@@ -133,9 +136,8 @@ public final class TextToDatastoreIT extends TemplateTestBase {
     // Assert
     assertThatResult(result).isLaunchFinished();
 
-    QueryResults<Entity> queryResults = datastoreResourceManager.query("SELECT * from animal");
-    assertThat(queryResults).isNotNull();
-    assertThat(queryResults.hasNext()).isTrue();
+    List<Entity> queryResults = datastoreResourceManager.query("SELECT * from animal");
+    assertThat(queryResults).isNotEmpty();
 
     assertThatDatastoreRecords(queryResults)
         .hasRecordsUnordered(
