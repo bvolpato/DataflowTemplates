@@ -60,12 +60,16 @@ public class DefaultDatastoreResourceManager implements DatastoreResourceManager
   public List<Entity> insert(String kind, Map<Long, FullEntity<?>> entities) {
     List<Entity> created = new ArrayList<>();
 
-    for (Map.Entry<Long, FullEntity<?>> entry : entities.entrySet()) {
-      Key entityKey =
-          datastore.newKeyFactory().setKind(kind).setNamespace(namespace).newKey(entry.getKey());
-      Entity entity = Entity.newBuilder(entityKey, entry.getValue()).build();
-      created.add(datastore.put(entity));
-      keys.add(entityKey);
+    try {
+      for (Map.Entry<Long, FullEntity<?>> entry : entities.entrySet()) {
+        Key entityKey =
+            datastore.newKeyFactory().setKind(kind).setNamespace(namespace).newKey(entry.getKey());
+        Entity entity = Entity.newBuilder(entityKey, entry.getValue()).build();
+        created.add(datastore.put(entity));
+        keys.add(entityKey);
+      }
+    } catch (Exception e) {
+      throw new DatastoreResourceManagerException("Error inserting Datastore entity", e);
     }
 
     return created;
@@ -73,29 +77,37 @@ public class DefaultDatastoreResourceManager implements DatastoreResourceManager
 
   @Override
   public List<Entity> query(String gqlQuery) {
-    QueryResults<Entity> queryResults =
-        datastore.run(
-            GqlQuery.newGqlQueryBuilder(ResultType.ENTITY, gqlQuery)
-                .setNamespace(namespace)
-                .build());
+    try {
+      QueryResults<Entity> queryResults =
+          datastore.run(
+              GqlQuery.newGqlQueryBuilder(ResultType.ENTITY, gqlQuery)
+                  .setNamespace(namespace)
+                  .build());
 
-    List<Entity> entities = new ArrayList<>();
+      List<Entity> entities = new ArrayList<>();
 
-    while (queryResults.hasNext()) {
-      Entity entity = queryResults.next();
-      entities.add(entity);
+      while (queryResults.hasNext()) {
+        Entity entity = queryResults.next();
+        entities.add(entity);
 
-      // Mark for deletion if namespace matches the test
-      if (entity.getKey().getNamespace().equals(namespace)) {
-        keys.add(entity.getKey());
+        // Mark for deletion if namespace matches the test
+        if (entity.getKey().getNamespace().equals(namespace)) {
+          keys.add(entity.getKey());
+        }
       }
+      return entities;
+    } catch (Exception e) {
+      throw new DatastoreResourceManagerException("Error running Datastore query", e);
     }
-    return entities;
   }
 
   @Override
   public void cleanupAll() {
-    datastore.delete(keys.toArray(new Key[0]));
+    try {
+      datastore.delete(keys.toArray(new Key[0]));
+    } catch (Exception e) {
+      throw new DatastoreResourceManagerException("Error cleaning up resources", e);
+    }
     keys.clear();
   }
 

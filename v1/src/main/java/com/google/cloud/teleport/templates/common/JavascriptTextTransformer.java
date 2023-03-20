@@ -111,7 +111,6 @@ public abstract class JavascriptTextTransformer {
     public abstract String functionName();
 
     private Invocable invocable;
-    private ScriptEngine engine;
 
     /** Builder for {@link JavascriptTextTransformer}. */
     @AutoValue.Builder

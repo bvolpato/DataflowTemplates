@@ -25,7 +25,6 @@ import com.google.cloud.bigquery.InsertAllRequest;
 import com.google.cloud.bigquery.TableResult;
 import com.google.cloud.bigtable.data.v2.models.RowCell;
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.spanner.Struct;
 import com.google.cloud.spanner.Type;
 import com.google.cloud.spanner.Value;
