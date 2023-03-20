@@ -25,7 +25,10 @@ import com.google.api.services.dataflow.model.Job;
 import com.google.api.services.dataflow.model.MetricUpdate;
 import com.google.cloud.teleport.it.logging.LogStrings;
 import com.google.common.base.Strings;
+import dev.failsafe.Failsafe;
+import dev.failsafe.RetryPolicy;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,34 +58,40 @@ public abstract class AbstractPipelineLauncher implements PipelineLauncher {
   @Override
   public Job getJob(String project, String region, String jobId) throws IOException {
     LOG.info("Getting the status of {} under {}", jobId, project);
-    Job job = client.projects().locations().jobs().get(project, region, jobId).execute();
+
+    Job job =
+        Failsafe.with(clientRetryPolicy())
+            .get(() -> client.projects().locations().jobs().get(project, region, jobId).execute());
+
     LOG.info("Received job on get request for {}:\n{}", jobId, LogStrings.formatForLogging(job));
     return job;
   }
 
   @Override
   public JobState getJobStatus(String project, String region, String jobId) throws IOException {
-    LOG.info("Getting the status of {} under {}", jobId, project);
-
-    Job job = client.projects().locations().jobs().get(project, region, jobId).execute();
-    LOG.info("Received job on get request for {}:\n{}", jobId, LogStrings.formatForLogging(job));
-    return handleJobState(job);
+    return handleJobState(getJob(project, region, jobId));
   }
 
   @Override
-  public Job cancelJob(String project, String region, String jobId) throws IOException {
+  public Job cancelJob(String project, String region, String jobId) {
     LOG.info("Cancelling {} under {}", jobId, project);
     Job job = new Job().setRequestedState(JobState.CANCELLED.toString());
     LOG.info("Sending job to update {}:\n{}", jobId, LogStrings.formatForLogging(job));
-    return client.projects().locations().jobs().update(project, region, jobId, job).execute();
+    return Failsafe.with(clientRetryPolicy())
+        .get(
+            () ->
+                client.projects().locations().jobs().update(project, region, jobId, job).execute());
   }
 
   @Override
-  public Job drainJob(String project, String region, String jobId) throws IOException {
+  public Job drainJob(String project, String region, String jobId) {
     LOG.info("Draining {} under {}", jobId, project);
     Job job = new Job().setRequestedState(JobState.DRAINED.toString());
     LOG.info("Sending job to update {}:\n{}", jobId, LogStrings.formatForLogging(job));
-    return client.projects().locations().jobs().update(project, region, jobId, job).execute();
+    return Failsafe.with(clientRetryPolicy())
+        .get(
+            () ->
+                client.projects().locations().jobs().update(project, region, jobId, job).execute());
   }
 
   @Override
@@ -235,5 +244,22 @@ public abstract class AbstractPipelineLauncher implements PipelineLauncher {
               jobId, project));
     }
     return state;
+  }
+
+  /**
+   * Create a policy to retry when client returns a "Server is not responding" error. By default, it
+   * retries up to 3 times using a backoff strategy.
+   *
+   * @return Failsafe's RetryPolicy.
+   */
+  private <T> RetryPolicy<T> clientRetryPolicy() {
+    return RetryPolicy.<T>builder()
+        .handleIf(
+            throwable ->
+                throwable.getMessage() != null
+                    && throwable.getMessage().contains("Server is not responding"))
+        .withBackoff(Duration.ofMillis(100), Duration.ofSeconds(5))
+        .withMaxRetries(3)
+        .build();
   }
 }
