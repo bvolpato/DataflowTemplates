@@ -28,10 +28,11 @@ public interface DatastoreResourceManager extends ResourceManager {
   /**
    * Insert entities to Datastore.
    *
+   * @param kind Kind of document to insert.
    * @param entities Entities to insert to Datastore.
    * @return Entities.
    */
-  List<Entity> insert(Map<Long, FullEntity<?>> entities);
+  List<Entity> insert(String kind, Map<Long, FullEntity<?>> entities);
 
   /**
    * Run a Gql Query and return the results in entity format.

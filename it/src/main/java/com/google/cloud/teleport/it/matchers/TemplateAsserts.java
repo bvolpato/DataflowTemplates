@@ -17,6 +17,7 @@ package com.google.cloud.teleport.it.matchers;
 
 import static com.google.cloud.teleport.it.matchers.RecordsSubject.bigtableRowsToRecords;
 import static com.google.cloud.teleport.it.matchers.RecordsSubject.cassandraRowsToRecords;
+import static com.google.cloud.teleport.it.matchers.RecordsSubject.datastoreResultsToRecords;
 import static com.google.cloud.teleport.it.matchers.RecordsSubject.genericRecordToRecords;
 import static com.google.cloud.teleport.it.matchers.RecordsSubject.structsToRecords;
 import static com.google.cloud.teleport.it.matchers.RecordsSubject.tableResultToRecords;
@@ -24,6 +25,8 @@ import static com.google.common.truth.Truth.assertAbout;
 
 import com.datastax.oss.driver.api.core.cql.Row;
 import com.google.cloud.bigquery.TableResult;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.spanner.Struct;
 import com.google.cloud.teleport.it.artifacts.Artifact;
 import com.google.cloud.teleport.it.launcher.PipelineLauncher.LaunchInfo;
@@ -117,6 +120,17 @@ public final class TemplateAsserts {
    */
   public static RecordsSubject assertThatRecords(@Nullable Iterable<Row> rows) {
     return assertThatRecords(cassandraRowsToRecords(rows));
+  }
+
+  /**
+   * Creates a {@link RecordsSubject} to assert information within a list of records.
+   *
+   * @param results Records in Datastore {@link com.google.cloud.datastore.Entity} format to use in
+   *     the comparison.
+   * @return Truth Subject to chain assertions.
+   */
+  public static RecordsSubject assertThatDatastoreRecords(QueryResults<Entity> results) {
+    return assertThatRecords(datastoreResultsToRecords(results));
   }
 
   /**

@@ -17,7 +17,6 @@ package com.google.cloud.teleport.it.datastore;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.teleport.it.TestProperties;
@@ -32,12 +31,12 @@ public class DefaultDatastoreResourceManagerIT {
   @Test
   public void testInsert() throws IOException {
     DefaultDatastoreResourceManager resourceManager =
-        DefaultDatastoreResourceManager.builder("person", DatastoreUtils.createTestId("testInsert"))
-            .credentialsProvider(
-                FixedCredentialsProvider.create(TestProperties.buildCredentialsFromEnv()))
+        DefaultDatastoreResourceManager.builder(DatastoreUtils.createTestId("testInsert"))
+            .credentials(TestProperties.buildCredentialsFromEnv())
             .build();
     List<Entity> entities =
         resourceManager.insert(
+            "person",
             Map.of(
                 1L,
                 Entity.newBuilder().set("name", "John Doe").build(),
@@ -51,14 +50,13 @@ public class DefaultDatastoreResourceManagerIT {
   @Test
   public void testInsertQuery() throws IOException {
     DefaultDatastoreResourceManager resourceManager =
-        DefaultDatastoreResourceManager.builder(
-                "person", DatastoreUtils.createTestId("testInsertQuery"))
-            .credentialsProvider(
-                FixedCredentialsProvider.create(TestProperties.buildCredentialsFromEnv()))
+        DefaultDatastoreResourceManager.builder(DatastoreUtils.createTestId("testInsertQuery"))
+            .credentials(TestProperties.buildCredentialsFromEnv())
             .build();
 
     List<Entity> entities =
-        resourceManager.insert(Map.of(1L, Entity.newBuilder().set("name", "John Doe").build()));
+        resourceManager.insert(
+            "person", Map.of(1L, Entity.newBuilder().set("name", "John Doe").build()));
 
     assertThat(entities).hasSize(1);
     QueryResults<Entity> queryResults = resourceManager.query("SELECT * from person");
@@ -74,12 +72,11 @@ public class DefaultDatastoreResourceManagerIT {
   @Test
   public void testInsertCleanUp() throws IOException {
     DefaultDatastoreResourceManager resourceManager =
-        DefaultDatastoreResourceManager.builder(
-                "person", DatastoreUtils.createTestId("testInsertCleanUp"))
-            .credentialsProvider(
-                FixedCredentialsProvider.create(TestProperties.buildCredentialsFromEnv()))
+        DefaultDatastoreResourceManager.builder(DatastoreUtils.createTestId("testInsertCleanUp"))
+            .credentials(TestProperties.buildCredentialsFromEnv())
             .build();
-    resourceManager.insert(Map.of(1L, Entity.newBuilder().set("name", "John Doe").build()));
+    resourceManager.insert(
+        "person", Map.of(1L, Entity.newBuilder().set("name", "John Doe").build()));
 
     resourceManager.cleanupAll();
 

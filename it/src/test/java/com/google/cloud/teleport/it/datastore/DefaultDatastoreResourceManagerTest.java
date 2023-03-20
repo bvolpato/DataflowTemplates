@@ -24,7 +24,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.api.gax.core.CredentialsProvider;
+import com.google.auth.Credentials;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.FullEntity;
@@ -58,15 +58,12 @@ public class DefaultDatastoreResourceManagerTest {
     when(keyFactory.setKind(anyString())).thenReturn(keyFactory);
     when(keyFactory.setNamespace(anyString())).thenReturn(keyFactory);
 
-    CredentialsProvider credentialsProviderMock = mock(CredentialsProvider.class);
-    when(credentialsProviderMock.getCredentials()).thenReturn(null);
+    Credentials credentialsMock = mock(Credentials.class);
 
     DefaultDatastoreResourceManager.Builder builder =
-        DefaultDatastoreResourceManager.builder("test_kind", "test_namespace")
-            .credentialsProvider(credentialsProviderMock);
+        DefaultDatastoreResourceManager.builder("test_namespace").credentials(credentialsMock);
 
-    resourceManager =
-        new DefaultDatastoreResourceManager("test-kind", "test-namespace", datastoreMock);
+    resourceManager = new DefaultDatastoreResourceManager("test-namespace", datastoreMock);
   }
 
   @Test
@@ -80,7 +77,7 @@ public class DefaultDatastoreResourceManagerTest {
     when(datastoreMock.put(any(FullEntity.class))).thenReturn(entity);
 
     // Execute the method under test
-    List<Entity> result = resourceManager.insert(entities);
+    List<Entity> result = resourceManager.insert("test_kind", entities);
 
     // Verify the result
     assertThat(result).hasSize(1);
@@ -107,7 +104,8 @@ public class DefaultDatastoreResourceManagerTest {
   public void testCleanupAll() {
     // Prepare test data
     Key key = datastoreMock.newKeyFactory().newKey(1L);
-    resourceManager.insert(Collections.singletonMap(1L, Entity.newBuilder(key).build()));
+    resourceManager.insert(
+        "test_kind", Collections.singletonMap(1L, Entity.newBuilder(key).build()));
 
     // Execute the method under test
     resourceManager.cleanupAll();

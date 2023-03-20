@@ -17,7 +17,7 @@ package com.google.cloud.teleport.it.datastore;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.google.api.gax.core.CredentialsProvider;
+import com.google.auth.Credentials;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
@@ -28,41 +28,34 @@ import com.google.cloud.datastore.Query.ResultType;
 import com.google.cloud.datastore.QueryResults;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class DefaultDatastoreResourceManager implements DatastoreResourceManager {
 
-  private final String kind;
   private final String namespace;
 
   private final Datastore datastore;
   private final List<Key> keys;
 
-  public DefaultDatastoreResourceManager(Builder builder) throws IOException {
-    this.kind = builder.kind;
+  public DefaultDatastoreResourceManager(Builder builder) {
     this.namespace = builder.namespace;
 
     this.datastore =
-        DatastoreOptions.newBuilder()
-            .setCredentials(builder.credentialsProvider.getCredentials())
-            .build()
-            .getService();
+        DatastoreOptions.newBuilder().setCredentials(builder.credentials).build().getService();
     this.keys = new ArrayList<>();
   }
 
   @VisibleForTesting
-  DefaultDatastoreResourceManager(String kind, String namespace, Datastore datastore) {
-    this.kind = kind;
+  DefaultDatastoreResourceManager(String namespace, Datastore datastore) {
     this.namespace = namespace;
     this.datastore = datastore;
     this.keys = new ArrayList<>();
   }
 
   @Override
-  public List<Entity> insert(Map<Long, FullEntity<?>> entities) {
+  public List<Entity> insert(String kind, Map<Long, FullEntity<?>> entities) {
     List<Entity> created = new ArrayList<>();
 
     for (Map.Entry<Long, FullEntity<?>> entry : entities.entrySet()) {
@@ -87,30 +80,27 @@ public class DefaultDatastoreResourceManager implements DatastoreResourceManager
     datastore.delete(keys.toArray(new Key[0]));
   }
 
-  public static Builder builder(String kind, String namespace) {
-    checkArgument(!Strings.isNullOrEmpty(kind), "kind can not be null or empty");
+  public static Builder builder(String namespace) {
     checkArgument(!Strings.isNullOrEmpty(namespace), "namespace can not be empty");
-    return new Builder(kind, namespace);
+    return new Builder(namespace);
   }
 
   public static final class Builder {
 
-    private final String kind;
     private final String namespace;
-    private CredentialsProvider credentialsProvider;
+    private Credentials credentials;
 
-    private Builder(String kind, String namespace) {
-      this.kind = kind;
+    private Builder(String namespace) {
       this.namespace = namespace;
     }
 
-    public Builder credentialsProvider(CredentialsProvider credentialsProvider) {
-      this.credentialsProvider = credentialsProvider;
+    public Builder credentials(Credentials credentials) {
+      this.credentials = credentials;
       return this;
     }
 
-    public DefaultDatastoreResourceManager build() throws IOException {
-      if (credentialsProvider == null) {
+    public DefaultDatastoreResourceManager build() {
+      if (credentials == null) {
         throw new IllegalArgumentException(
             "Unable to find credentials. Please provide credentials to authenticate to GCP");
       }

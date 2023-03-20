@@ -13,10 +13,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.cloud.teleport.v2.templates;
+package com.google.cloud.teleport.templates;
 
 import static com.google.cloud.teleport.it.TestProperties.getProperty;
-import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatArtifacts;
+import static com.google.cloud.teleport.it.matchers.RecordsSubject.bigQueryRowsToRecords;
+import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatDatastoreRecords;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatPipeline;
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
 import static com.google.common.truth.Truth.assertThat;
@@ -25,22 +26,23 @@ import com.google.cloud.Tuple;
 import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
 import com.google.cloud.bigquery.Schema;
 import com.google.cloud.bigquery.TableId;
+import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.teleport.it.TemplateTestBase;
 import com.google.cloud.teleport.it.TestProperties;
-import com.google.cloud.teleport.it.artifacts.Artifact;
 import com.google.cloud.teleport.it.bigquery.BigQueryResourceManager;
 import com.google.cloud.teleport.it.bigquery.BigQueryTestUtils;
 import com.google.cloud.teleport.it.bigquery.DefaultBigQueryResourceManager;
 import com.google.cloud.teleport.it.common.ResourceManagerUtils;
+import com.google.cloud.teleport.it.datastore.DatastoreResourceManager;
+import com.google.cloud.teleport.it.datastore.DefaultDatastoreResourceManager;
 import com.google.cloud.teleport.it.launcher.PipelineLauncher.LaunchConfig;
 import com.google.cloud.teleport.it.launcher.PipelineLauncher.LaunchInfo;
 import com.google.cloud.teleport.it.launcher.PipelineOperator.Result;
-import com.google.cloud.teleport.metadata.SkipDirectRunnerTest;
 import com.google.cloud.teleport.metadata.TemplateIntegrationTest;
-import com.google.re2j.Pattern;
+import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,21 +50,21 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Integration test for {@link BigQueryToParquet}. */
-// SkipDirectRunnerTest: BigQueryIO fails mutation check https://github.com/apache/beam/issues/25319
-@Category({TemplateIntegrationTest.class, SkipDirectRunnerTest.class})
-@TemplateIntegrationTest(BigQueryToParquet.class)
+/** Integration test for {@link BigQueryToDatastore}. */
+@Category(TemplateIntegrationTest.class)
+@TemplateIntegrationTest(BigQueryToDatastore.class)
 @RunWith(JUnit4.class)
-public final class BigQueryToParquetIT extends TemplateTestBase {
+public final class BigQueryToDatastoreIT extends TemplateTestBase {
 
   private BigQueryResourceManager bigQueryResourceManager;
+  private DatastoreResourceManager datastoreResourceManager;
 
   // Define a set of parameters used to allow configuration of the test size being run.
   private static final String BIGQUERY_ID_COL = "test_id";
   private static final int BIGQUERY_NUM_ROWS =
       Integer.parseInt(getProperty("numRows", "100", TestProperties.Type.PROPERTY));
   private static final int BIGQUERY_NUM_FIELDS =
-      Integer.parseInt(getProperty("numFields", "50", TestProperties.Type.PROPERTY));
+      Integer.parseInt(getProperty("numFields", "20", TestProperties.Type.PROPERTY));
   private static final int BIGQUERY_MAX_ENTRY_LENGTH =
       Integer.min(
           300, Integer.parseInt(getProperty("maxEntryLength", "20", TestProperties.Type.PROPERTY)));
@@ -73,15 +75,17 @@ public final class BigQueryToParquetIT extends TemplateTestBase {
         DefaultBigQueryResourceManager.builder(testName, PROJECT)
             .setCredentials(credentials)
             .build();
+    datastoreResourceManager =
+        DefaultDatastoreResourceManager.builder(testId).credentials(credentials).build();
   }
 
   @After
   public void tearDown() {
-    ResourceManagerUtils.cleanResources(bigQueryResourceManager);
+    ResourceManagerUtils.cleanResources(bigQueryResourceManager, datastoreResourceManager);
   }
 
   @Test
-  public void testBigQueryToParquet() throws IOException {
+  public void testBigQueryToDatastore() throws IOException {
     // Arrange
     Tuple<Schema, List<RowToInsert>> generatedTable =
         BigQueryTestUtils.generateBigQueryTable(
@@ -90,13 +94,17 @@ public final class BigQueryToParquetIT extends TemplateTestBase {
     List<RowToInsert> bigQueryRows = generatedTable.y();
     TableId table = bigQueryResourceManager.createTable(testName, bigQuerySchema);
     bigQueryResourceManager.write(testName, bigQueryRows);
-    Pattern expectedFilePattern = Pattern.compile(".*");
 
     LaunchConfig.Builder options =
         LaunchConfig.builder(testName, specPath)
-            .addParameter("tableRef", toTableSpecLegacy(table))
-            .addParameter("bucket", getGcsPath(testName))
-            .addParameter("numShards", "5");
+            .addParameter("readQuery", "SELECT * FROM `" + toTableSpecStandard(table) + "`")
+            .addParameter("readIdColumn", BIGQUERY_ID_COL)
+            .addParameter("datastoreWriteProjectId", PROJECT)
+            .addParameter("datastoreWriteEntityKind", "person")
+            .addParameter("datastoreWriteNamespace", testId)
+            .addParameter("datastoreHintNumWorkers", "1")
+            .addParameter("errorWritePath", getGcsPath("errorWritePath"))
+            .addParameter("invalidOutputPath", getGcsPath("invalidOutputPath"));
 
     // Act
     LaunchInfo info = launchTemplate(options);
@@ -107,11 +115,12 @@ public final class BigQueryToParquetIT extends TemplateTestBase {
     // Assert
     assertThatResult(result).isLaunchFinished();
 
-    List<Artifact> artifacts = gcsClient.listArtifacts(testName, expectedFilePattern);
-    assertThat(artifacts).hasSize(5);
-    assertThatArtifacts(artifacts)
-        .asParquetRecords()
+    QueryResults<Entity> queryResults = datastoreResourceManager.query("SELECT * from person");
+    assertThat(queryResults).isNotNull();
+    assertThat(queryResults.hasNext()).isTrue();
+
+    assertThatDatastoreRecords(queryResults)
         .hasRecordsUnordered(
-            bigQueryRows.stream().map(RowToInsert::getContent).collect(Collectors.toList()));
+            bigQueryRowsToRecords(bigQueryRows, ImmutableList.of(BIGQUERY_ID_COL)));
   }
 }
