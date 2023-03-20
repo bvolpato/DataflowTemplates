@@ -304,7 +304,9 @@ public abstract class TemplateTestBase {
       "-Dregion=" + TestProperties.region(),
       "-DbucketName=" + bucketName,
       "-DstagePrefix=" + prefix,
-      "-DtemplateName=" + template.name()
+      "-DtemplateName=" + template.name(),
+      // Print stacktrace when command fails
+      "-e"
     };
   }
 
