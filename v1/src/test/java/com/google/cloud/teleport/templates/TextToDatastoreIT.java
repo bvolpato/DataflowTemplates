@@ -21,7 +21,6 @@ import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatRe
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.teleport.it.PipelineUtils;
 import com.google.cloud.teleport.it.TemplateTestBase;
 import com.google.cloud.teleport.it.common.ResourceManagerUtils;

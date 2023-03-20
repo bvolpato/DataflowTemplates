@@ -26,7 +26,6 @@ import static com.google.common.truth.Truth.assertAbout;
 import com.datastax.oss.driver.api.core.cql.Row;
 import com.google.cloud.bigquery.TableResult;
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.spanner.Struct;
 import com.google.cloud.teleport.it.artifacts.Artifact;
 import com.google.cloud.teleport.it.launcher.PipelineLauncher.LaunchInfo;

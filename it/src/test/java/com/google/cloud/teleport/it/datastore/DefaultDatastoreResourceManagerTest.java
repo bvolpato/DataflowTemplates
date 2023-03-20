@@ -96,12 +96,19 @@ public class DefaultDatastoreResourceManagerTest {
     when(mockResult.hasNext()).thenReturn(true).thenReturn(false);
     when(mockResult.next()).thenReturn(mockEntity);
 
+    Key mockKey = mock(Key.class);
+    when(mockEntity.getKey()).thenReturn(mockKey);
+    when(mockKey.getNamespace()).thenReturn("test-namespace");
+
     // Execute the method under test
     List<Entity> result = resourceManager.query(gqlQuery);
+    resourceManager.cleanupAll();
 
     // Verify the result
     assertThat(result).isNotEmpty();
     assertThat(result.get(0)).isEqualTo(mockEntity);
+
+    verify(datastoreMock).delete(mockKey);
   }
 
   @Test
