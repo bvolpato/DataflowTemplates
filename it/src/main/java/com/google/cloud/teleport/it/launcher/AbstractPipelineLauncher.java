@@ -15,6 +15,7 @@
  */
 package com.google.cloud.teleport.it.launcher;
 
+import static com.google.cloud.teleport.it.common.RetryUtil.clientRetryPolicy;
 import static com.google.cloud.teleport.it.launcher.PipelineLauncher.JobState.FAILED;
 import static com.google.cloud.teleport.it.launcher.PipelineLauncher.JobState.PENDING_STATES;
 import static com.google.cloud.teleport.it.logging.LogStrings.formatForLogging;
@@ -26,9 +27,7 @@ import com.google.api.services.dataflow.model.MetricUpdate;
 import com.google.cloud.teleport.it.logging.LogStrings;
 import com.google.common.base.Strings;
 import dev.failsafe.Failsafe;
-import dev.failsafe.RetryPolicy;
 import java.io.IOException;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -244,23 +243,5 @@ public abstract class AbstractPipelineLauncher implements PipelineLauncher {
               jobId, project));
     }
     return state;
-  }
-
-  /**
-   * Create a policy to retry when client returns a "Server is not responding" error. By default, it
-   * retries up to 3 times using a backoff strategy.
-   *
-   * @return Failsafe's RetryPolicy.
-   */
-  private <T> RetryPolicy<T> clientRetryPolicy() {
-    return RetryPolicy.<T>builder()
-        .handle(IOException.class)
-        .handleIf(
-            throwable ->
-                throwable.getMessage() != null
-                    && throwable.getMessage().contains("Server is not responding"))
-        .withBackoff(Duration.ofMillis(100), Duration.ofSeconds(5))
-        .withMaxRetries(3)
-        .build();
   }
 }

@@ -31,6 +31,7 @@ import com.google.api.services.dataflow.model.Job;
 import com.google.cloud.teleport.it.launcher.PipelineLauncher.JobState;
 import dev.failsafe.FailsafeException;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -91,12 +92,13 @@ public final class AbstractPipelineLauncherTest {
     Update update = mock(Update.class);
     when(getLocationJobs(client).update(any(), any(), any(), any()))
         .thenThrow(new IOException("Connection reset"))
+        .thenThrow(new SocketTimeoutException("Read timed out"))
         .thenReturn(update);
     when(update.execute()).thenThrow(new IOException("Connection reset")).thenReturn(new Job());
 
     new FakePipelineLauncher(client).cancelJob(PROJECT, REGION, JOB_ID);
 
-    verify(getLocationJobs(client), times(3))
+    verify(getLocationJobs(client), times(4))
         .update(
             projectCaptor.capture(),
             regionCaptor.capture(),
