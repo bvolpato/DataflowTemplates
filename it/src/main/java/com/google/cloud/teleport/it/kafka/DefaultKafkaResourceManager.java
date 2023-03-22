@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
+import org.testcontainers.utility.MountableFile;
 
 /**
  * Default class for implementation of {@link KafkaResourceManager} interface.
@@ -196,6 +197,7 @@ public class DefaultKafkaResourceManager extends TestContainerResourceManager<Ge
 
     private Set<String> topicNames;
     int numTopics;
+    boolean enableSsl;
 
     private Builder(String testId) {
       super(testId);
@@ -203,6 +205,7 @@ public class DefaultKafkaResourceManager extends TestContainerResourceManager<Ge
       this.containerImageTag = DEFAULT_KAFKA_CONTAINER_TAG;
       this.topicNames = new HashSet<>();
       this.numTopics = 0;
+      this.enableSsl = false;
     }
 
     /**
@@ -243,6 +246,17 @@ public class DefaultKafkaResourceManager extends TestContainerResourceManager<Ge
       return this;
     }
 
+    /**
+     * Whether we should enable SSL in the container or not.
+     *
+     * @param enableSsl Flag to enable or disable.
+     * @return this builder object with enableSsl set
+     */
+    public Builder setEnableSsl(boolean enableSsl) {
+      this.enableSsl = enableSsl;
+      return this;
+    }
+
     @Override
     public DefaultKafkaResourceManager build() {
       return new DefaultKafkaResourceManager(this);
@@ -256,6 +270,44 @@ public class DefaultKafkaResourceManager extends TestContainerResourceManager<Ge
     public DefaultKafkaContainer(Builder builder) {
       super(DockerImageName.parse(builder.containerImageName).withTag(builder.containerImageTag));
       this.host = builder.host;
+
+      if (builder.enableSsl) {
+        // Files were created using https://kafka.apache.org/documentation.html#security_ssl
+        // https://github.com/confluentinc/cp-docker-client-test-cluster/blob/master/bin/gen-ssl-certs.sh
+        String containerCertsFolder = "/etc/kafka/secrets/certs/";
+        MountableFile fileKeystore =
+            MountableFile.forClasspathResource("test_certs/kafka.server.keystore.jks");
+        MountableFile fileTruststore =
+            MountableFile.forClasspathResource("test_certs/kafka.server.truststore.jks");
+        MountableFile fileKeystoreCred =
+            MountableFile.forClasspathResource("test_certs/server_keystore_creds");
+        MountableFile fileTruststoreCred =
+            MountableFile.forClasspathResource("test_certs/server_truststore_creds");
+        MountableFile fileKeyCred =
+            MountableFile.forClasspathResource("test_certs/server_sslkey_creds");
+
+        withCopyFileToContainer(fileKeystore, containerCertsFolder + "/kafka.server.keystore.jks")
+            .withCopyFileToContainer(fileTruststore, containerCertsFolder + "/kafka.server.truststore.jks")
+            .withCopyFileToContainer(fileKeystoreCred, containerCertsFolder + "/server_keystore_creds")
+            .withCopyFileToContainer(fileTruststoreCred, containerCertsFolder + "/server_truststore_creds")
+            .withCopyFileToContainer(fileKeyCred, containerCertsFolder + "/server_sslkey_creds");
+
+        withEnv("KAFKA_SSL_CLIENT_AUTH", "required")
+            .withEnv("KAFKA_SECURITY_PROTOCOL", "SSL")
+            .withEnv(
+                "KAFKA_SSL_KEYSTORE_FILENAME", "etc/kafka/secrets/certs/kafka.server.keystore.jks")
+            .withEnv(
+                "KAFKA_SSL_KEYSTORE_CREDENTIALS",
+                "etc/kafka/secrets/certs/server_keystore_creds")
+            .withEnv(
+                "KAFKA_SSL_KEY_CREDENTIALS", "etc/kafka/secrets/certs/server_sslkey_creds")
+            .withEnv(
+                "KAFKA_SSL_TRUSTSTORE_FILENAME",
+                "etc/kafka/secrets/certs/kafka.server.truststore.jks")
+            .withEnv(
+                "KAFKA_SSL_TRUSTSTORE_CREDENTIALS",
+                "etc/kafka/secrets/certs/server_truststore_creds");
+      }
     }
 
     @Override

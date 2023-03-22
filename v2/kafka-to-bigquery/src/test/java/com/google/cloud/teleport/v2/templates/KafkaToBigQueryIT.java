@@ -73,7 +73,8 @@ public final class KafkaToBigQueryIT extends TemplateTestBase {
             .build();
     bigQueryClient.createDataset(REGION);
 
-    kafkaResourceManager = DefaultKafkaResourceManager.builder(testName).setHost(HOST_IP).build();
+    kafkaResourceManager =
+        DefaultKafkaResourceManager.builder(testName).setEnableSsl(true).setHost(HOST_IP).build();
   }
 
   @After
@@ -84,6 +85,13 @@ public final class KafkaToBigQueryIT extends TemplateTestBase {
   @Test
   public void testKafkaToBigQuery() throws IOException {
     baseKafkaToBigQuery(Function.identity()); // no extra parameters
+  }
+
+  @Test
+  public void testKafkaToBigQuerySsl() throws IOException {
+    baseKafkaToBigQuery(b -> b.addParameter("enableSsl", "true")
+        .addParameter("sslKeystorePath", "true")
+        .);
   }
 
   @Test
