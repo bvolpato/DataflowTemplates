@@ -162,8 +162,8 @@ public final class GCSToElasticsearchIT extends TemplateTestBase {
   public void testElasticsearchCsvWithoutHeadersWithJsonSchema() throws IOException {
     // Arrange
     gcsClient.uploadArtifact(
-        "input/with_headers_10.csv",
-        Resources.getResource("GCSToElasticsearch/with_headers_10.csv").getPath());
+        "input/no_header_10.csv",
+        Resources.getResource("GCSToElasticsearch/no_header_10.csv").getPath());
     gcsClient.createArtifact(
         "input/schema.json",
         "[{\n"
