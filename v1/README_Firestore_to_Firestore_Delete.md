@@ -117,7 +117,7 @@ gcloud dataflow jobs run "firestore-to-firestore-delete-job" \
   --parameters "firestoreDeleteProjectId=$FIRESTORE_DELETE_PROJECT_ID" \
   --parameters "firestoreHintNumWorkers=$FIRESTORE_HINT_NUM_WORKERS" \
   --parameters "javascriptTextTransformGcsPath=$JAVASCRIPT_TEXT_TRANSFORM_GCS_PATH" \
-  --parameters "javascriptTextTransformFunctionName=$JAVASCRIPT_TEXT_TRANSFORM_FUNCTION_NAME" 
+  --parameters "javascriptTextTransformFunctionName=$JAVASCRIPT_TEXT_TRANSFORM_FUNCTION_NAME"
 ```
 
 For more information about the command, please check:

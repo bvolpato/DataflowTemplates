@@ -114,7 +114,7 @@ gcloud dataflow jobs run "firestore-to-gcs-text-job" \
   --parameters "firestoreReadNamespace=$FIRESTORE_READ_NAMESPACE" \
   --parameters "javascriptTextTransformGcsPath=$JAVASCRIPT_TEXT_TRANSFORM_GCS_PATH" \
   --parameters "javascriptTextTransformFunctionName=$JAVASCRIPT_TEXT_TRANSFORM_FUNCTION_NAME" \
-  --parameters "textWritePrefix=$TEXT_WRITE_PREFIX" 
+  --parameters "textWritePrefix=$TEXT_WRITE_PREFIX"
 ```
 
 For more information about the command, please check:

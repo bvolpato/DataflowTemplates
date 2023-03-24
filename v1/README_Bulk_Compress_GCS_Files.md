@@ -108,7 +108,7 @@ gcloud dataflow jobs run "bulk-compress-gcs-files-job" \
   --parameters "inputFilePattern=$INPUT_FILE_PATTERN" \
   --parameters "outputDirectory=$OUTPUT_DIRECTORY" \
   --parameters "outputFailureFile=$OUTPUT_FAILURE_FILE" \
-  --parameters "compression=$COMPRESSION" 
+  --parameters "compression=$COMPRESSION"
 ```
 
 For more information about the command, please check:

@@ -135,7 +135,7 @@ gcloud dataflow jobs run "jdbc-to-bigquery-job" \
   --parameters "KMSEncryptionKey=$KMSENCRYPTION_KEY" \
   --parameters "useColumnAlias=$USE_COLUMN_ALIAS" \
   --parameters "disabledAlgorithms=$DISABLED_ALGORITHMS" \
-  --parameters "extraFilesToStage=$EXTRA_FILES_TO_STAGE" 
+  --parameters "extraFilesToStage=$EXTRA_FILES_TO_STAGE"
 ```
 
 For more information about the command, please check:

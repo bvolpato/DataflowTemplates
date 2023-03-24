@@ -129,7 +129,7 @@ gcloud dataflow jobs run "cloud-spanner-to-gcs-avro-job" \
   --parameters "shouldExportTimestampAsLogicalType=$SHOULD_EXPORT_TIMESTAMP_AS_LOGICAL_TYPE" \
   --parameters "tableNames=$TABLE_NAMES" \
   --parameters "shouldExportRelatedTables=$SHOULD_EXPORT_RELATED_TABLES" \
-  --parameters "spannerPriority=$SPANNER_PRIORITY" 
+  --parameters "spannerPriority=$SPANNER_PRIORITY"
 ```
 
 For more information about the command, please check:

@@ -126,7 +126,7 @@ gcloud dataflow jobs run "cassandra-to-cloud-bigtable-job" \
   --parameters "bigtableTableId=$BIGTABLE_TABLE_ID" \
   --parameters "defaultColumnFamily=$DEFAULT_COLUMN_FAMILY" \
   --parameters "rowKeySeparator=$ROW_KEY_SEPARATOR" \
-  --parameters "splitLargeRows=$SPLIT_LARGE_ROWS" 
+  --parameters "splitLargeRows=$SPLIT_LARGE_ROWS"
 ```
 
 For more information about the command, please check:

@@ -120,7 +120,7 @@ gcloud dataflow jobs run "gcs-text-to-firestore-job" \
   --parameters "firestoreWriteEntityKind=$FIRESTORE_WRITE_ENTITY_KIND" \
   --parameters "firestoreWriteNamespace=$FIRESTORE_WRITE_NAMESPACE" \
   --parameters "firestoreHintNumWorkers=$FIRESTORE_HINT_NUM_WORKERS" \
-  --parameters "errorWritePath=$ERROR_WRITE_PATH" 
+  --parameters "errorWritePath=$ERROR_WRITE_PATH"
 ```
 
 For more information about the command, please check:

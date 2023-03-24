@@ -120,7 +120,7 @@ gcloud dataflow jobs run "cloud-bigquery-to-cloud-datastore-job" \
   --parameters "datastoreWriteEntityKind=$DATASTORE_WRITE_ENTITY_KIND" \
   --parameters "datastoreWriteNamespace=$DATASTORE_WRITE_NAMESPACE" \
   --parameters "datastoreHintNumWorkers=$DATASTORE_HINT_NUM_WORKERS" \
-  --parameters "errorWritePath=$ERROR_WRITE_PATH" 
+  --parameters "errorWritePath=$ERROR_WRITE_PATH"
 ```
 
 For more information about the command, please check:

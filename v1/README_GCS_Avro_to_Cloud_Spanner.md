@@ -129,7 +129,7 @@ gcloud dataflow jobs run "gcs-avro-to-cloud-spanner-job" \
   --parameters "earlyIndexCreateFlag=$EARLY_INDEX_CREATE_FLAG" \
   --parameters "spannerProjectId=$SPANNER_PROJECT_ID" \
   --parameters "ddlCreationTimeoutInMinutes=$DDL_CREATION_TIMEOUT_IN_MINUTES" \
-  --parameters "spannerPriority=$SPANNER_PRIORITY" 
+  --parameters "spannerPriority=$SPANNER_PRIORITY"
 ```
 
 For more information about the command, please check:

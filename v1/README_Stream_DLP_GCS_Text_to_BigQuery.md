@@ -114,7 +114,7 @@ gcloud dataflow jobs run "stream-dlp-gcs-text-to-bigquery-job" \
   --parameters "inspectTemplateName=$INSPECT_TEMPLATE_NAME" \
   --parameters "batchSize=$BATCH_SIZE" \
   --parameters "datasetName=$DATASET_NAME" \
-  --parameters "dlpProjectId=$DLP_PROJECT_ID" 
+  --parameters "dlpProjectId=$DLP_PROJECT_ID"
 ```
 
 For more information about the command, please check:

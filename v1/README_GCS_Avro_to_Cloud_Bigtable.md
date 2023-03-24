@@ -111,7 +111,7 @@ gcloud dataflow jobs run "gcs-avro-to-cloud-bigtable-job" \
   --parameters "bigtableInstanceId=$BIGTABLE_INSTANCE_ID" \
   --parameters "bigtableTableId=$BIGTABLE_TABLE_ID" \
   --parameters "inputFilePattern=$INPUT_FILE_PATTERN" \
-  --parameters "splitLargeRows=$SPLIT_LARGE_ROWS" 
+  --parameters "splitLargeRows=$SPLIT_LARGE_ROWS"
 ```
 
 For more information about the command, please check:

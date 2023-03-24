@@ -120,7 +120,7 @@ gcloud dataflow jobs run "cloud-bigquery-to-gcs-tensorflow-records-job" \
   --parameters "outputSuffix=$OUTPUT_SUFFIX" \
   --parameters "trainingPercentage=$TRAINING_PERCENTAGE" \
   --parameters "testingPercentage=$TESTING_PERCENTAGE" \
-  --parameters "validationPercentage=$VALIDATION_PERCENTAGE" 
+  --parameters "validationPercentage=$VALIDATION_PERCENTAGE"
 ```
 
 For more information about the command, please check:

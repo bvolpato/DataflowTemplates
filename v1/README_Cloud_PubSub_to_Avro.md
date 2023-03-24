@@ -129,7 +129,7 @@ gcloud dataflow jobs run "cloud-pubsub-to-avro-job" \
   --parameters "monthPattern=$MONTH_PATTERN" \
   --parameters "dayPattern=$DAY_PATTERN" \
   --parameters "hourPattern=$HOUR_PATTERN" \
-  --parameters "minutePattern=$MINUTE_PATTERN" 
+  --parameters "minutePattern=$MINUTE_PATTERN"
 ```
 
 For more information about the command, please check:

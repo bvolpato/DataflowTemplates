@@ -141,7 +141,7 @@ gcloud dataflow jobs run "gcs-text-to-cloud-spanner-job" \
   --parameters "spannerProjectId=$SPANNER_PROJECT_ID" \
   --parameters "spannerPriority=$SPANNER_PRIORITY" \
   --parameters "handleNewLine=$HANDLE_NEW_LINE" \
-  --parameters "invalidOutputPath=$INVALID_OUTPUT_PATH" 
+  --parameters "invalidOutputPath=$INVALID_OUTPUT_PATH"
 ```
 
 For more information about the command, please check:

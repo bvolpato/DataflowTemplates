@@ -117,7 +117,7 @@ gcloud dataflow jobs run "datastore-to-datastore-delete-job" \
   --parameters "javascriptTextTransformGcsPath=$JAVASCRIPT_TEXT_TRANSFORM_GCS_PATH" \
   --parameters "javascriptTextTransformFunctionName=$JAVASCRIPT_TEXT_TRANSFORM_FUNCTION_NAME" \
   --parameters "datastoreDeleteProjectId=$DATASTORE_DELETE_PROJECT_ID" \
-  --parameters "datastoreHintNumWorkers=$DATASTORE_HINT_NUM_WORKERS" 
+  --parameters "datastoreHintNumWorkers=$DATASTORE_HINT_NUM_WORKERS"
 ```
 
 For more information about the command, please check:

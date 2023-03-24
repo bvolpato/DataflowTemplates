@@ -111,7 +111,7 @@ gcloud dataflow jobs run "cloud-bigtable-to-gcs-avro-job" \
   --parameters "bigtableInstanceId=$BIGTABLE_INSTANCE_ID" \
   --parameters "bigtableTableId=$BIGTABLE_TABLE_ID" \
   --parameters "outputDirectory=$OUTPUT_DIRECTORY" \
-  --parameters "filenamePrefix=$FILENAME_PREFIX" 
+  --parameters "filenamePrefix=$FILENAME_PREFIX"
 ```
 
 For more information about the command, please check:

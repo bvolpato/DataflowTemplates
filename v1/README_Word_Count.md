@@ -102,7 +102,7 @@ gcloud dataflow jobs run "word-count-job" \
   --region "$REGION" \
   --gcs-location "$TEMPLATE_SPEC_GCSPATH" \
   --parameters "inputFile=$INPUT_FILE" \
-  --parameters "output=$OUTPUT" 
+  --parameters "output=$OUTPUT"
 ```
 
 For more information about the command, please check:

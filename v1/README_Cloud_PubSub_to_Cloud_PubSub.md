@@ -108,7 +108,7 @@ gcloud dataflow jobs run "cloud-pubsub-to-cloud-pubsub-job" \
   --parameters "inputSubscription=$INPUT_SUBSCRIPTION" \
   --parameters "outputTopic=$OUTPUT_TOPIC" \
   --parameters "filterKey=$FILTER_KEY" \
-  --parameters "filterValue=$FILTER_VALUE" 
+  --parameters "filterValue=$FILTER_VALUE"
 ```
 
 For more information about the command, please check:

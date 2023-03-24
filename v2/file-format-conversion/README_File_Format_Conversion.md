@@ -85,7 +85,7 @@ The command should build and save the template to Google Cloud, and then print
 the complete location on Cloud Storage:
 
 ```
-Flex Template was staged! gs://{BUCKET}/{PATH}
+Flex Template was staged! gs://<bucket-name>/templates/flex/File_Format_Conversion
 ```
 
 The specific path should be copied as it will be used in the following steps.
@@ -99,10 +99,10 @@ You can use the path above run the template (or share with others for execution)
 To start a job with that template at any time using `gcloud`, you can use:
 
 ```shell
-export TEMPLATE_SPEC_GCSPATH="gs://$BUCKET_NAME/templates/flex/File_Format_Conversion"
 export PROJECT=<my-project>
 export BUCKET_NAME=<bucket-name>
 export REGION=us-central1
+export TEMPLATE_SPEC_GCSPATH="gs://$BUCKET_NAME/templates/flex/File_Format_Conversion"
 
 ### Mandatory
 export INPUT_FILE_FORMAT=<inputFileFormat>

@@ -105,7 +105,7 @@ gcloud dataflow jobs run "bulk-decompress-gcs-files-job" \
   --gcs-location "$TEMPLATE_SPEC_GCSPATH" \
   --parameters "inputFilePattern=$INPUT_FILE_PATTERN" \
   --parameters "outputDirectory=$OUTPUT_DIRECTORY" \
-  --parameters "outputFailureFile=$OUTPUT_FAILURE_FILE" 
+  --parameters "outputFailureFile=$OUTPUT_FAILURE_FILE"
 ```
 
 For more information about the command, please check:

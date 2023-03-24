@@ -114,7 +114,7 @@ gcloud dataflow jobs run "gcs-sequencefile-to-cloud-bigtable-job" \
   --parameters "bigtableTableId=$BIGTABLE_TABLE_ID" \
   --parameters "bigtableAppProfileId=$BIGTABLE_APP_PROFILE_ID" \
   --parameters "sourcePattern=$SOURCE_PATTERN" \
-  --parameters "mutationThrottleLatencyMs=$MUTATION_THROTTLE_LATENCY_MS" 
+  --parameters "mutationThrottleLatencyMs=$MUTATION_THROTTLE_LATENCY_MS"
 ```
 
 For more information about the command, please check:

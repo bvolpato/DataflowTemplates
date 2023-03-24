@@ -126,7 +126,7 @@ gcloud dataflow jobs run "cloud-bigtable-to-gcs-sequencefile-job" \
   --parameters "bigtableMaxVersions=$BIGTABLE_MAX_VERSIONS" \
   --parameters "bigtableFilter=$BIGTABLE_FILTER" \
   --parameters "destinationPath=$DESTINATION_PATH" \
-  --parameters "filenamePrefix=$FILENAME_PREFIX" 
+  --parameters "filenamePrefix=$FILENAME_PREFIX"
 ```
 
 For more information about the command, please check:

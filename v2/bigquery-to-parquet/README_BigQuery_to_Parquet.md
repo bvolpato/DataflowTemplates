@@ -111,7 +111,7 @@ gcloud dataflow flex-template run "bigquery-to-parquet-job" \
   --parameters "bucket=$BUCKET" \
   --parameters "numShards=$NUM_SHARDS" \
   --parameters "fields=$FIELDS" \
-  --parameters "rowRestriction=$ROW_RESTRICTION" 
+  --parameters "rowRestriction=$ROW_RESTRICTION"
 ```
 
 For more information about the command, please check:

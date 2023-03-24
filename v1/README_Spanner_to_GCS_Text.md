@@ -123,7 +123,7 @@ gcloud dataflow jobs run "spanner-to-gcs-text-job" \
   --parameters "spannerDatabaseId=$SPANNER_DATABASE_ID" \
   --parameters "spannerHost=$SPANNER_HOST" \
   --parameters "spannerSnapshotTime=$SPANNER_SNAPSHOT_TIME" \
-  --parameters "textWritePrefix=$TEXT_WRITE_PREFIX" 
+  --parameters "textWritePrefix=$TEXT_WRITE_PREFIX"
 ```
 
 For more information about the command, please check:

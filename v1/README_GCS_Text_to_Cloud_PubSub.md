@@ -102,7 +102,7 @@ gcloud dataflow jobs run "gcs-text-to-cloud-pubsub-job" \
   --region "$REGION" \
   --gcs-location "$TEMPLATE_SPEC_GCSPATH" \
   --parameters "inputFilePattern=$INPUT_FILE_PATTERN" \
-  --parameters "outputTopic=$OUTPUT_TOPIC" 
+  --parameters "outputTopic=$OUTPUT_TOPIC"
 ```
 
 For more information about the command, please check:

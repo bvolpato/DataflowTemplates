@@ -144,7 +144,7 @@ gcloud dataflow jobs run "cloud-pubsub-to-splunk-job" \
   --parameters "enableGzipHttpCompression=$ENABLE_GZIP_HTTP_COMPRESSION" \
   --parameters "javascriptTextTransformGcsPath=$JAVASCRIPT_TEXT_TRANSFORM_GCS_PATH" \
   --parameters "javascriptTextTransformFunctionName=$JAVASCRIPT_TEXT_TRANSFORM_FUNCTION_NAME" \
-  --parameters "outputDeadletterTopic=$OUTPUT_DEADLETTER_TOPIC" 
+  --parameters "outputDeadletterTopic=$OUTPUT_DEADLETTER_TOPIC"
 ```
 
 For more information about the command, please check:

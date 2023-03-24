@@ -144,7 +144,7 @@ gcloud dataflow flex-template run "bigquery-to-bigtable-job" \
   --parameters "bigtableWriteProjectId=$BIGTABLE_WRITE_PROJECT_ID" \
   --parameters "bigtableBulkWriteLatencyTargetMs=$BIGTABLE_BULK_WRITE_LATENCY_TARGET_MS" \
   --parameters "bigtableBulkWriteMaxRowKeyCount=$BIGTABLE_BULK_WRITE_MAX_ROW_KEY_COUNT" \
-  --parameters "bigtableBulkWriteMaxRequestSizeBytes=$BIGTABLE_BULK_WRITE_MAX_REQUEST_SIZE_BYTES" 
+  --parameters "bigtableBulkWriteMaxRequestSizeBytes=$BIGTABLE_BULK_WRITE_MAX_REQUEST_SIZE_BYTES"
 ```
 
 For more information about the command, please check:

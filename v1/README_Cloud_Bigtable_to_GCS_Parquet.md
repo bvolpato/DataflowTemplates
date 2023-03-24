@@ -114,7 +114,7 @@ gcloud dataflow jobs run "cloud-bigtable-to-gcs-parquet-job" \
   --parameters "bigtableTableId=$BIGTABLE_TABLE_ID" \
   --parameters "outputDirectory=$OUTPUT_DIRECTORY" \
   --parameters "filenamePrefix=$FILENAME_PREFIX" \
-  --parameters "numShards=$NUM_SHARDS" 
+  --parameters "numShards=$NUM_SHARDS"
 ```
 
 For more information about the command, please check:
