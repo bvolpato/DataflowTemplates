@@ -4,7 +4,7 @@ ${spec.metadata.description!?ensure_ends_with(".")}
 
 <#if spec.metadata.googleReleased>
 :memo: This is a Google-provided template! Please
-check [Provided templates documentation](https://cloud.google.com/dataflow/docs/guides/templates/provided-templates)
+check [Provided templates documentation](<#if spec.metadata.documentationLink?has_content>${spec.metadata.documentationLink}<#else>https://cloud.google.com/dataflow/docs/guides/templates/provided-templates</#if>)
 on how to use it without having to build from sources.
 </#if>
 
@@ -89,9 +89,9 @@ the complete location on Cloud Storage:
 
 ```
 <#if flex>
-Flex Template was staged! gs://{BUCKET}/{PATH}
+Flex Template was staged! gs://<bucket-name>/templates/<#if flex>flex/</#if>${spec.metadata.internalName}
 <#else>
-Classic Template was staged! gs://{BUCKET}/{PATH}
+Classic Template was staged! gs://<bucket-name>/templates/<#if flex>flex/</#if>${spec.metadata.internalName}
 </#if>
 ```
 
@@ -106,10 +106,10 @@ You can use the path above run the template (or share with others for execution)
 To start a job with that template at any time using `gcloud`, you can use:
 
 ```shell
-export TEMPLATE_SPEC_GCSPATH="gs://$BUCKET_NAME/templates/<#if flex>flex/</#if>${spec.metadata.internalName}"
 export PROJECT=<my-project>
 export BUCKET_NAME=<bucket-name>
 export REGION=us-central1
+export TEMPLATE_SPEC_GCSPATH="gs://$BUCKET_NAME/templates/<#if flex>flex/</#if>${spec.metadata.internalName}"
 
 ### Mandatory
 <#list spec.metadata.parameters as parameter><#if !parameter.optional!false>export ${parameter.name?replace('([a-z])([A-Z])', '$1_$2', 'r')?upper_case?replace("-", "_")}=${(parameter.defaultValue?c)!"<${parameter.name}>"}
