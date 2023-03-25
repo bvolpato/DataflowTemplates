@@ -118,6 +118,12 @@ public class MongoDbUtils implements Serializable {
     if (userOption.equals("FLATTEN")) {
       document.forEach(
           (key, value) -> {
+
+            // Null values will be ignored / not set on the TableRow
+            if (value == null) {
+              return;
+            }
+
             String valueClass = value.getClass().getName();
             switch (valueClass) {
               case "java.lang.Double":
