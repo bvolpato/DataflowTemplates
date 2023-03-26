@@ -221,14 +221,7 @@ public final class TestProperties {
       if (credentialsStream == null) {
         return applicationDefault;
       }
-      ServiceAccountCredentials serviceAccountCredentials =
-          ServiceAccountCredentials.fromStream(credentialsStream);
-      LOG.info(
-          "Going to use service account: {} ({})",
-          serviceAccountCredentials.getAccount(),
-          serviceAccountCredentials.getClientEmail());
-
-      return serviceAccountCredentials;
+      return ServiceAccountCredentials.fromStream(credentialsStream);
     } catch (IOException e) {
       throw new RuntimeException(
           "Unable to get application default credentials! \n"

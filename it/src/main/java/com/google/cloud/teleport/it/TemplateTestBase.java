@@ -145,8 +145,6 @@ public abstract class TemplateTestBase {
       credentials = TestProperties.buildCredentialsFromEnv();
     }
 
-    LOG.info("Using credentials: {}", credentials);
-
     // Prefer artifactBucket, but use the staging one if none given
     if (TestProperties.hasArtifactBucket()) {
       artifactBucketName = TestProperties.artifactBucket();
