@@ -77,28 +77,24 @@ public class DefaultDatastoreResourceManager implements DatastoreResourceManager
 
   @Override
   public List<Entity> query(String gqlQuery) {
-    try {
-      QueryResults<Entity> queryResults =
-          datastore.run(
-              GqlQuery.newGqlQueryBuilder(ResultType.ENTITY, gqlQuery)
-                  .setNamespace(namespace)
-                  .build());
+    QueryResults<Entity> queryResults =
+        datastore.run(
+            GqlQuery.newGqlQueryBuilder(ResultType.ENTITY, gqlQuery)
+                .setNamespace(namespace)
+                .build());
 
-      List<Entity> entities = new ArrayList<>();
+    List<Entity> entities = new ArrayList<>();
 
-      while (queryResults.hasNext()) {
-        Entity entity = queryResults.next();
-        entities.add(entity);
+    while (queryResults.hasNext()) {
+      Entity entity = queryResults.next();
+      entities.add(entity);
 
-        // Mark for deletion if namespace matches the test
-        if (entity.getKey().getNamespace().equals(namespace)) {
-          keys.add(entity.getKey());
-        }
+      // Mark for deletion if namespace matches the test
+      if (entity.getKey().getNamespace().equals(namespace)) {
+        keys.add(entity.getKey());
       }
-      return entities;
-    } catch (Exception e) {
-      throw new DatastoreResourceManagerException("Error running Datastore query", e);
     }
+    return entities;
   }
 
   @Override
