@@ -5,7 +5,11 @@ ${spec.metadata.description!?ensure_ends_with(".")}
 <#if spec.metadata.googleReleased>
 :memo: This is a Google-provided template! Please
 check [Provided templates documentation](<#if spec.metadata.documentationLink?has_content>${spec.metadata.documentationLink}<#else>https://cloud.google.com/dataflow/docs/guides/templates/provided-templates</#if>)
-on how to use it without having to build from sources.
+on how to use it without having to build from sources using [Create job from template](https://console.cloud.google.com/dataflow/createjob?template=${spec.metadata.internalName).
+</#if>
+
+<#if spec.metadata.additionalHelp?has_content>
+${spec.metadata.additionalHelp!?ensure_ends_with(".")}
 </#if>
 
 :bulb: This is a generated documentation based
@@ -24,6 +28,20 @@ on [Metadata Annotations](https://github.com/GoogleCloudPlatform/DataflowTemplat
 <#list spec.metadata.parameters as parameter><#if parameter.optional!false>* **${parameter.name}** (${parameter.label}): ${parameter.helpText?ensure_ends_with(".")}
 </#if></#list>
 
+
+<#if spec.metadata.udfSupport>
+## User-Defined functions (UDFs)
+
+The ${spec.metadata.name} Template supports User-Defined functions (UDFs).
+UDFs allow you to customize functionality by providing a JavaScript function
+without having to maintain or build the entire template code.
+
+Check [Create user-defined functions for Dataflow templates](https://cloud.devsite.corp.google.com/dataflow/docs/guides/templates/create-template-udf)
+and [Using UDFs](https://github.com/GoogleCloudPlatform/DataflowTemplates#using-udfs) 
+for more information about how to create and test those functions.
+
+</#if>
+
 ## Getting Started
 
 ### Requirements
@@ -35,8 +53,8 @@ on [Metadata Annotations](https://github.com/GoogleCloudPlatform/DataflowTemplat
   * `gcloud auth login`
   * `gcloud auth application-default login`
 
-:star2: Those dependencies are already installed if you use Google Cloud Shell 
-editor: [![Open in Cloud Shell](http://gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2FGoogleCloudPlatform%2FDataflowTemplates.git&cloudshell_open_in_editor=${spec.metadata.sourceFilePath!README.md})
+:star2: Those dependencies are already installed if you use Google Cloud Shell! 
+[![Open in Cloud Shell](http://gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2FGoogleCloudPlatform%2FDataflowTemplates.git&cloudshell_open_in_editor=${spec.metadata.sourceFilePath!README.md})
 
 ### Templates Plugin
 
@@ -181,3 +199,4 @@ mvn clean package -PtemplatesRun \
 </#if>
 -am
 ```
+
