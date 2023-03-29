@@ -37,7 +37,7 @@ public @interface Template {
   String description();
 
   /** Additional help information to display on documentations. */
-  String additionalHelp();
+  String additionalHelp() default "";
 
   /** Container name to stage (required for Flex templates). */
   String flexContainerName() default "";

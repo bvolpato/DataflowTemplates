@@ -57,6 +57,10 @@ import org.slf4j.LoggerFactory;
  * org.apache.beam.sdk.io.splunk.SplunkEvent}s and writes those records into Splunk's HEC endpoint.
  * Any errors which occur in the execution of the UDF, conversion to {@link
  * org.apache.beam.sdk.io.splunk.SplunkEvent} or writing to HEC will be outputted to a GCS link.
+ *
+ * <p>Check out <a
+ * href="https://github.com/GoogleCloudPlatform/DataflowTemplates/blob/main/v2/googlecloud-to-splunk/README_GCS_To_Splunk.md">README</a>
+ * for instructions on how to use or modify this template.
  */
 @Template(
     name = "GCS_To_Splunk",

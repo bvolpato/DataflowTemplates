@@ -5,7 +5,7 @@ ${spec.metadata.description!?ensure_ends_with(".")}
 <#if spec.metadata.googleReleased>
 :memo: This is a Google-provided template! Please
 check [Provided templates documentation](<#if spec.metadata.documentationLink?has_content>${spec.metadata.documentationLink}<#else>https://cloud.google.com/dataflow/docs/guides/templates/provided-templates</#if>)
-on how to use it without having to build from sources using [Create job from template](https://console.cloud.google.com/dataflow/createjob?template=${spec.metadata.internalName).
+on how to use it without having to build from sources using [Create job from template](https://console.cloud.google.com/dataflow/createjob?template=${spec.metadata.internalName}).
 </#if>
 
 <#if spec.metadata.additionalHelp?has_content>
