@@ -36,7 +36,7 @@ The ${spec.metadata.name} Template supports User-Defined functions (UDFs).
 UDFs allow you to customize functionality by providing a JavaScript function
 without having to maintain or build the entire template code.
 
-Check [Create user-defined functions for Dataflow templates](https://cloud.devsite.corp.google.com/dataflow/docs/guides/templates/create-template-udf)
+Check [Create user-defined functions for Dataflow templates](https://cloud.google.com/dataflow/docs/guides/templates/create-template-udf)
 and [Using UDFs](https://github.com/GoogleCloudPlatform/DataflowTemplates#using-udfs) 
 for more information about how to create and test those functions.
 
@@ -53,7 +53,7 @@ for more information about how to create and test those functions.
   * `gcloud auth login`
   * `gcloud auth application-default login`
 
-:star2: Those dependencies are already installed if you use Google Cloud Shell! 
+:star2: Those dependencies are pre-installed if you use Google Cloud Shell! 
 [![Open in Cloud Shell](http://gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2FGoogleCloudPlatform%2FDataflowTemplates.git&cloudshell_open_in_editor=${spec.metadata.sourceFilePath!README.md})
 
 ### Templates Plugin
