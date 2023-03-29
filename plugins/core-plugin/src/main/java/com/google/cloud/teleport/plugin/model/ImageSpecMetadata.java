@@ -33,6 +33,7 @@ public class ImageSpecMetadata {
   private String module;
   private String documentationLink;
   private boolean googleReleased;
+  private String sourceFilePath;
 
   public String getDescription() {
     return description;
@@ -104,6 +105,14 @@ public class ImageSpecMetadata {
 
   public void setGoogleReleased(boolean googleReleased) {
     this.googleReleased = googleReleased;
+  }
+
+  public String getSourceFilePath() {
+    return sourceFilePath;
+  }
+
+  public void setSourceFilePath(String sourceFilePath) {
+    this.sourceFilePath = sourceFilePath;
   }
 
   public Optional<ImageSpecParameter> getParameter(String name) {
