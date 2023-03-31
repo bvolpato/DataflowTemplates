@@ -382,12 +382,12 @@ public abstract class TemplateTestBase {
     // Property allows testing with more workers
     if (System.getProperty("numWorkers") != null) {
       options.addEnvironment("numWorkers", Integer.valueOf(System.getProperty("numWorkers")));
-      options.addEnvironment("autoscalingAlgorithm", "NONE");
+      options.addParameter("autoscalingAlgorithm", "NONE");
     }
     // Property allows testing with more workers
     if (System.getProperty("maxNumWorkers") != null) {
       options.addEnvironment("maxNumWorkers", Integer.valueOf(System.getProperty("maxNumWorkers")));
-      options.addEnvironment("autoscalingAlgorithm", "THROUGHPUT_BASED");
+      options.addParameter("autoscalingAlgorithm", "THROUGHPUT_BASED");
     }
 
     if (System.getProperty("workerMachineType") != null) {
