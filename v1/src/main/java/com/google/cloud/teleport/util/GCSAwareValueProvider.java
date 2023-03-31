@@ -21,12 +21,16 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import org.apache.beam.sdk.options.ValueProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * ValueProvider for a String, that is aware when the string contains a URL (starts with gs://) to
  * resolve for the contents of that file.
  */
 public class GCSAwareValueProvider implements ValueProvider<String>, Serializable {
+
+  private static final Logger LOG = LoggerFactory.getLogger(GCSAwareValueProvider.class);
 
   private transient volatile String cachedValue;
 
@@ -40,7 +44,7 @@ public class GCSAwareValueProvider implements ValueProvider<String>, Serializabl
   public synchronized String get() {
 
     try {
-      System.out.println(InetAddress.getLocalHost().getHostName() + " -- calling with cached value " + cachedValue);
+      LOG.info(InetAddress.getLocalHost().getHostName() + " -- calling with cached value " + cachedValue);
     } catch (UnknownHostException e) {
       throw new RuntimeException(e);
     }
