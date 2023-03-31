@@ -379,6 +379,16 @@ public abstract class TemplateTestBase {
     if (System.getProperty("enableStreamingEngine") != null) {
       options.addEnvironment("enableStreamingEngine", true);
     }
+    // Property allows testing with more workers
+    if (System.getProperty("numWorkers") != null) {
+      options.addEnvironment("numWorkers", Integer.valueOf(System.getProperty("numWorkers")));
+      options.addEnvironment("autoscalingAlgorithm", "NONE");
+    }
+    // Property allows testing with more workers
+    if (System.getProperty("maxNumWorkers") != null) {
+      options.addEnvironment("maxNumWorkers", Integer.valueOf(System.getProperty("maxNumWorkers")));
+      options.addEnvironment("autoscalingAlgorithm", "THROUGHPUT_BASED");
+    }
 
     if (System.getProperty("workerMachineType") != null) {
       options.addEnvironment("workerMachineType", System.getProperty("workerMachineType"));

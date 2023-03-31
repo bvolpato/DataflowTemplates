@@ -17,6 +17,8 @@ package com.google.cloud.teleport.util;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import org.apache.beam.sdk.options.ValueProvider;
 
@@ -36,6 +38,13 @@ public class GCSAwareValueProvider implements ValueProvider<String>, Serializabl
 
   @Override
   public synchronized String get() {
+
+    try {
+      System.out.println(InetAddress.getLocalHost().getHostName() + " -- calling with cached value " + cachedValue);
+    } catch (UnknownHostException e) {
+      throw new RuntimeException(e);
+    }
+
     if (cachedValue != null) {
       return cachedValue;
     }
