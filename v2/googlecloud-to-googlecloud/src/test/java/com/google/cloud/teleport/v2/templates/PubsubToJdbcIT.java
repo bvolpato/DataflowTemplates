@@ -20,7 +20,7 @@ import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatRe
 import static com.google.cloud.teleport.it.matchers.TemplateAsserts.assertThatResult;
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.cloud.teleport.it.TemplateTestBase;
+import com.google.cloud.teleport.it.common.JDBCBaseIT;
 import com.google.cloud.teleport.it.common.ResourceManagerUtils;
 import com.google.cloud.teleport.it.conditions.PubsubMessagesCheck;
 import com.google.cloud.teleport.it.jdbc.DefaultMySQLResourceManager;
@@ -52,7 +52,7 @@ import org.junit.runners.JUnit4;
 @Category(TemplateIntegrationTest.class)
 @TemplateIntegrationTest(PubsubToJdbc.class)
 @RunWith(JUnit4.class)
-public final class PubsubToJdbcIT extends TemplateTestBase {
+public final class PubsubToJdbcIT extends JDBCBaseIT {
 
   private PubsubResourceManager pubsubResourceManager;
   private DefaultMySQLResourceManager jdbcResourceManager;
@@ -78,6 +78,7 @@ public final class PubsubToJdbcIT extends TemplateTestBase {
   public void testPubsubToJdbc() throws IOException {
     // Arrange
     Map<String, String> columns = new LinkedHashMap<>();
+    columns.put("id", "NUMERIC NOT NULL");
     columns.put("job", "VARCHAR(32)");
     columns.put("name", "VARCHAR(32)");
     JDBCResourceManager.JDBCSchema schema = new JDBCResourceManager.JDBCSchema(columns, "id");
@@ -92,10 +93,8 @@ public final class PubsubToJdbcIT extends TemplateTestBase {
     LaunchConfig.Builder options =
         LaunchConfig.builder(testName, specPath)
             .addParameter("inputSubscription", subscription.toString())
-            .addParameter("driverClassName", "com.mysql.jdbc.Driver")
-            .addParameter(
-                "driverJars",
-                "gs://cloud-teleport-testing-data/mysql-jar/mysql-connector-java-8.0.30.jar")
+            .addParameter("driverClassName", MYSQL_DRIVER)
+            .addParameter("driverJars", mySqlDriverGCSPath())
             .addParameter("connectionUrl", jdbcResourceManager.getUri())
             .addParameter("username", jdbcResourceManager.getUsername())
             .addParameter("password", jdbcResourceManager.getPassword())
