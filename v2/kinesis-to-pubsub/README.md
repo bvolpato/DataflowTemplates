@@ -1,4 +1,4 @@
-# Dataflow Flex Template to ingest data from AWS Kinesis to Google Cloud Pub/Sub
+# Dataflow Template to move data from AWS Kinesis to Google Cloud Pub/Sub
 
 This directory contains a Dataflow Flex Template that creates a pipeline
 to read data from a single data stream from

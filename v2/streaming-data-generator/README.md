@@ -33,9 +33,9 @@ Below table outlines supported sinks and output encoding formats:
 * Java 11
 * Maven 3
 * One of the following depending on Sink Type:
-  &nbsp;&nbsp;PubSub Topic
-  &nbsp;&nbsp;BigQuery Table
-  &nbsp;&nbsp;Google Cloud Storage Bucket
+  - PubSub Topic
+  - BigQuery Table
+  - Google Cloud Storage Bucket
 
 ### Creating the Schema File
 The schema file used to generate JSON messages with fake data is based on the
@@ -118,8 +118,8 @@ Based on the above schema, the message payload will be as shown below and attrib
 
 #### Generate Avro Pub/Sub Messages
 To generate Avro encoded Pub/Sub messages supply following additional parameters:
-&nbsp;&nbsp;--outputType=AVRO
-&nbsp;&nbsp;--avroSchemaLocation=gs://bucketname/prefix/filename.avsc
+- --outputType=AVRO
+- --avroSchemaLocation=gs://bucketname/prefix/filename.avsc
 
 Below is the example of avro schema corresponding to above message schema:
 ```javascript
@@ -143,11 +143,11 @@ Below is the example of avro schema corresponding to above message schema:
 #### Write to BigQuery
   * Output table must already exists and table schema should match schema supplied to generate fake records.
   * Supply following additional parameters:
-    &nbsp;&nbsp;--sinkType=BIGQUERY
-    &nbsp;&nbsp;--outputTableSpec=projectid:datasetid.tableid
+    - --sinkType=BIGQUERY
+    - --outputTableSpec=projectid:datasetid.tableid
   * Optional parameters are:
-    &nbsp;&nbsp;--writeDisposition=[WRITE_APPEND|WRITE_TRUNCATE|WRITE_EMPTY]. Default is WRITE_APPEND
-    &nbsp;&nbsp;--outputDeadletterTable=projectid:datasetid.tableid. If not supplied creates a table with name outputtableid_error_records
+    - --writeDisposition=[WRITE_APPEND|WRITE_TRUNCATE|WRITE_EMPTY]. Default is WRITE_APPEND
+    - --outputDeadletterTable=projectid:datasetid.tableid. If not supplied creates a table with name outputtableid_error_records
 
 Template uses Streaming Inserts method instead of load to write data to BigQuery. Streaming Inserts are not free and subject to quota limits.
 For more latest informatioon check [BigQuery docs](https://cloud.google.com/bigquery/streaming-data-into-bigquery)
@@ -155,248 +155,24 @@ For more latest informatioon check [BigQuery docs](https://cloud.google.com/bigq
 #### Write to Google Cloud Storage
   * Output Bucket must already exists.
   * Supply following additional parameters:
-    &nbsp;&nbsp;--sinkType=GCS
-    &nbsp;&nbsp;--outputDirectory=gs://bucketname/prefix/
-    &nbsp;&nbsp;--outputType=[AVRO|PQRQUET]. If not specified default output is JSON.
-    &nbsp;&nbsp;--avroSchemaLocation=gs://bucketname/prefix/filename.avsc (Mandatory when Output encoding type is AVRO or PARQUET)
+    - --sinkType=GCS
+    - --outputDirectory=gs://bucketname/prefix/
+    - --outputType=[AVRO|PQRQUET]. If not specified default output is JSON.
+    - --avroSchemaLocation=gs://bucketname/prefix/filename.avsc (Mandatory when Output encoding type is AVRO or PARQUET)
   * Optional parameters include:
-    &nbsp;&nbsp;--windowDuration=< Duration of fixed window >. Default is 1m (i.e 1 minute)
-    &nbsp;&nbsp;--outputFilenamePrefix=< Prefix for each file >. Default is output-
-    &nbsp;&nbsp;--numShards=< Number of output files per window >. Must be specified as 1 or higher number
+    - --windowDuration=< Duration of fixed window >. Default is 1m (i.e 1 minute)
+    - --outputFilenamePrefix=< Prefix for each file >. Default is output-
+    - --numShards=< Number of output files per window >. Must be specified as 1 or higher number
 
 #### Writing fixed number of records
 By default templates generates unlimited number of messages but however if you need fixed number of messages include
 the option --messagesLimit=<number> to convert the pipeline from unbounded source to bounded source.
 
-### Testing Pipeline
-The template unit tests can be run using:
 
-```sh
-mvn test
-```
+### Building/Using Template
 
-### Building Template
-Flex templates containerize the pipeline code and defines template specification file.
+For instructions on how to use or customize, check the template specific
+generated documentation:
 
-#### Building Container Image
-* Set environment variables that will be used in the build process.
+- [Streaming Data Generator Template](./README_Streaming_Data_Generator.md)
 
-```sh
-export PROJECT=<my-project>
-export IMAGE_NAME=<my-image-name>
-export BUCKET_NAME=gs://<bucket-name>
-export TARGET_GCR_IMAGE=gcr.io/${PROJECT}/${IMAGE_NAME}
-export BASE_CONTAINER_IMAGE=gcr.io/dataflow-templates-base/java11-template-launcher-base
-export BASE_CONTAINER_IMAGE_VERSION=latest
-export TEMPLATE_MODULE=streaming-data-generator
-export APP_ROOT=/template/${TEMPLATE_MODULE}
-export COMMAND_SPEC=${APP_ROOT}/resources/${TEMPLATE_MODULE}-command-spec.json
-export TEMPLATE_IMAGE_SPEC=${BUCKET_NAME}/images/${TEMPLATE_MODULE}-image-spec.json
-```
-* Build and push image to Google Container Repository
-
-```sh
-mvn clean package -Dimage=${TARGET_GCR_IMAGE} \
-                  -Dbase-container-image=${BASE_CONTAINER_IMAGE} \
-                  -Dbase-container-image.version=${BASE_CONTAINER_IMAGE_VERSION} \
-                  -Dapp-root=${APP_ROOT} \
-                  -Dcommand-spec=${COMMAND_SPEC} \
-                  -am -pl ${TEMPLATE_MODULE}
-```
-
-#### Creating Template Spec
-
-Create template spec in Google Cloud Storage with path to container image in Google Container Repository and pipeline metadata.
-
-```json
-{
-	"image": "gcr.io/project-id/image-name",
-	"metadata": {
-		"name": "Streaming data generator",
-		"description": "Generates Synthetic data as per user specified schema at a fixed QPS and writes to Sink of user choice.",
-		"parameters": [
-                    {
-                        "name": "schemaLocation",
-                        "label": "Location of Schema file.",
-                        "helpText": "GCS path of schema location. ex: gs://MyBucket/file.json",
-                        "is_optional": false,
-                        "regexes": [
-                           "^gs:\\/\\/[^\\n\\r]+$"
-                        ],
-                        "paramType": "GCS_READ_FILE"
-                    },
-                    {
-                        "name": "qps",
-                        "label": "Required output qps",
-                        "helpText": "Messages to be published per second",
-                        "is_optional": false,
-                        "regexes": [
-                            "^[1-9][0-9]*$"
-                        ],
-                        "paramType": "TEXT"
-                    },
-                    {
-                        "name": "topic",
-                        "label": "PubSub Topic name",
-                        "helpText": "The name of the topic to which the pipeline should publish data. For example, projects/<project-id>/topics/<topic-name>",
-                        "is_optional": true,
-                        "regexes": [
-                            "^projects\\/[^\\n\\r\\/]+\\/topics\\/[^\\n\\r\\/]+$"
-                        ],
-                        "paramType": "PUBSUB_TOPIC"
-                    },
-                    {
-                         "name": "outputType",
-                         "label": "Output Encoding Type",
-                         "helpText": "The message Output type. Default is JSON",
-                         "is_optional": true,
-                         "regexes": [
-                             "^(JSON|AVRO|PARQUET)$"
-                         ],
-                         "paramType": "TEXT"
-                    },
-                    {
-                        "name": "avroSchemaLocation",
-                        "label": "Location of Avro Schema file",
-                        "helpText": "GCS path of avro schema location. Mandatory when outputType is AVRO or PARQUET. ex: gs://MyBucket/file.avsc",
-                        "is_optional": true,
-                        "regexes": [
-                            "^gs:\\/\\/[^\\n\\r]+$"
-                        ],
-                        "paramType": "GCS_READ_FILE"
-                    },
-                    {
-                         "name": "sinkType",
-                         "label": "Output Sink Type",
-                         "helpText": "The message Sink type. Default is PUBSUB",
-                         "is_optional": true,
-                         "regexes": [
-                             "^(PUBSUB|BIGQUERY|GCS)$"
-                         ],
-                         "paramType": "TEXT"
-                    },
-                    {
-                         "name": "outputTableSpec",
-                         "label": "Output BigQuery table",
-                         "helpText": "Output BigQuery table. For example, <project>:<dataset>.<table_name>. Mandatory when sinkType is BIGQUERY.",
-                         "isOptional": true,
-                         "regexes": [
-                           ".+:.+\\..+"
-                         ],
-                         "paramType": "TEXT"
-                   },
-                   {
-                     "name": "writeDisposition",
-                     "label": "BigQuery Write Disposition",
-                     "helpText": "BigQuery WriteDisposition. For example, WRITE_APPEND, WRITE_EMPTY or WRITE_TRUNCATE. Default: WRITE_APPEND",
-                     "isOptional": true,
-                     "regexes": [
-                       "^(WRITE_APPEND|WRITE_EMPTY|WRITE_TRUNCATE)$"
-                     ],
-                     "paramType": "TEXT"
-                   },
-                   {
-                        "name": "outputDeadletterTable",
-                        "label": "Output Deadletter table",
-                        "helpText": "Output Deadletter table. For example, <project>:<dataset>.<table_name>",
-                        "isOptional": true,
-                        "regexes": [
-                          ".+:.+\\..+"
-                        ],
-                        "paramType": "TEXT"
-                   },
-                   {
-                        "name": "windowDuration",
-                        "label": "Fixed window Duration",
-                        "helpText": "Window interval at which output is written to GCS. Default:1m (i.e 1 minute).",
-                        "isOptional": true,
-                        "regexes": ["^[1-9][0-9]*[s|m|h]$"],
-                        "paramType": "TEXT"
-                   },
-                   {
-                        "name": "outputDirectory",
-                        "label": "Output Directory",
-                        "helpText": "The directory to write output files. Mandatory when sink is GCS and must end with a slash. For example, gs://MyBucket/",
-                        "isOptional": true,
-                        "regexes": [
-                          "^gs:\\/\\/[^\\n\\r]+$"
-                        ],
-                        "paramType": "GCS_WRITE_FOLDER"
-                   },
-                   {
-                        "name": "outputFilenamePrefix",
-                        "label": "Output Filename Prefix",
-                        "helpText": "The filename prefix of the files to write to. Default:output-",
-                        "isOptional": true,
-                        "regexes": [],
-                        "paramType": "TEXT"
-                   },
-                   {
-                        "name": "numShards",
-                        "label": "Number of Shards.",
-                        "helpText": "Maximum number of output shards. Default:0 and should be set to 1 or higher number.",
-                        "isOptional": true,
-                        "regexes": [
-                          "^[1-9][0-9]*$"
-                        ],
-                        "paramType": "TEXT"
-                   },
-                   {
-                       "name": "messagesLimit",
-                       "label": "Maximum number of output Messages.",
-                       "helpText": "Maximum number of output messages. Default:0 indicating Unlimited.",
-                       "isOptional": true,
-                       "regexes": [
-                         "^[1-9]\\d*$"
-                       ],
-                       "paramType": "TEXT"
-                   },
-                   {
-
-                       "name": "autoscalingAlgorithm",
-                       "label": "autoscaling Algorithm",
-                       "helpText": "autoscalingAlgorithm",
-                       "isOptional": true,
-                       "regexes": [
-                         "^(THROUGHPUT_BASED|NONE)$"
-                       ],
-                       "paramType": "TEXT"
-                   }
-		]
-	   },
-	"sdk_info": {
-			"language": "JAVA"
-		}
-}
-```
-
-### Executing Template
-Below example publishes Avro encoded messages to Pub/Sub :
-* schemaLocation: GCS Location of schema file in json format (e.g: gs://<path-to-schema-location-in-gcs>).
-* qps: Queries Per Second
-* outputType: AVRO
-* avroSchemaLocation: GCS Location of avro schema file (e.g: gs://<path-to-schema-location-in-gcs>).
-* pubsubTopic: PubSub Topic id.
-
-Template can be executed using the following gcloud command:
-```sh
-export PROJECT=<my-project>
-export TEMPLATE_MODULE=streaming-data-generator
-export TEMPLATE_SPEC_GCSPATH=gs://path/to/template-spec
-export SCHEMA_LOCATION=gs://path/to/schemafile.json
-export QPS=1
-export PUBSUB_TOPIC=projects/$PROJECT/topics/<topic-id>
-export OUTPUTTYPE=AVRO
-export AVRO_SCHEMA_LOCATION=gs://path/to/avroschemafile.avsc
-
-export JOB_NAME="${TEMPLATE_MODULE}-`date +%Y%m%d-%H%M%S-%N`"
-gcloud beta dataflow flex-template run ${JOB_NAME} \
-        --project=${PROJECT} --region=us-central1 \
-        --template-file-gcs-location=${TEMPLATE_SPEC_GCSPATH} \
-        --parameters schemaLocation=$SCHEMA_LOCATION,qps=$QPS,topic=$PUBSUB_TOPIC,outputType=$OUTPUTTYPE,avroSchemaLocation=$AVRO_SCHEMA_LOCATION
-```
- *Note*: Additional options such as autoscaling Algorithm,  max workers, service account can be specified in the parameters section as shown below:
-
- ```sh
-  --parameters schemaLocation=$SCHEMA_LOCATION,topic=$PUBSUB_TOPIC,qps=$QPS,autoscalingAlgorithm="THROUGHPUT_BASED",maxNumWorkers=5,serviceAccount=$serviceAccount
-```

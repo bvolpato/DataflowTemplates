@@ -1,13 +1,12 @@
-# Google Cloud to MongoDB Dataflow templates
+# MongoDB to Google Cloud Module
 
-is the top-level module containing a batch
-of templates enabling data integration between Google Cloud products and MongoDB.
+This module contains templates to move data from MongoDB to Google Cloud products.
 
-## Templates
-* [MongoDbToBigQuery](docs/MongoDbToBigQuery/README.md)
-* [MongoDbToBigQueryCDC](docs/MongoDbToBigQueryCDC/README.md)
+For instructions on how to use or customize, check the template specific
+documentation:
+
+- [MongoDB to BigQuery](./README_MongoDB_to_BigQuery.md)
+- [MongoDB to BigQuery CDC](./README_MongoDB_to_BigQuery_CDC.md)
 
 ## Guides
 * [Troubleshooting Guide](docs/troubleshooting.md)
-
-Please refer to the corresponding links above for additional information.

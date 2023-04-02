@@ -1,9 +1,9 @@
-# Pub/Sub Binary to BigQuery
+# Pub/Sub Binary to BigQuery Module
 
-A collection of Dataflow Flex Templates to stream binary objects (Avro, Proto
-etc.) from Pub/Sub to BigQuery.
+This module contains templates to move data from Pub/Sub to BigQuery in binary format.
 
-*   [Pub/Sub Avro to BigQuery](docs/PubSubAvroToBigQuery/README.md)
-*   [Pub/Sub Protobuf to BigQuery](docs/PubSubProtoToBigQuery/README.md)
+For instructions on how to use or customize, check the template specific
+documentation:
 
-Please refer to the links above for more details on the specific template.
+- [Pub/Sub Avro to BigQuery](./README_PubSub_Avro_to_BigQuery.md)
+- [Pub/Sub Proto to BigQuery](./README_PubSub_Proto_to_BigQuery.md)
