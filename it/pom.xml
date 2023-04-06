@@ -34,7 +34,7 @@
     <kafka.version>2.4.1</kafka.version>
     <mongodb.version>3.12.10</mongodb.version>
     <dataflow-api.version>v1b3-rev20220920-2.0.0</dataflow-api.version>
-    <parquet-avro.version>1.12.0</parquet-avro.version>
+    <parquet-avro.version>1.13.0</parquet-avro.version>
     <testcontainers.version>1.17.5</testcontainers.version>
   </properties>
 
