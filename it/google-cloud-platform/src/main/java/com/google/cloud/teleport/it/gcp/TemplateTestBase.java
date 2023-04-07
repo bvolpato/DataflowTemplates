@@ -271,7 +271,7 @@ public abstract class TemplateTestBase {
     // Classic templates run on parent pom and -pl v1
     if (pomPath.endsWith("v1/pom.xml")) {
       pomPath = new File(pom.getParentFile().getParentFile(), "pom.xml").getAbsolutePath();
-      moduleBuild = String.join(",", List.of("metadata", "it", "v1"));
+      moduleBuild = String.join(",", List.of("metadata", "v1"));
     } else if (pomPath.contains("v2/")) {
       // Flex templates run on parent pom and -pl {path-to-folder}
       moduleBuild = String.join(",", getModulesBuild(pomPath));
@@ -317,7 +317,6 @@ public abstract class TemplateTestBase {
   private List<String> getModulesBuild(String pomPath) {
     List<String> modules = new ArrayList<>();
     modules.add("metadata");
-    modules.add("it");
     modules.add("v2/common");
 
     // Force building specific common areas. This is much faster than using -am when staging.
