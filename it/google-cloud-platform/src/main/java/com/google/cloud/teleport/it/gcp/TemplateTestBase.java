@@ -299,6 +299,7 @@ public abstract class TemplateTestBase {
       // Skip shading for now due to flakiness / slowness in the process.
       "-DskipShade",
       "-DskipTests",
+      "-Dmaven.test.skip",
       "-Dcheckstyle.skip",
       "-Dmdep.analyze.skip",
       "-Dspotless.check.skip",
