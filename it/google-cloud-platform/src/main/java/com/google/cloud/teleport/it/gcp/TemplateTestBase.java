@@ -317,18 +317,6 @@ public abstract class TemplateTestBase {
     List<String> modules = new ArrayList<>();
     modules.add("metadata");
     modules.add("v2/common");
-
-    // Force building specific common areas. This is much faster than using -am when staging.
-    if (pomPath.contains("kafka")) {
-      modules.add("v2/kafka-common");
-    }
-    if (pomPath.contains("elasticsearch")) {
-      modules.add("v2/elasticsearch-common");
-    }
-    if (pomPath.contains("bigtable")) {
-      modules.add("v2/bigtable-common");
-    }
-
     modules.add(pomPath.substring(pomPath.indexOf("v2/")).replace("/pom.xml", ""));
 
     return modules;
