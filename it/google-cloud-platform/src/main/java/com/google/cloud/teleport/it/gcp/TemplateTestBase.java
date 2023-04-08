@@ -292,8 +292,7 @@ public abstract class TemplateTestBase {
       pomPath,
       "-pl",
       moduleBuild,
-      // Do not make all dependencies every time. Faster but requires prior `mvn install`.
-      //      "-am",
+      "-am",
       "-PtemplatesStage,pluginOutputDir",
       "-DpluginRunId=" + RandomStringUtils.randomAlphanumeric(16),
       // Skip shading for now due to flakiness / slowness in the process.
