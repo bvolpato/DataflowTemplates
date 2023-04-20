@@ -68,7 +68,7 @@ public class TemplatesReleaseMojo extends TemplatesBaseMojo {
 
   @Parameter(
       name = "baseContainerImage",
-      defaultValue = "gcr.io/dataflow-templates-base/java11-template-launcher-base:latest",
+      defaultValue = "gcr.io/dataflow-templates-base/java11-template-launcher-base-distroless:20230417_RC01",
       required = false)
   protected String baseContainerImage;
 
