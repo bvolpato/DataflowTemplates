@@ -30,8 +30,7 @@
   </parent>
 
   <properties>
-    <json-data-generator.version>1.10</json-data-generator.version>
-    <snakeyaml.version>1.33</snakeyaml.version>
+    <json-data-generator.version>1.16</json-data-generator.version>
    </properties>
 
   <dependencies>
@@ -47,14 +46,8 @@
       <groupId>com.github.vincentrussell</groupId>
       <artifactId>json-data-generator</artifactId>
       <version>${json-data-generator.version}</version>
-      <!-- Excluding  snakeyaml since it is using android version -->
-      <exclusions>
-       <exclusion>
-         <groupId>org.yaml</groupId>
-         <artifactId>snakeyaml</artifactId>
-       </exclusion>
-      </exclusions>
     </dependency>
+
     <!-- Jdbc dependencies -->
     <dependency>
       <groupId>org.postgresql</groupId>
