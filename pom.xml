@@ -322,7 +322,7 @@
               <groups>
                 ${integration.tests}
               </groups>
-              <reuseForks>true</reuseForks>
+              <reuseForks>false</reuseForks>
               <parallel>${itParallelismType}</parallel>
               <threadCount>${itParallelism}</threadCount>
             </configuration>
