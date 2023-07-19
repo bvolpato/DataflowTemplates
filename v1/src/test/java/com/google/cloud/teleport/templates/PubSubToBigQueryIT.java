@@ -317,17 +317,20 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
               return true;
             };
 
+    BigQueryRowsCheck bigQueryRowsCheck = BigQueryRowsCheck.builder(bigQueryResourceManager, table)
+            .setMinRows(MESSAGES_COUNT)
+            .build();
+    BigQueryRowsCheck bigQueryDlqRowsCheck = BigQueryRowsCheck.builder(bigQueryResourceManager, dlqTable)
+            .setMinRows(BAD_MESSAGES_COUNT)
+            .build();
+
     Result result =
             pipelineOperator()
                     .waitForCondition(
                             createConfig(info),
                             pubSubMessageSender,
-                            BigQueryRowsCheck.builder(bigQueryResourceManager, table)
-                                    .setMinRows(MESSAGES_COUNT * 2)
-                                    .build(),
-                            BigQueryRowsCheck.builder(bigQueryResourceManager, dlqTable)
-                                    .setMinRows(BAD_MESSAGES_COUNT)
-                                    .build());
+                            bigQueryRowsCheck,
+                            bigQueryDlqRowsCheck);
 
     // modify UDF to test reloading
     gcsClient.createArtifact(
@@ -339,7 +342,8 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
                     + "}");
 
     // wait to ensure the reload will take effect.
-    TimeUnit.MINUTES.sleep(3);
+    TimeUnit.MINUTES.sleep(2);
+
     List<Map<String, Object>> expectedLowerMessages = new ArrayList<>();
     List<ByteString> goodLowerData = new ArrayList<>();
     for (int i = MESSAGES_COUNT + 1; i <= MESSAGES_COUNT * 2; i++) {
@@ -368,7 +372,7 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
                             createConfig(info),
                             pubSubReloadedMessageSender,
                             BigQueryRowsCheck.builder(bigQueryResourceManager, table)
-                                    .setMinRows(MESSAGES_COUNT * 2)
+                                    .setMinRows(bigQueryRowsCheck.getRowCount().intValue() + MESSAGES_COUNT)
                                     .build());
 
     // Assert
