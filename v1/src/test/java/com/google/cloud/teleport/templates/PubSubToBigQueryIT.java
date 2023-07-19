@@ -45,7 +45,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.json.JSONObject;
@@ -332,6 +331,18 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
                             bigQueryRowsCheck,
                             bigQueryDlqRowsCheck);
 
+    // Assert
+    assertThatResult(result).meetsConditions();
+    TableResult records = bigQueryResourceManager.readTable(table);
+
+    // Make sure record can be read and UDF changed name to uppercase
+    assertThatBigQueryRecords(records).hasRecordsUnordered(expectedUpperMessages);
+
+    TableResult dlqRecords = bigQueryResourceManager.readTable(dlqTable);
+    assertThat(dlqRecords.getValues().iterator().next().toString())
+            .contains("Expected json literal but found");
+    assertThat(dlqRecords.getTotalRows()).isAtLeast(BAD_MESSAGES_COUNT);
+
     // modify UDF to test reloading
     gcsClient.createArtifact(
             "udf.js",
@@ -374,19 +385,6 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
                             BigQueryRowsCheck.builder(bigQueryResourceManager, table)
                                     .setMinRows(bigQueryRowsCheck.getRowCount().intValue() + MESSAGES_COUNT)
                                     .build());
-
-    // Assert
-    assertThatResult(result).meetsConditions();
-    TableResult records = bigQueryResourceManager.readTable(table);
-
-    // Make sure record can be read and UDF changed name to uppercase
-    assertThatBigQueryRecords(records).hasRecordsUnordered(expectedUpperMessages);
-
-    TableResult dlqRecords = bigQueryResourceManager.readTable(dlqTable);
-    assertThat(dlqRecords.getValues().iterator().next().toString())
-            .contains("Expected json literal but found");
-    assertThat(dlqRecords.getTotalRows()).isAtLeast(BAD_MESSAGES_COUNT);
-
     // Assert
     assertThatResult(reloadedResult).meetsConditions();
     TableResult reloadedRecords = bigQueryResourceManager.readTable(table);
