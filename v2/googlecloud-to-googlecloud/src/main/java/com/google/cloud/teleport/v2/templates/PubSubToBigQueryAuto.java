@@ -21,6 +21,7 @@ import com.google.cloud.teleport.metadata.auto.AutoTemplate;
 import com.google.cloud.teleport.v2.auto.blocks.PubsubMessageToTableRow;
 import com.google.cloud.teleport.v2.auto.blocks.ReadFromPubSub;
 import com.google.cloud.teleport.v2.auto.blocks.WriteToBigQuery;
+import com.google.cloud.teleport.v2.auto.dlq.WriteDlqToBigQuery;
 
 @Template(
     name = "PubSub_to_BigQuery_Auto",
@@ -29,6 +30,7 @@ import com.google.cloud.teleport.v2.auto.blocks.WriteToBigQuery;
     description =
         "Streaming pipeline. Ingests JSON-encoded messages from a Pub/Sub subscription or topic, transforms them using a JavaScript user-defined function (UDF), and writes them to a pre-existing BigQuery table as BigQuery elements.",
     blocks = {ReadFromPubSub.class, PubsubMessageToTableRow.class, WriteToBigQuery.class},
+    dlqBlock = WriteDlqToBigQuery.class,
     flexContainerName = "pubsub-to-bigquery-auto",
     contactInformation = "https://cloud.google.com/support")
 public class PubSubToBigQueryAuto {

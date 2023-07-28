@@ -16,14 +16,22 @@
 package com.google.cloud.teleport.metadata.auto;
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
-public @interface Outputs {
+@Repeatable(Outputs.class)
+public @interface Output {
 
   /** Output that this source can produce. */
-  Output[] value();
+  Class<?> value();
+
+  /** List of types if the above class is generic. */
+  Class<?>[] types() default void.class;
+
+  /** Is the output supposed to be routed to a dlq. */
+  boolean isDlq() default false;
 }

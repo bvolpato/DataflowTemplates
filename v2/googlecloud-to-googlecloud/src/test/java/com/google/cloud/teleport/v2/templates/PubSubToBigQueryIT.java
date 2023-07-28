@@ -54,7 +54,7 @@ import org.junit.runners.JUnit4;
 
 /** Integration test for {@link PubSubToBigQuery} Flex template. */
 @Category(TemplateIntegrationTest.class)
-@TemplateIntegrationTest(PubSubToBigQuery.class)
+@TemplateIntegrationTest(PubSubToBigQueryAuto.class)
 @RunWith(JUnit4.class)
 public final class PubSubToBigQueryIT extends TemplateTestBase {
 
@@ -69,7 +69,9 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
     pubsubResourceManager =
         PubsubResourceManager.builder(testName, PROJECT, credentialsProvider).build();
     bigQueryResourceManager =
-        BigQueryResourceManager.builder(testName, PROJECT, credentials).build();
+        BigQueryResourceManager.builder(testName, PROJECT, credentials)
+            .setDatasetId("dippatel")
+            .build();
 
     gcsClient.createArtifact(
         "udf.js",
@@ -86,12 +88,12 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
   }
 
   @Test
-  public void testPubsubToBigQuery() throws IOException {
+  public void testPubsubToBigQuery() throws IOException, InterruptedException {
     basePubsubToBigQuery(Function.identity()); // no extra parameters
   }
 
   @Test
-  public void testPubsubToBigQueryWithStorageApi() throws IOException {
+  public void testPubsubToBigQueryWithStorageApi() throws IOException, InterruptedException {
     basePubsubToBigQuery(
         b ->
             b.addParameter("useStorageWriteApi", "true")
@@ -105,7 +107,8 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
   }
 
   private void basePubsubToBigQuery(
-      Function<LaunchConfig.Builder, LaunchConfig.Builder> paramsAdder) throws IOException {
+      Function<LaunchConfig.Builder, LaunchConfig.Builder> paramsAdder)
+      throws IOException, InterruptedException {
     // Arrange
     List<Field> bqSchemaFields =
         Arrays.asList(
@@ -115,20 +118,22 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
     Schema bqSchema = Schema.of(bqSchemaFields);
 
     TopicName topic = pubsubResourceManager.createTopic("input");
-    bigQueryResourceManager.createDataset(REGION);
+    // bigQueryResourceManager.createDataset(REGION);
     SubscriptionName subscription = pubsubResourceManager.createSubscription(topic, "sub-1");
     TableId table = bigQueryResourceManager.createTable(testName, bqSchema);
-    TableId dlqTable =
-        TableId.of(
-            PROJECT,
-            table.getDataset(),
-            table.getTable() + PubSubToBigQuery.DEFAULT_DEADLETTER_TABLE_SUFFIX);
+    TableId dlqTable = TableId.of(PROJECT, "dippatel", "error_records");
+    // TableId dlqTable =
+    //     bigQueryResourceManager.createTable(
+    //         table.getTable() + PubSubToBigQuery.DEFAULT_DEADLETTER_TABLE_SUFFIX,
+    //         BqJsonToBqSchema.readBigQuerySchema(
+    //             ResourceUtils.getDeadletterTableSchemaJson().getBytes(StandardCharsets.UTF_8)));
 
     LaunchConfig.Builder options =
         paramsAdder.apply(
             LaunchConfig.builder(testName, specPath)
                 .addParameter("inputSubscription", subscription.toString())
                 .addParameter("outputTableSpec", toTableSpecLegacy(table))
+                .addParameter("outputDeadletterTable", toTableSpecLegacy(dlqTable))
                 .addParameter("javascriptTextTransformGcsPath", getGcsPath("udf.js"))
                 .addParameter("javascriptTextTransformFunctionName", "uppercaseName"));
 
@@ -146,6 +151,8 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
       ByteString messageData = ByteString.copyFromUtf8("bad id " + i);
       pubsubResourceManager.publish(topic, ImmutableMap.of(), messageData);
     }
+
+    // Thread.sleep(5 * 60000);
 
     Result result =
         pipelineOperator()
@@ -184,20 +191,22 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
     Schema bqSchema = Schema.of(bqSchemaFields);
 
     TopicName topic = pubsubResourceManager.createTopic("input");
-    bigQueryResourceManager.createDataset(REGION);
+    // bigQueryResourceManager.createDataset(REGION);
     SubscriptionName subscription = pubsubResourceManager.createSubscription(topic, "sub-1");
     TableId table = bigQueryResourceManager.createTable(testName, bqSchema);
-    TableId dlqTable =
-        TableId.of(
-            PROJECT,
-            table.getDataset(),
-            table.getTable() + PubSubToBigQuery.DEFAULT_DEADLETTER_TABLE_SUFFIX);
+    TableId dlqTable = TableId.of(PROJECT, "dippatel", "error_records");
+    // TableId dlqTable =
+    //     bigQueryResourceManager.createTable(
+    //         table.getTable() + PubSubToBigQuery.DEFAULT_DEADLETTER_TABLE_SUFFIX,
+    //         BqJsonToBqSchema.readBigQuerySchema(
+    //             ResourceUtils.getDeadletterTableSchemaJson().getBytes(StandardCharsets.UTF_8)));
 
     LaunchConfig.Builder options =
         paramsAdder.apply(
             LaunchConfig.builder(testName, specPath)
                 .addParameter("inputSubscription", subscription.toString())
                 .addParameter("outputTableSpec", toTableSpecLegacy(table))
+                .addParameter("outputDeadletterTable", toTableSpecLegacy(dlqTable))
                 .addParameter("javascriptTextTransformGcsPath", getGcsPath("udf.js"))
                 .addParameter("javascriptTextTransformFunctionReload", "true")
                 .addParameter("javascriptTextTransformReloadIntervalMinutes", "1")
@@ -217,7 +226,7 @@ public final class PubSubToBigQueryIT extends TemplateTestBase {
       ByteString messageData = ByteString.copyFromUtf8("bad id " + i);
       pubsubResourceManager.publish(topic, ImmutableMap.of(), messageData);
     }
-
+    // Thread.sleep(5 * 60000);
     BigQueryRowsCheck bigQueryRowsCheck =
         BigQueryRowsCheck.builder(bigQueryResourceManager, table)
             .setMinRows(MESSAGES_COUNT)

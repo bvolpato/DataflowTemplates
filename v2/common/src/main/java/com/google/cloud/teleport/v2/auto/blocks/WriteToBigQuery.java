@@ -41,6 +41,7 @@ import org.apache.beam.sdk.io.gcp.bigquery.WriteResult;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.transforms.MapElements;
 import org.apache.beam.sdk.values.PCollection;
+import org.apache.beam.sdk.values.PCollectionTuple;
 import org.apache.commons.lang3.StringUtils;
 
 public class WriteToBigQuery implements TemplateSink<SinkOptions> {
@@ -65,17 +66,19 @@ public class WriteToBigQuery implements TemplateSink<SinkOptions> {
   private static final JsonFactory JSON_FACTORY = Transport.getJsonFactory();
 
   @Consumes(TableRow.class)
-  public void writeTableRows(PCollection<TableRow> input, SinkOptions options) {
+  public void writeTableRows(PCollectionTuple input, SinkOptions options) {
     WriteResult writeResult =
-        input.apply(
-            "WriteTableRows",
-            BigQueryIO.writeTableRows()
-                .withoutValidation()
-                .withCreateDisposition(CreateDisposition.CREATE_NEVER)
-                .withWriteDisposition(WriteDisposition.WRITE_APPEND)
-                .withExtendedErrorInfo()
-                .withFailedInsertRetryPolicy(InsertRetryPolicy.retryTransientErrors())
-                .to(options.getOutputTableSpec()));
+        input
+            .get(BlockConstants.OUTPUT_TAG)
+            .apply(
+                "WriteTableRows",
+                BigQueryIO.writeTableRows()
+                    .withoutValidation()
+                    .withCreateDisposition(CreateDisposition.CREATE_NEVER)
+                    .withWriteDisposition(WriteDisposition.WRITE_APPEND)
+                    .withExtendedErrorInfo()
+                    .withFailedInsertRetryPolicy(InsertRetryPolicy.retryTransientErrors())
+                    .to(options.getOutputTableSpec()));
 
     handleFailures(writeResult, options);
   }

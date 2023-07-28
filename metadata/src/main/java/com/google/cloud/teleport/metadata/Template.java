@@ -68,6 +68,8 @@ public @interface Template {
 
   Class<?>[] blocks() default void.class;
 
+  Class<?> dlqBlock() default void.class;
+
   /** An array that specifies the orders. */
   Class<?>[] optionsOrder() default void.class;
 

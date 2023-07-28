@@ -26,4 +26,7 @@ public @interface Consumes {
 
   /** Input that this sink can consume. */
   Class<?> value();
+
+  /** List of types if the above class is generic. */
+  Class<?>[] types() default void.class;
 }

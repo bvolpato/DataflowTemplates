@@ -40,8 +40,11 @@ public class AutoTemplate {
     try {
       List<ExecutionBlock> orderedBlocks = buildExecutionBlocks(templateClass);
 
+      TemplateBlock dlqInstance = getDlqInstance(templateClass);
+
       Class<? extends PipelineOptions> newOptionsClass =
-          createNewOptionsClass(orderedBlocks, AutoTemplate.class.getClassLoader());
+          createNewOptionsClass(
+              orderedBlocks, AutoTemplate.class.getClassLoader(), dlqInstance.getOptionsClass());
 
       LOG.info("Created options class {}", newOptionsClass);
 
@@ -63,6 +66,18 @@ public class AutoTemplate {
         } else {
           input =
               executionBlock.blockMethod.invoke(executionBlock.blockInstance, input, optionsClass);
+        }
+        if (dlqInstance != null) {
+          ExecutionBlock dlqBlock;
+          for (Output o : outputs(executionBlock.getBlockMethod())) {
+            if (o.isDlq()) {
+              dlqBlock = buildDlqExecutionBlock(templateClass, o);
+              input =
+                  dlqBlock.blockMethod.invoke(
+                      dlqBlock.blockInstance, input, options.as(dlqInstance.getOptionsClass()));
+              break;
+            }
+          }
         }
       }
 
@@ -108,7 +123,13 @@ public class AutoTemplate {
     List<Class<?>> transformations = chainedClasses.subList(1, chainedClasses.size() - 1);
     LOG.info("Transformations are {}", transformations);
 
-    Class<?> previousType = outputs(sourceMethod);
+    Output previousType = null;
+
+    for (Output o : outputs(sourceMethod)) {
+      if (!o.isDlq()) {
+        previousType = o;
+      }
+    }
 
     List<ExecutionBlock> orderedBlocks = new ArrayList<>();
     orderedBlocks.add(new ExecutionBlock(sourceBlockClass, templateSourceInstance, sourceMethod));
@@ -117,7 +138,8 @@ public class AutoTemplate {
 
       LOG.info("Returned type from the previous block: {}", previousType);
 
-      Method transformMethod = getTransformMethod(transformationClass, previousType);
+      Method transformMethod =
+          getTransformMethod(transformationClass, previousType.value(), previousType.types());
 
       LOG.info("Next method will be {}", transformMethod);
 
@@ -129,18 +151,77 @@ public class AutoTemplate {
 
       orderedBlocks.add(
           new ExecutionBlock(transformationClass, transformInstance, transformMethod));
-      previousType = outputs(transformMethod);
+      for (Output o : outputs(transformMethod)) {
+        if (!o.isDlq()) {
+          previousType = o;
+        }
+      }
     }
 
     Class<?> sinkClass = chainedClasses.get(chainedClasses.size() - 1);
     LOG.info("Sink is {}", sinkClass);
 
-    Method sinkMethod = getTransformMethod(sinkClass, previousType);
+    Method sinkMethod = getTransformMethod(sinkClass, previousType.value(), previousType.types());
     TemplateSink<?> sinkInstance =
         sinkClass.asSubclass(TemplateSink.class).getDeclaredConstructor().newInstance();
 
     orderedBlocks.add(new ExecutionBlock(sinkClass, sinkInstance, sinkMethod));
     return orderedBlocks;
+  }
+
+  public static ExecutionBlock buildDlqExecutionBlock(Class<?> templateClass, Output output)
+      throws InstantiationException,
+          IllegalAccessException,
+          InvocationTargetException,
+          NoSuchMethodException {
+
+    Template annotations = templateClass.getAnnotation(Template.class);
+    if (annotations == null) {
+      throw new IllegalStateException(
+          "Class "
+              + templateClass
+              + " does not have a @Template annotation, can not use auto template features.");
+    }
+    Class<?> dlqBlock = annotations.dlqBlock();
+    if (dlqBlock == null) {
+      return null;
+    }
+
+    LOG.info("Found DLQ Block {}", dlqBlock);
+
+    Class<? extends TemplateSink> dlqBlockClass = dlqBlock.asSubclass(TemplateSink.class);
+    TemplateSink<?> templateDlqInstance = dlqBlockClass.getDeclaredConstructor().newInstance();
+
+    Method dlqMethod = getTransformMethod(dlqBlockClass, output.value(), output.types());
+
+    LOG.info("Dlq method will be {}", dlqMethod);
+
+    return new ExecutionBlock(dlqBlockClass, templateDlqInstance, dlqMethod);
+  }
+
+  public static TemplateSink<?> getDlqInstance(Class<?> templateClass)
+      throws InstantiationException,
+          IllegalAccessException,
+          InvocationTargetException,
+          NoSuchMethodException {
+    Template annotations = templateClass.getAnnotation(Template.class);
+    if (annotations == null) {
+      throw new IllegalStateException(
+          "Class "
+              + templateClass
+              + " does not have a @Template annotation, can not use auto template features.");
+    }
+    Class<?> dlqBlock = annotations.dlqBlock();
+    if (dlqBlock == null) {
+      throw new IllegalStateException(
+          "Class "
+              + templateClass
+              + " does not have a @Template annotation with valid dlqBlock, can not use auto template features.");
+    }
+
+    Class<? extends TemplateSink> dlqBlockClass = dlqBlock.asSubclass(TemplateSink.class);
+    TemplateSink<?> templateDlqInstance = dlqBlockClass.getDeclaredConstructor().newInstance();
+    return templateDlqInstance;
   }
 
   private static Method getReadMethod(Class<? extends TemplateSource> clazz) {
@@ -153,13 +234,17 @@ public class AutoTemplate {
     throw new IllegalStateException("Class " + clazz + " does not have a read implementation");
   }
 
-  private static Method getTransformMethod(Class<?> clazz, Class<?> input) {
+  private static Method getTransformMethod(Class<?> clazz, Class<?> input, Class<?>[] types) {
     for (Method method : clazz.getMethods()) {
       Consumes annotation = method.getAnnotation(Consumes.class);
       if (annotation != null) {
-        LOG.info("Class {} has method to consume {}", clazz, annotation.value());
+        LOG.info(
+            "Class {} has method to consume {} with types {}",
+            clazz,
+            annotation.value(),
+            annotation.types());
 
-        if (annotation.value() == input) {
+        if (annotation.value() == input && Arrays.equals(annotation.types(), types)) {
           return method;
         }
       }
@@ -169,16 +254,18 @@ public class AutoTemplate {
         "Class " + clazz + " does not have a transform implementation for " + input);
   }
 
-  private static Class<?> outputs(Method method) {
-    if (method.getAnnotation(Outputs.class) == null) {
+  private static Output[] outputs(Method method) {
+    if (method.getAnnotation(Outputs.class) == null && method.getAnnotation(Output.class) == null) {
       throw new IllegalStateException("Method " + method + " does not implement @Outputs");
     }
-
+    if (method.getAnnotation(Outputs.class) == null) {
+      return new Output[] {method.getAnnotation(Output.class)};
+    }
     return method.getAnnotation(Outputs.class).value();
   }
 
   public static Class<? extends PipelineOptions> createNewOptionsClass(
-      Collection<ExecutionBlock> blocks, ClassLoader loader) {
+      Collection<ExecutionBlock> blocks, ClassLoader loader, Class<?> dlqOptions) {
 
     LOG.info("Creating new options class to implement {}", blocks);
 
@@ -189,7 +276,9 @@ public class AutoTemplate {
       allOptionsClassBuilder =
           allOptionsClassBuilder.implement(executionBlock.blockInstance.getOptionsClass());
     }
-
+    if (dlqOptions != null) {
+      allOptionsClassBuilder = allOptionsClassBuilder.implement(dlqOptions);
+    }
     return allOptionsClassBuilder.make().load(loader).getLoaded();
   }
 

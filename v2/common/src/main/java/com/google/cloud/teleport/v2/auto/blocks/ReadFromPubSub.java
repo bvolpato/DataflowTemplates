@@ -16,6 +16,7 @@
 package com.google.cloud.teleport.v2.auto.blocks;
 
 import com.google.cloud.teleport.metadata.TemplateParameter;
+import com.google.cloud.teleport.metadata.auto.Output;
 import com.google.cloud.teleport.metadata.auto.Outputs;
 import com.google.cloud.teleport.metadata.auto.TemplateSource;
 import com.google.cloud.teleport.v2.auto.blocks.ReadFromPubSub.ReadFromPubSubOptions;
@@ -40,7 +41,7 @@ public class ReadFromPubSub implements TemplateSource<PubsubMessage, ReadFromPub
   }
 
   @Override
-  @Outputs(PubsubMessage.class)
+  @Outputs({@Output(value = PubsubMessage.class)})
   public PCollection<PubsubMessage> read(Pipeline pipeline, ReadFromPubSubOptions options) {
 
     return pipeline.apply(
