@@ -46,7 +46,8 @@ public class ReadFromPubSub implements TemplateSource<PubsubMessage, ReadFromPub
 
     return pipeline.apply(
         "ReadPubSubSubscription",
-        PubsubIO.readMessagesWithAttributes().fromSubscription(options.getInputSubscription()));
+        PubsubIO.readMessagesWithAttributesAndMessageId()
+            .fromSubscription(options.getInputSubscription()));
   }
 
   @Override

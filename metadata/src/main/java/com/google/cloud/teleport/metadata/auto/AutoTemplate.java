@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.DynamicType;
 import org.apache.beam.sdk.Pipeline;
@@ -34,7 +35,8 @@ public class AutoTemplate {
 
   private static final Logger LOG = LoggerFactory.getLogger(AutoTemplate.class);
 
-  public static void setup(Class<?> templateClass, String[] args) {
+  public static void setup(
+      Class<?> templateClass, String[] args, Consumer<PipelineOptions> preprocess) {
     LOG.info("Starting automatic template for template {}...", templateClass);
 
     try {
@@ -49,6 +51,7 @@ public class AutoTemplate {
       LOG.info("Created options class {}", newOptionsClass);
 
       PipelineOptions options = PipelineOptionsFactory.fromArgs(args).as(newOptionsClass);
+      preprocess.accept(options);
 
       Pipeline pipeline = Pipeline.create(options);
 
@@ -72,9 +75,8 @@ public class AutoTemplate {
           for (Output o : outputs(executionBlock.getBlockMethod())) {
             if (o.isDlq()) {
               dlqBlock = buildDlqExecutionBlock(templateClass, o);
-              input =
-                  dlqBlock.blockMethod.invoke(
-                      dlqBlock.blockInstance, input, options.as(dlqInstance.getOptionsClass()));
+              dlqBlock.blockMethod.invoke(
+                  dlqBlock.blockInstance, input, options.as(dlqInstance.getOptionsClass()));
               break;
             }
           }

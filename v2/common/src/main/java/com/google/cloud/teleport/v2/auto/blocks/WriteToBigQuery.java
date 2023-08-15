@@ -19,6 +19,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.services.bigquery.model.TableRow;
 import com.google.cloud.teleport.metadata.TemplateParameter;
 import com.google.cloud.teleport.metadata.auto.Consumes;
+import com.google.cloud.teleport.metadata.auto.Output;
 import com.google.cloud.teleport.metadata.auto.TemplateSink;
 import com.google.cloud.teleport.v2.auto.blocks.WriteToBigQuery.SinkOptions;
 import com.google.cloud.teleport.v2.auto.dlq.AutoDLQUtil;
@@ -66,7 +67,11 @@ public class WriteToBigQuery implements TemplateSink<SinkOptions> {
   private static final JsonFactory JSON_FACTORY = Transport.getJsonFactory();
 
   @Consumes(TableRow.class)
-  public void writeTableRows(PCollectionTuple input, SinkOptions options) {
+  @Output(
+      value = FailsafeElement.class,
+      types = {String.class, String.class},
+      isDlq = true)
+  public PCollectionTuple writeTableRows(PCollectionTuple input, SinkOptions options) {
     WriteResult writeResult =
         input
             .get(BlockConstants.OUTPUT_TAG)
@@ -80,7 +85,15 @@ public class WriteToBigQuery implements TemplateSink<SinkOptions> {
                     .withFailedInsertRetryPolicy(InsertRetryPolicy.retryTransientErrors())
                     .to(options.getOutputTableSpec()));
 
-    handleFailures(writeResult, options);
+    PCollection<FailsafeElement<String, String>> failedInserts =
+        BigQueryIOUtils.writeResultToBigQueryInsertErrors(writeResult, options)
+            .apply(
+                "WrapInsertionErrors",
+                MapElements.into(FAILSAFE_ELEMENT_CODER.getEncodedTypeDescriptor())
+                    .via((BigQueryInsertError e) -> wrapBigQueryInsertError(e)))
+            .setCoder(FAILSAFE_ELEMENT_CODER);
+
+    return PCollectionTuple.of(BlockConstants.ERROR_TAG_STR, failedInserts);
   }
 
   @Consumes(GenericRecord.class)

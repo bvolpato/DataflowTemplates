@@ -22,6 +22,9 @@ import com.google.cloud.teleport.v2.auto.blocks.PubsubMessageToTableRow;
 import com.google.cloud.teleport.v2.auto.blocks.ReadFromPubSub;
 import com.google.cloud.teleport.v2.auto.blocks.WriteToBigQuery;
 import com.google.cloud.teleport.v2.auto.dlq.WriteDlqToBigQuery;
+import java.util.function.Consumer;
+import org.apache.beam.sdk.options.PipelineOptions;
+import org.apache.commons.lang3.StringUtils;
 
 @Template(
     name = "PubSub_to_BigQuery_Auto",
@@ -36,6 +39,19 @@ import com.google.cloud.teleport.v2.auto.dlq.WriteDlqToBigQuery;
 public class PubSubToBigQueryAuto {
 
   public static void main(String[] args) {
-    AutoTemplate.setup(PubSubToBigQueryAuto.class, args);
+    AutoTemplate.setup(PubSubToBigQueryAuto.class, args, new DefaultDLQProvider());
+  }
+
+  static class DefaultDLQProvider implements Consumer<PipelineOptions> {
+
+    @Override
+    public void accept(PipelineOptions options) {
+      WriteDlqToBigQuery.BigQueryDlqOptions dlq =
+          options.as(WriteDlqToBigQuery.BigQueryDlqOptions.class);
+      if (StringUtils.isEmpty(dlq.getOutputDeadletterTable())) {
+        dlq.setOutputDeadletterTable(
+            options.as(WriteToBigQuery.SinkOptions.class).getOutputTableSpec() + "_error_records");
+      }
+    }
   }
 }
