@@ -22,42 +22,40 @@ import java.util.Map;
 /** Class {@link BigQueryDefaultSchemas}. */
 public final class BigQueryDefaultSchemas {
 
-  public static final Map<String, StandardSQLTypeName> WEB_SDK_SCHEMA =
-      new HashMap<String, StandardSQLTypeName>() {
-        {
-          put("$os", StandardSQLTypeName.STRING);
-          put("$browser", StandardSQLTypeName.STRING);
-          put("$referrer", StandardSQLTypeName.STRING);
-          put("$referring_domain", StandardSQLTypeName.STRING);
-          put("$current_url", StandardSQLTypeName.STRING);
-          put("$browser_version", StandardSQLTypeName.STRING);
-          put("$screen_height", StandardSQLTypeName.STRING);
-          put("$screen_width", StandardSQLTypeName.STRING);
-          put("mp_lib", StandardSQLTypeName.STRING);
-          put("$lib_version", StandardSQLTypeName.STRING);
-          put("hostname", StandardSQLTypeName.STRING);
-          put("$initial_referrer", StandardSQLTypeName.STRING);
-          put("$initial_referring_domain", StandardSQLTypeName.STRING);
-          put("branch", StandardSQLTypeName.STRING);
-        }
-      };
+  public static final Map<String, StandardSQLTypeName> WEB_SDK_SCHEMA = new HashMap<>();
 
-  public static final Map<String, StandardSQLTypeName> DATASTREAM_METADATA_SCHEMA =
-      new HashMap<String, StandardSQLTypeName>() {
-        {
-          put("_metadata_change_type", StandardSQLTypeName.STRING);
-          put("_metadata_deleted", StandardSQLTypeName.BOOL);
-          put("_metadata_timestamp", StandardSQLTypeName.TIMESTAMP);
-          put("_metadata_read_timestamp", StandardSQLTypeName.TIMESTAMP);
+  static {
+    WEB_SDK_SCHEMA.put("$os", StandardSQLTypeName.STRING);
+    WEB_SDK_SCHEMA.put("$browser", StandardSQLTypeName.STRING);
+    WEB_SDK_SCHEMA.put("$referrer", StandardSQLTypeName.STRING);
+    WEB_SDK_SCHEMA.put("$referring_domain", StandardSQLTypeName.STRING);
+    WEB_SDK_SCHEMA.put("$current_url", StandardSQLTypeName.STRING);
+    WEB_SDK_SCHEMA.put("$browser_version", StandardSQLTypeName.STRING);
+    WEB_SDK_SCHEMA.put("$screen_height", StandardSQLTypeName.STRING);
+    WEB_SDK_SCHEMA.put("$screen_width", StandardSQLTypeName.STRING);
+    WEB_SDK_SCHEMA.put("mp_lib", StandardSQLTypeName.STRING);
+    WEB_SDK_SCHEMA.put("$lib_version", StandardSQLTypeName.STRING);
+    WEB_SDK_SCHEMA.put("hostname", StandardSQLTypeName.STRING);
+    WEB_SDK_SCHEMA.put("$initial_referrer", StandardSQLTypeName.STRING);
+    WEB_SDK_SCHEMA.put("$initial_referring_domain", StandardSQLTypeName.STRING);
+    WEB_SDK_SCHEMA.put("branch", StandardSQLTypeName.STRING);
+  }
 
-          // Oracle specific metadata
-          put("_metadata_row_id", StandardSQLTypeName.STRING);
-          put("_metadata_rs_id", StandardSQLTypeName.STRING);
-          put("_metadata_ssn", StandardSQLTypeName.INT64);
+  public static final Map<String, StandardSQLTypeName> DATASTREAM_METADATA_SCHEMA = new HashMap<>();
 
-          // MySQL Specific Metadata
-          put("_metadata_log_file", StandardSQLTypeName.STRING);
-          put("_metadata_log_position", StandardSQLTypeName.INT64);
-        }
-      };
+  static {
+    DATASTREAM_METADATA_SCHEMA.put("_metadata_change_type", StandardSQLTypeName.STRING);
+    DATASTREAM_METADATA_SCHEMA.put("_metadata_deleted", StandardSQLTypeName.BOOL);
+    DATASTREAM_METADATA_SCHEMA.put("_metadata_timestamp", StandardSQLTypeName.TIMESTAMP);
+    DATASTREAM_METADATA_SCHEMA.put("_metadata_read_timestamp", StandardSQLTypeName.TIMESTAMP);
+
+    // Oracle specific metadata
+    DATASTREAM_METADATA_SCHEMA.put("_metadata_row_id", StandardSQLTypeName.STRING);
+    DATASTREAM_METADATA_SCHEMA.put("_metadata_rs_id", StandardSQLTypeName.STRING);
+    DATASTREAM_METADATA_SCHEMA.put("_metadata_ssn", StandardSQLTypeName.INT64);
+
+    // MySQL Specific Metadata
+    DATASTREAM_METADATA_SCHEMA.put("_metadata_log_file", StandardSQLTypeName.STRING);
+    DATASTREAM_METADATA_SCHEMA.put("_metadata_log_position", StandardSQLTypeName.INT64);
+  }
 }

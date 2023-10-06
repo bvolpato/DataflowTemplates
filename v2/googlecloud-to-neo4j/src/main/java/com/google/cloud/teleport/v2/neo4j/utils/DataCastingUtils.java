@@ -145,6 +145,7 @@ public class DataCastingUtils {
     return null;
   }
 
+  @SuppressWarnings("FromTemporalAccessor")
   public static Map<String, Object> rowToNeo4jDataMap(Row row, Target target) {
 
     Map<String, Object> map = new HashMap<>();

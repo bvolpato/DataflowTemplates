@@ -719,21 +719,21 @@ public class BigQueryConverters {
   }
 
   public static final Map<String, LegacySQLTypeName> BQ_TYPE_STRINGS =
-      new HashMap<String, LegacySQLTypeName>() {
-        {
-          put("BOOLEAN", LegacySQLTypeName.BOOLEAN);
-          put("BYTES", LegacySQLTypeName.BYTES);
-          put("DATE", LegacySQLTypeName.DATE);
-          put("DATETIME", LegacySQLTypeName.DATETIME);
-          put("FLOAT", LegacySQLTypeName.FLOAT);
-          put("INTEGER", LegacySQLTypeName.INTEGER);
-          put("NUMERIC", LegacySQLTypeName.NUMERIC);
-          put("RECORD", LegacySQLTypeName.RECORD);
-          put("STRING", LegacySQLTypeName.STRING);
-          put("TIME", LegacySQLTypeName.TIME);
-          put("TIMESTAMP", LegacySQLTypeName.TIMESTAMP);
-        }
-      };
+      new HashMap<String, LegacySQLTypeName>();
+
+  static {
+    BQ_TYPE_STRINGS.put("BOOLEAN", LegacySQLTypeName.BOOLEAN);
+    BQ_TYPE_STRINGS.put("BYTES", LegacySQLTypeName.BYTES);
+    BQ_TYPE_STRINGS.put("DATE", LegacySQLTypeName.DATE);
+    BQ_TYPE_STRINGS.put("DATETIME", LegacySQLTypeName.DATETIME);
+    BQ_TYPE_STRINGS.put("FLOAT", LegacySQLTypeName.FLOAT);
+    BQ_TYPE_STRINGS.put("INTEGER", LegacySQLTypeName.INTEGER);
+    BQ_TYPE_STRINGS.put("NUMERIC", LegacySQLTypeName.NUMERIC);
+    BQ_TYPE_STRINGS.put("RECORD", LegacySQLTypeName.RECORD);
+    BQ_TYPE_STRINGS.put("STRING", LegacySQLTypeName.STRING);
+    BQ_TYPE_STRINGS.put("TIME", LegacySQLTypeName.TIME);
+    BQ_TYPE_STRINGS.put("TIMESTAMP", LegacySQLTypeName.TIMESTAMP);
+  }
 
   /**
    * The {@link SchemaUtils} Class to easily convert from a json string to a BigQuery
