@@ -493,7 +493,7 @@ public class PubSubCdcToBigQuery {
                   convertedTableRows.get(failsafeTableRowTransformer.transformDeadletterOut)))
           .apply("Flatten", Flatten.pCollections())
           .apply(
-              "WriteFailedRecords",
+              "WriteFailedConvertRecords",
               ErrorConverters.WriteStringMessageErrors.newBuilder()
                   .setErrorRecordsTable(
                       BigQueryConverters.maybeUseDefaultDeadletterTable(

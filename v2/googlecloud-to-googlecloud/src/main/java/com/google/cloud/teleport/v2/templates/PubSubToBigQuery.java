@@ -299,7 +299,7 @@ public class PubSubToBigQuery {
                 convertedTableRows.get(TRANSFORM_DEADLETTER_OUT)))
         .apply("Flatten", Flatten.pCollections())
         .apply(
-            "WriteFailedRecords",
+            "WriteFailedConvertRecords",
             ErrorConverters.WritePubsubMessageErrors.newBuilder()
                 .setErrorRecordsTable(
                     !Strings.isNullOrEmpty(options.getOutputDeadletterTable())
