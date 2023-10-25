@@ -115,4 +115,20 @@ public class TemplateDocsUtilsTest {
         "This has the project id. For example: <code>project_id</code>",
         replaceSiteTags("This has the project id. (Example: project_id)"));
   }
+
+  @Test
+  public void testReplaceSiteTagsPreserveLinks() {
+    assertEquals(
+        "This has the project id. Check <a href=\"https://google.com\">Google</a> for more!",
+        replaceSiteTags(
+            "This has the project id. Check <a href=\"https://google.com\">Google</a> for more!"));
+  }
+
+  @Test
+  public void testReplaceSiteTagsPreserveExternalLinks() {
+    assertEquals(
+        "This has the project id. Check <a href=\"https://google.com\" class=\"external\">Google</a> for more!",
+        replaceSiteTags(
+            "This has the project id. Check <a href=\"https://google.com\" class=\"external\">Google</a> for more!"));
+  }
 }

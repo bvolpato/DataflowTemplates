@@ -152,6 +152,8 @@ public final class TemplateDocsUtils {
         .replaceAll("(?m)\\.? \\(Example: (.*?)\\)", ". For example: <code>$1</code>")
         .replaceAll("(?m)For example, \"(.*?)\"", "For example: <code>$1</code>")
         .replaceAll("(?m)Defaults to: (.*?)\\.", "Defaults to: <code>$1</code>.")
-        .replaceAll("(?m)`(.*?)`", "<code>$1</code>");
+        .replaceAll("(?m)`(.*?)`", "<code>$1</code>")
+        .replaceAll("&lt;a href=\"(.*?)\"&gt;", "<a href=\"$1\">")
+        .replaceAll("&lt;/a&gt;", "</a>");
   }
 }
