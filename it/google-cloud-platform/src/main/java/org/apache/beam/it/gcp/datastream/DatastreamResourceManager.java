@@ -140,6 +140,8 @@ public final class DatastreamResourceManager implements ResourceManager {
             .setConnectionProfileId(connectionProfileId)
             .build();
 
+    LOG.info("Creating connection profile: {}", request.toString());
+
     ConnectionProfile reference = datastreamClient.createConnectionProfileAsync(request).get();
     createdConnectionProfileIds.add(connectionProfileId);
     return reference;
@@ -210,9 +212,12 @@ public final class DatastreamResourceManager implements ResourceManager {
 
       return reference;
 
+    } catch (ExecutionException e) {
+      throw new DatastreamResourceManagerException(
+              "Failed to create JDBC source connection profile.", e);
     } catch (Exception e) {
       throw new DatastreamResourceManagerException(
-          "Failed to create JDBC source connection profile.", e);
+              "Failed to create JDBC source connection profile.", e);
     }
   }
 
